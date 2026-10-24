@@ -44,8 +44,8 @@ grid.
 | 3 | S-003 | Picks behaviour, reason, stage, daily goal, constraints, exclusions | Checks free text for red flags (EQ-008); saves the profile | Proceeds to S-004 |
 | 4 | S-004 | Sees the first options | Ranks the library (EQ-003) with reasons (EQ-004) | 1–3 options visible |
 
-**Branch points:** declines consent → stays on S-001 with an explanation (nothing stored);
-red-flag text → S-090, the text is not stored.
+**Branch points:** wants detail → S-108 sheet, then back to S-001; doesn't agree → closes the
+app, nothing stored (there is no decline screen); red-flag text → S-090, the text is not stored.
 
 ### UF-002 — Daily options
 | Step | Screen | User does | System does | Success looks like |

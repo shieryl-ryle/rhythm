@@ -20,7 +20,7 @@ IDs: `S-001…` main screens · `S-09x` error/blocked states · `S-1xx` dialogs/
 
 | ID | Screen | Purpose (one line) | Serves | Entry points | Auth | Required states |
 |---|---|---|---|---|---|---|
-| S-001 | Welcome & consent | Explain what data is used, what isn't, and what leaves the device; get consent | F-007 | First launch; consent version changed | Public (no consent yet) | idle / declined (cannot continue, explains why) |
+| S-001 | Welcome & consent | Welcome first (what Rhythm does), then one privacy statement and consent. No "Not now": a person who doesn't agree closes the app, and nothing is stored (owner decision 2026-10-24) | F-007 | First launch; consent version changed | Public (no consent yet) | idle |
 | S-002 | AI choice | Opt in or out of AI rewording, with plain explanation | F-007 | After S-001 | Consented | idle |
 | S-003 | My Starting Point | Choose behaviour, reason, stage, daily goal, constraints, excluded categories | F-001 | After S-002; Settings → Edit starting point | Consented | idle / validation error / red-flag → S-090 |
 | S-004 | Today | One hero option with an inline reason; accept, edit, "Something else" (swap through up to 3), "Not today"; time and energy dropdown pills; compact week strip of small rectangles | F-002 | Tab; notification tap | Consented | loading / option / planned / reflected / empty (all excluded or nothing fits) / paused / welcome-back banner / AI-fallback (silent) |
@@ -38,10 +38,11 @@ IDs: `S-001…` main screens · `S-09x` error/blocked states · `S-1xx` dialogs/
 | S-105 | Observation edit sheet | Confirm, edit, or delete an observation | F-004 | What works → item | Consented | idle |
 | S-107 | Why-this sheet | Full explanation of why an option was offered (EQ-004 inputs, AI-worded original text) | F-002, BR-004, BR-019 | Today → "Why this suggestion?" | Consented | idle |
 | S-106 | Notification settings sheet | Opt in, pick times, quiet hours | F-008 | Settings; first accepted option (one-time prompt) | Consented | idle / OS permission denied (explain + link to OS settings) |
+| S-108 | What-we-store sheet | Full detail of what data is used, where it's kept, what AI wording sends, and the user's controls | F-007, BR-014, BR-016 | S-001 → "See exactly what we store" | Public (no consent yet) | idle |
 
 ## 3. Information architecture
 ```
-First run: Welcome & consent (S-001) → AI choice (S-002) → My Starting Point (S-003)
+First run: Welcome & consent (S-001, + What we store S-108) → AI choice (S-002) → My Starting Point (S-003)
 Tabs
  ├─ Today (S-004)
  │   ├─ Edit option (S-102) · Not today (S-103) · Reflection (S-101) · Why this (S-107)

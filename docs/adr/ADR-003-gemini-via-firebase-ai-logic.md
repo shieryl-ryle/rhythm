@@ -1,7 +1,7 @@
 # ADR-003 — Gemini via Firebase AI Logic for bounded rewording
 
 - **Date:** 2026-10-23
-- **Status:** Accepted
+- **Status:** Superseded by ADR-006
 - **Owners:** Shieryl (team)
 - **Related:** [PRD](../prd.md) §2 (hybrid learning), F-002, F-004, BR-002, BR-010, BR-016 · [ADR-002](ADR-002-flutter-android-web-on-device.md)
 

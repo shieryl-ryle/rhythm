@@ -2,7 +2,7 @@
 
 > **Purpose:** the WHY, for the Future Health Digital Innovation Challenge judges. Owns business
 > objectives, the business model hypothesis, and business risks. Scope details live in the [PRD](prd.md).
-> **Status:** Draft v0.2 (v0.1 → v0.2: Rhythm concept and evidence boundary added from the owner's brief) · **Date:** 2026-10-23 · **Owner:** Shieryl
+> **Status:** Draft v0.3 (v0.3: physical-activity focus, no LLM in the prototype, social as the next phase, differentiation added; ADR-005..007) · **Date:** 2026-10-24 · **Owner:** Shieryl
 > **Traces to:** [PRD](prd.md) · business-model ADR: none yet (payer left open on purpose — see §5)
 > **Challenge:** [Future Health Digital Innovation Challenge](https://hack2skill.com/event/futurehealthchallenge/)
 > — **Wellbeing** track: *"help people understand changes in their health and wellbeing, sustain
@@ -17,13 +17,17 @@ barriers: busyness, fatigue, stress, competing activities, disrupted routines, a
 noticeable rewards. These shape our **working hypothesis**: people stop when the benefits feel less
 noticeable than the immediate effort, and tracking only satisfies for a while. For people
 returning, several disrupted routines at once feel like one overwhelming whole rather than a set of
-manageable decisions. **None of this is a confirmed cause.** We will build a working prototype
-for the Wellbeing track that helps people find a manageable way to start or continue within their
-current circumstances. It will use a bounded AI model under explicit safety and data-governance
-guardrails. The proposed concept, **Rhythm**, is a mobile app built on a loop: choose an action → try it →
-share what happened → better-fitting options next time. It has no chatbot, and data stays on the
-device. The concept itself is a hypothesis for user sessions to test; the [PRD](prd.md) owns what
-we build. Value is created for users (sustained healthy behaviour)
+manageable decisions. A teammate's review added two more barriers: not every activity suits every
+person, and activity rarely fits the schedule people actually have. **None of this is a confirmed
+cause.** We will build a working prototype for the Wellbeing track that helps people find ways to
+be **physically active** that fit their likes, access, time and energy, and to come back after a
+break. The proposed concept, **Rhythm**, is a mobile app built on a loop: one suggested activity →
+try it → share what happened → better-fitting suggestions next time. It adapts through a
+transparent, rules-based personalisation engine, so every suggestion shows its reason. The
+prototype uses no LLM, has no chatbot, and keeps all data on the device. Social features (friends,
+circles, challenges, events) are the planned next phase. The concept itself is a hypothesis for
+user sessions to test; the [PRD](prd.md) owns what we build. Value is created for users (sustained
+physical activity)
 and potentially for organisations that fund prevention. **Who pays is an open hypothesis** with
 three candidates (§5).
 
@@ -40,11 +44,26 @@ I can care for my health alongside my responsibilities and personal priorities.*
 
 ## 3. Scope
 - **In scope:** one working prototype for the Wellbeing track, built around the job statement
-  above; features are defined in the [PRD](prd.md) (`F-###`). Includes bounded AI assistance,
-  explicit consent, data minimisation, and user-controlled data.
+  above and focused on physical activity; features are defined in the [PRD](prd.md) (`F-###`).
+  Includes an explainable personalisation engine, explicit consent, data minimisation, and
+  user-controlled data.
+- **Next phase (designed and pitched, not built for the challenge):** friends and circles, group
+  challenges and events, friend streaks, calendar-aware timing, and activity data from phones and
+  watches.
 - **Out of scope:** diagnosis, treatment, or any medical claims; clinical risk scoring; integration
-  with clinical records; a production-scale launch; monetisation features (billing) during the
-  challenge.
+  with clinical records; LLM features in the prototype; a production-scale launch; monetisation
+  features (billing) during the challenge.
+
+## 3a. Alternatives and differentiation
+| Alternative | What people get | Where it falls short for our users |
+|---|---|---|
+| Social fitness apps (e.g. Strava) | Effort seen and celebrated by others, which is a strong motivator | Built around people who already have an activity and a routine. Little help finding what fits, or coming back after a break |
+| Habit trackers | Add a habit, tick it off, keep a streak | The same task every day; a broken streak feels like lost progress, and many people stop there |
+| Wearables and health platforms | Automatic tracking | Records activity, but doesn't help decide what to do today or when |
+
+**Rhythm's position:** it suggests activities that fit the person (likes, access, time and
+energy), learns from their answers in ways they can see, and makes coming back after a break
+easy. The next phase adds Strava-style social recognition in a cooperative form.
 
 ## 4. Stakeholders
 | Stakeholder | Role | Interest | Influence |
@@ -53,7 +72,7 @@ I can care for my health alongside my responsibilities and personal priorities.*
 | Target users (people struggling to start, sustain, or return to healthy routines) | Uses / validates | Fits their real circumstances; low effort; respects their priorities | High |
 | Team (2–4 people, Flutter experience) | Builds | Ships a working prototype by 2026-11-20 | High |
 | Possible payers (employers, insurers/health funds, public health bodies) | Could fund a pilot | Measurable engagement and prevention value | Medium |
-| Privacy regulators, platform stores, AI provider | Could block | Lawful data handling, store policies, AI usage policies | Medium |
+| Privacy regulators, platform stores | Could block | Lawful data handling, store policies | Medium |
 
 ## 5. Business model hypothesis
 All three payer options stay open as **hypotheses** to test (§11). No option is validated yet.
@@ -91,7 +110,7 @@ Source: challenge page, checked 2026-10-23. The page says dates may change.
 | Item | Cost | Notes (free tier, quota, assumption) |
 |---|---|---|
 | Cloud hosting | Target $0 | Free tiers only; limits checked in `choose-stack` and recorded in [System Design](system-design.md) |
-| AI API usage | Target $0 to low | Free tier or credits; quota and per-call cost checked before use; usage capped in the prototype |
+| AI API usage | $0 | No LLM in the prototype ([ADR-006](adr/ADR-006-no-ai-in-p0.md)) |
 | Team time | TBD (2–4 people × ~4 weeks part-time) | Assumption |
 | **Expected benefit** | Prize (USD 50k / 35k / 20k for places 1–3), the post-challenge readiness pathway, and validated learning about the problem | Hypothesis |
 
@@ -104,8 +123,9 @@ Source: challenge page, checked 2026-10-23. The page says dates may change.
   2026-10-23).
 - **Cultural:** respect religious, social, and cultural sensitivities (an expectation stated by the
   challenge).
-- **Technical:** no mandatory platform, model, or device. Team experience is Flutter. The AI must
-  be bounded, explainable, and safe ("Responsible AI, safety, and data governance" is judged).
+- **Technical:** no mandatory platform, model, or device. Team experience is Flutter. Any
+  personalisation must be explainable and safe ("Responsible AI, safety, and data governance" is
+  judged); the prototype meets this with a transparent rules-based engine and no LLM.
 - **Time / team:** 2–4 people; about 4 weeks to submission; team of up to 5 allowed.
 
 ## 10. Risks
@@ -116,8 +136,10 @@ Source: challenge page, checked 2026-10-23. The page says dates may change.
 | RK-003 | Scope is too large for ~4 weeks | H | H | One core journey; deployed walking skeleton first; feature freeze 2026-11-13 |
 | RK-004 | Weak commercial story ("Commercial viability and path to pilot" is judged) | M | M | Test all three payer options with at least one conversation each; present a pilot shape |
 | RK-005 | Personal wellbeing data mishandled or over-collected | L | H | Data minimisation, explicit consent, user deletion, no third-party sharing; rules in the PRD; data-governance section in the technical documentation |
-| RK-006 | AI API cost or quota limits break the demo | M | M | Free tier or credits with a usage cap; a rules-based fallback path; seeded demo data |
+| RK-006 | ~~AI API cost or quota limits break the demo~~ Retired 2026-10-24: no LLM in the prototype (ADR-006) | — | — | — |
 | RK-007 | Challenge dates or rules change | L | M | Re-check the challenge page weekly; plan to the earliest date |
+| RK-008 | New ideas (social, calendar, health data) pull scope past the freeze | H | H | Those are next phase; only free-time timing is in the prototype; feature freeze 2026-11-13 |
+| RK-009 | Without an LLM, judges score "AI" and "technical depth" lower | M | M | Present the ranking as an explainable personalisation engine with visible learning; document its design and limits; show the AI and social roadmap |
 
 ## 11. Validation plan
 | Hypothesis | How we test it | When | Success signal |
@@ -125,4 +147,6 @@ Source: challenge page, checked 2026-10-23. The page says dates may change.
 | People stop when benefits feel less noticeable than the effort, and tracking satisfies only temporarily | Short interviews and prototype sessions with target users | Before 2026-11-13 | Participants describe this pattern unprompted, or the prototype's "noticing benefits" element changes their stated intent to continue |
 | For people returning, several disrupted routines feel like one overwhelming whole | Sessions with people who recently lost a routine | Before 2026-11-13 | Breaking the return into small decisions feels more manageable to them (self-report) |
 | A manageable, circumstance-fit step helps people start or continue | Prototype sessions | Before 2026-11-13 | Users choose a step they say they can do today |
+| Suggesting activities similar to ones people like helps them find one worth continuing | Prototype sessions | Before 2026-11-13 | Users say they would try a suggested new activity |
+| Being seen and celebrated by others motivates continuing (the Strava insight) | Show the social wireframes in sessions | Before 2026-11-13 | Users say the social features would make them more likely to keep going |
 | An employer, insurer, or public health body would fund a pilot | One conversation per payer option | Before 2026-12-07 | Stated interest, a named contact, or an LOI |
