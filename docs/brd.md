@@ -2,7 +2,7 @@
 
 > **Purpose:** the WHY, for the Future Health Digital Innovation Challenge judges. Owns business
 > objectives, the business model hypothesis, and business risks. Scope details live in the [PRD](prd.md).
-> **Status:** Draft v0.3 (v0.3: physical-activity focus, no LLM in the prototype, social as the next phase, differentiation added; ADR-005..007) · **Date:** 2026-10-24 · **Owner:** Shieryl
+> **Status:** Draft v0.4 (v0.4: share cards, widget and calendar in the prototype; iPhone, Watch and invites as the next phase and a growth channel; ADR-008. v0.3: physical-activity focus, no LLM, social next, differentiation; ADR-005..007) · **Date:** 2026-10-25 · **Owner:** Shieryl
 > **Traces to:** [PRD](prd.md) · business-model ADR: none yet (payer left open on purpose — see §5)
 > **Challenge:** [Future Health Digital Innovation Challenge](https://hack2skill.com/event/futurehealthchallenge/)
 > — **Wellbeing** track: *"help people understand changes in their health and wellbeing, sustain
@@ -47,9 +47,16 @@ I can care for my health alongside my responsibilities and personal priorities.*
   above and focused on physical activity; features are defined in the [PRD](prd.md) (`F-###`).
   Includes an explainable personalisation engine, explicit consent, data minimisation, and
   user-controlled data.
-- **Next phase (designed and pitched, not built for the challenge):** friends and circles, group
-  challenges and events, friend streaks, calendar-aware timing, and activity data from phones and
-  watches.
+- **Also in the prototype (Android):** sharing achievement cards to social media, a home-screen
+  widget, and adding activities to the phone's calendar (stretch).
+- **Next phase (designed and pitched, not built for the challenge):**
+  - friends and circles, and friend streaks;
+  - a Challenges tab with invites by link, QR code or join code;
+  - iPhone, Apple Watch and iOS widgets;
+  - activity data from phones and watches.
+
+  Invites to people who don't use Rhythm yet are a planned **growth channel**: every shared
+  challenge or achievement brings new users in.
 - **Out of scope:** diagnosis, treatment, or any medical claims; clinical risk scoring; integration
   with clinical records; LLM features in the prototype; a production-scale launch; monetisation
   features (billing) during the challenge.
@@ -149,4 +156,5 @@ Source: challenge page, checked 2026-10-23. The page says dates may change.
 | A manageable, circumstance-fit step helps people start or continue | Prototype sessions | Before 2026-11-13 | Users choose a step they say they can do today |
 | Suggesting activities similar to ones people like helps them find one worth continuing | Prototype sessions | Before 2026-11-13 | Users say they would try a suggested new activity |
 | Being seen and celebrated by others motivates continuing (the Strava insight) | Show the social wireframes in sessions | Before 2026-11-13 | Users say the social features would make them more likely to keep going |
+| People would share achievements and invite friends who don't use Rhythm (growth) | Ask in sessions after showing the share card and challenge invite | Before 2026-11-13 | Users say they would share or invite someone, and name who |
 | An employer, insurer, or public health body would fund a pilot | One conversation per payer option | Before 2026-12-07 | Stated interest, a named contact, or an LOI |

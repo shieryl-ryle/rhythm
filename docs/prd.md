@@ -1,6 +1,15 @@
 # PRD — Rhythm (working name)
 
-**Status:** Draft v0.3 · **Owner:** Shieryl · **Last updated:** 2026-10-24
+**Status:** Draft v0.4 · **Owner:** Shieryl · **Last updated:** 2026-10-25
+
+v0.4 changes ([ADR-008](adr/ADR-008-phone-integrations-and-platform-roadmap.md)):
+- Setup asks which of 4 paths fits, with follow-ups for each (F-001).
+- People can follow more than one activity (F-002).
+- The grid shows on Today when the app opens (F-006).
+- Challenges and events get their own tab with invites, in P1 (F-012).
+- F-013 now adds activities to the phone's calendar instead of reading free slots.
+- New features: share achievements (F-015) and an Android widget (F-016), both P0; iPhone and Apple
+  Watch (F-017), P1.
 
 v0.3 changes:
 - Narrowed to physical activity. Setup now learns about the person first, Today shows one hero
@@ -53,7 +62,9 @@ and not validated in Abu Dhabi. It informs hypotheses only.
   is due **2026-11-20**; it needs a working prototype plus technical documentation of assumptions
   and limitations.
 - **Deadline / budget:** about 4 weeks; team of 2–4; target $0 (free tiers). See [BRD](brd.md) §8.
-- **Platform:** Flutter app for Android (APK) and a web demo ([ADR-002](adr/ADR-002-flutter-android-web-on-device.md)).
+- **Platform:** Flutter app for Android (APK) and a web demo for the challenge
+  ([ADR-002](adr/ADR-002-flutter-android-web-on-device.md)). iPhone, Apple Watch and iOS widgets
+  are P1 ([ADR-008](adr/ADR-008-phone-integrations-and-platform-roadmap.md)).
 - **Domain:** **physical activity** ([ADR-005](adr/ADR-005-physical-activity-focus.md)). Other
   healthy habits (sleep, hydration…) are out of scope for this phase.
 - **Interaction model:** one suggestion card, quick selections, and progress views. **No chatbot.**
@@ -61,8 +72,10 @@ and not validated in Abu Dhabi. It informs hypotheses only.
   learns from each person's own answers: activities they like and why, what they finished or
   enjoyed, what got in the way, and when they are free. Every suggestion shows its reason.
   **No LLM in P0** ([ADR-006](adr/ADR-006-no-ai-in-p0.md)).
-- **Data:** on the device only, with no account, for all P0 features. Nothing leaves the phone. P1
-  social features need an opt-in account and a backend.
+- **Data:** on the device only, with no account, for all P0 features. Rhythm itself sends nothing
+  anywhere. The only exceptions are actions the person takes: adding an activity to their phone's
+  calendar (which their calendar account then syncs) and sharing a card through the phone's share
+  sheet. P1 social features need an opt-in account and a backend.
 - **Legal / privacy:** users are global. Explicit consent, data minimisation, user-controlled
   sharing and deletion. Wellness framing only, with no diagnosis or treatment, to stay outside
   medical-device rules. Respect cultural and religious sensitivities. The challenge rules page
@@ -89,20 +102,23 @@ entry point.
 ## 5. Features & user stories
 | ID | Feature | User story | Priority |
 |---|---|---|---|
-| F-001 | My Starting Point | As a person starting, maintaining, or returning, I want to tell the app which activities I already like and why, what I have access to (e.g. a gym membership), when I'm usually free, what gets in the way, what to leave out, my reason and my stage, so that suggestions fit my life from day one. | P0 |
-| F-002 | Today's Suggestion | As a busy person, I want one activity suggestion that fits today, with the reason and a suggested time. I want to accept or edit it, swap it ("Something else", up to 2 more), or choose "Not today" (lighter, later, pause, or "my plan fell through"), so that I do something realistic today. Suggestions may include new activities similar to ones I like. | P0 |
+| F-001 | My Starting Point | As a person starting, maintaining, or returning, I want to first say which of four situations fits me, then answer follow-ups for that situation:<br>(1) **continue** an activity I already do;<br>(2) **add a new** activity alongside it;<br>(3) **pick up again** one I stopped, including why it stopped;<br>(4) **start** for the first time.<br>Then I tell it when I'm usually free, what I have access to, what gets in the way, and what to leave out, so that suggestions fit my life from day one. | P0 |
+| F-002 | Today's Suggestion | As a busy person, I want one activity suggestion that fits today, with the reason and a suggested time. I want to accept or edit it, swap it ("Something else", up to 2 more), or choose "Not today" (lighter, later, pause, or "my plan fell through"), so that I do something realistic today. I can follow more than one activity (e.g. running and pickleball) and add or remove them anytime. Suggestions may include new activities similar to ones I like. | P0 |
 | F-003 | Quick Reflection | As a user who just tried (or skipped) an activity, I want to mark completed, partly completed, or skipped and optionally note enjoyment, effort, or a barrier (including "didn't fit my schedule"). I want to see what the app will change as a result, so that future suggestions fit better. | P0 |
 | F-004 | What Works for Me (lite) | As a user, I want to see, edit, and delete observations about what works for me, see how my suggestions have changed over time, and save activities to repeat, so that I stay in control of what the app has learned. | P0 |
 | F-005 | My Way Back | As a Returner, I want to say what changed (schedule, environment, responsibilities, energy, or something else) and then review a previously helpful approach or try a different one, so that returning feels manageable. | P0 |
-| F-006 | Meaningful Progress (commit grid) | As a user, I want a GitHub-style grid of small rectangles that get brighter the more of my daily goal I achieve, plus returns after breaks and my reported experiences, so that I see progress without guilt. | P0 |
+| F-006 | Meaningful Progress (commit grid) | As a user, I want a GitHub-style grid of small rectangles that get brighter the more of my daily goal I achieve, shown on Today as soon as I open the app, plus returns after breaks and my reported experiences on My rhythm, so that I see progress without guilt. | P0 |
 | F-007 | Consent & My Data | As a user, I want to understand what data is used and that it stays on my phone, and export or delete all my data, so that I trust the app. | P0 |
 | F-008 | Gentle Notifications | As a user, I want occasional opt-in reminders at times I choose that never nag or guilt me, and that quiet down when I pause, so that I remember without feeling pressured. | P0 |
 | F-009 | Personal Rewards | As a user, I want to set my own reward for a goal I choose (e.g. "after 5 walks this month → movie night"), so that progress feels worthwhile. | P1 |
 | F-010 | Friends & Circles | As a user, I want to add friends or join a small circle (friends, family, a community group), share my progress if I choose, see how they are doing, cheer them on, and keep a friend streak if we opt in, so that my effort is seen and celebrated. | P1 |
 | F-011 | Group Rewards | As a circle creator, I want to set a shared reward for a group goal (e.g. "family dinner out"), so that the group celebrates together. | P1 |
-| F-012 | Group Challenges & Events | As a user, I want to create or join a challenge or an event (e.g. "pickleball this Saturday"), and get a suggested alternative if it is cancelled, so that being active is something I do with others. | P1 |
-| F-013 | Calendar-aware Timing | As a user, I want the app to read my phone's calendar (on the device, if I allow it) and suggest a free slot, so that I don't have to work out when to fit activity in. | P1 (stretch for P0) |
+| F-012 | Group Challenges & Events | As a user, I want a **Challenges tab** where I can create and join group challenges and events (e.g. "pickleball this Saturday"). I want to invite people who already use Rhythm in the app, and people who don't through a link, QR code or join code that also brings them to the app. I want a suggested alternative if an event is cancelled, so that being active is something I do with others. | P1 |
+| F-013 | Calendar Sync | As a user, I want to add my planned activities to my phone's calendar if I allow it, so that they show up in Google Calendar or Apple Calendar alongside everything else. Rhythm writes to the calendar on the device, and my calendar account syncs it as usual. | P0 (stretch, Android) · Apple Calendar with F-017 |
 | F-014 | Activity Data Import | As a user, I want the app to learn from activities my phone or watch already records (Health Connect, Apple Health), so that I don't have to log everything by hand. | P1 |
+| F-015 | Share Achievements | As a user, I want to share an achievement card (e.g. "Came back after a break", "First pickleball game", "30 active days") through my phone's share sheet to Instagram, TikTok, Facebook or X, so that my effort is seen and celebrated. In P1 I can also share an open challenge as a link, QR code or join code (F-012). | P0 (cards) · P1 (challenge sharing) |
+| F-016 | Home-screen Widget | As a user, I want a home-screen widget that shows today's suggestion and my grid, and opens Today when tapped, so that I see it without opening the app. | P0 (Android) · P1 (iPhone) |
+| F-017 | iPhone & Apple Watch | As an iPhone user, I want Rhythm on my iPhone, and on my Apple Watch to see today's suggestion and log a quick check-in, so that it's with me wherever I am. | P1 |
 
 **Hard cuts (this phase):**
 - Competitive leaderboards: they create pressure and guilt for people in a lapse, which conflicts
@@ -144,20 +160,31 @@ entry point.
 | ID | Rule | Applies to |
 |---|---|---|
 | BR-014 | Before any personal data is collected, a consent screen explains what data is used and that it stays on the device. Nothing is stored until the user agrees. | F-007 |
-| BR-015 | For P0, all personal data is stored only on the device. There is no account, no network call that carries personal data, and no analytics that include personal data. | All P0 |
+| BR-015 | For P0, all personal data is stored only on the device. There is no account, no network call by Rhythm that carries personal data, and no analytics that include personal data. Data leaves only through actions the user takes: export (BR-017), calendar sync (BR-022) and sharing (BR-023). | All P0 |
 | BR-016 | (Dormant in P0, ADR-006) Data is sent to an LLM only after explicit AI opt-in, and only in de-identified minimum form. | — |
 | BR-017 | The user can export all their data and delete all their data from settings. Delete-all removes every local record and cannot be undone. | F-007 |
 | BR-018 | (P1 social) A member shares only what they opt into (by default grid brightness only, never reflections or barriers). Social views show no ranking. A paused member is shown neutrally. Leaving a circle or deleting an account removes the member's shared data. | F-010, F-011, F-012 |
-| BR-022 | (F-013) Calendar access is opt-in and read on the device only, to find free slots. Event titles and details are never stored, shown elsewhere, or exported. | F-013 |
+| BR-022 | Calendar sync is opt-in, and the user picks which calendar. Rhythm only adds and updates its own activity events (activity name, time, duration). It never reads, stores or exports the user's other events. Turning sync off stops new events; the user chooses whether to remove the ones already added. | F-013 |
+| BR-023 | Nothing is shared unless the user taps Share. A shared achievement card or widget shows no reflections, barriers, reasons for stopping or other free text by default. Achievements are milestones that only ever increase (e.g. active days, returns, first time trying an activity). There are no personal streak counts (BR-007). Cards, widgets and notifications use no guilt or loss wording. | F-015, F-016 |
+| BR-024 | (P1) An invite link, QR code or join code carries only the challenge or event details and the inviter's chosen display name. A person who isn't a user sees only that public summary until they join. | F-012, F-015 |
 
 ## 7. User journeys
 ### UJ-001 — First run
 1. Open the app → Welcome & consent (BR-014). The user agrees; there is no decline path (closing
    the app stores nothing).
-2. My Starting Point: activities they like and why, access and memberships, usual free times, what
-   gets in the way, what to leave out, their reason and stage.
-3. See the first suggestion on Today.
-- **Edge cases:** user picks "returning" (offer My Way Back); red-flag text in the reason (BR-003).
+2. My Starting Point, step 1: "What brings you here?"
+   1. **Continue:** which activity, how it's going, what's getting harder.
+   2. **Add a new one:** what they already do, then what they'd like to add or are curious about.
+   3. **Pick up again:** which activity, roughly when it stopped, and why it stopped. The reasons
+      are neutral options, plus "prefer not to say", and the question can be skipped (BR-008).
+      Then what would make it easier now.
+   4. **Start fresh:** what they enjoy or are curious about ("not sure yet" allowed).
+3. Shared steps: usual free times, access and memberships, what gets in the way, what to leave
+   out, and an optional reason.
+4. See the first suggestion on Today, with the grid at the top.
+- **Edge cases:**
+  - Path (3) leads to Today opening with My Way Back's smaller first step.
+  - Red-flag text in any free text triggers BR-003.
 
 ### UJ-002 — Daily loop
 1. Optional gentle notification (F-008) → open Today.
@@ -186,8 +213,12 @@ entry point.
 
 ## 8. Acceptance criteria
 ### F-001 — My Starting Point
-- [ ] The user can complete setup in ≤ 2 minutes. It covers at least one liked activity (or "not
-  sure yet"), usual free times, a stage, and optional reason, access, barriers, and exclusions.
+- [ ] The first question offers the 4 paths (continue, add a new one, pick up again, start fresh).
+  Each path shows only its own follow-ups.
+- [ ] Path (3) asks why the activity stopped, with neutral options, "prefer not to say", and skip
+  (BR-008).
+- [ ] The user can complete setup in ≤ 2 minutes. It covers at least one activity (or "not sure
+  yet"), usual free times, and optional reason, access, barriers, and exclusions.
 - [ ] Excluded categories are saved and never offered (BR-011).
 - [ ] Red-flag text triggers the fixed support message and no suggestion (BR-003).
 
@@ -199,6 +230,9 @@ entry point.
 - [ ] Accept, edit, swap, lighter, later, pause, and "my plan fell through" all work; pause takes
   ≤ 2 taps (BR-006).
 - [ ] Nothing is planned without accept or edit (BR-005).
+- [ ] The user can follow more than one activity, and add or remove them from Settings or Discover.
+- [ ] Today shows one suggestion card per followed activity, each with its own reason, time,
+  swap and "Not today".
 
 ### F-003 — Quick Reflection
 - [ ] Completed, partly completed, or skipped, plus optional enjoyment, effort, or barrier, saved
@@ -219,6 +253,8 @@ entry point.
 - [ ] Offers the previous helpful approach (if any) and a different one.
 
 ### F-006 — Meaningful Progress (commit grid)
+- [ ] The grid is visible at the top of Today when the app opens, with no scrolling. My rhythm
+  shows the full history.
 - [ ] The grid shows one small rectangle per day; brightness level follows the goal-achievement
   levels in [Methods](methods.md).
 - [ ] Pause days have a distinct neutral marker, not an empty or "failed" tile (BR-006).
@@ -230,6 +266,36 @@ entry point.
   user agrees (BR-014).
 - [ ] The app makes no network call carrying personal data (BR-015).
 - [ ] Export produces a readable file; delete-all leaves no local records (BR-017).
+
+### F-013 — Calendar Sync (P0 stretch, Android)
+- [ ] Off by default. Turning it on asks for the calendar permission and which calendar to use
+  (BR-022).
+- [ ] An accepted or edited activity appears in that calendar with its name, time and duration.
+  Moving or cancelling it in Rhythm updates the event.
+- [ ] Rhythm never reads other calendar events (BR-022).
+
+### F-015 — Share Achievements
+- [ ] An achievement card is generated on the device and shared through the system share sheet.
+  Nothing is sent without the user tapping Share (BR-023).
+- [ ] Cards show only milestones that never decrease. No reflections, barriers or free text
+  appear (BR-023).
+- [ ] P0 achievements:
+  - **Back at it:** the first check-in after a break.
+  - **Bounced back:** 3 returns.
+  - **Something new:** the first time doing an activity new to you.
+  - **Explorer:** 3 different activities tried.
+  - **10, 30 and 100 active days:** lifetime totals, where partly counts and pauses never reset.
+  - **Found your rhythm:** the first confirmed observation.
+
+  In P1: **Better together** (first group challenge or event) and **Brought a friend** (an invite
+  joins). Nothing is based on streaks, distance, calories or speed.
+- [ ] The card shows the achievement name and one line, an activity illustration, an optional
+  mini grid (off by default) and the Rhythm mark with a download link or QR code. It never shows
+  times, places, notes or reasons for stopping.
+
+### F-016 — Home-screen Widget (Android)
+- [ ] Shows today's suggestion (or the planned activity) and a compact grid. Tapping opens Today.
+- [ ] While paused, it shows the paused state neutrally. No guilt wording (BR-007, BR-023).
 
 ### F-008 — Gentle Notifications
 - [ ] Off by default; the user picks times (BR-012).
@@ -250,6 +316,8 @@ entry point.
 | Commit grid | GitHub-style day tiles (small rectangles); brighter means more of the day's goal achieved |
 | Circle (P1) | A small cooperative group with a shared goal and no ranking |
 | Friend streak (P1) | A shared, opt-in run of active days between friends, governed by BR-021 |
+| Achievement | A milestone that only ever increases (e.g. 30 active days, came back after a break, first time trying an activity); shareable as a card (BR-023) |
+| Path | The situation chosen at setup: continue, add a new one, pick up again, or start fresh |
 
 ## 10. Success metrics
 Measured in user sessions or a short diary study during the challenge. These are not at-scale
@@ -272,6 +340,10 @@ analytics; on-device data is shared only with the participant's consent.
 - Healthy habits other than physical activity (sleep, hydration…) in this phase.
 - Social features, accounts and sync in P0: on-device first; they arrive with P1 (F-010..F-012).
 - Wearable or health-platform integration in P0: planned as P1 (F-014).
+- iPhone, Apple Watch, iOS widgets and Apple Calendar in P0: planned as P1 (F-017,
+  [ADR-008](adr/ADR-008-phone-integrations-and-platform-roadmap.md)).
+- Direct Google Calendar sign-in: calendar sync goes through the phone's own calendar instead
+  (F-013).
 - Monetisation and billing during the challenge: the payer is still a hypothesis ([BRD](brd.md) §5).
 
 ## 12. Risks & dependencies
@@ -281,7 +353,7 @@ analytics; on-device data is shared only with the participant's consent.
 | Setup asks more (liked activities, access, free times) and feels long | Drop-off at first run | ≤ 2 minutes; most answers are taps; "not sure yet" allowed |
 | Learning shows no visible improvement within a short study | G2 unproven | After every reflection, say what changes; show "how Rhythm adjusted" on My rhythm; report honestly |
 | No LLM weakens the AI and technical-depth judging criteria | Lower score | Present the ranking as an explainable personalisation engine; document it in depth ([BRD](brd.md) RK-009) |
-| New ideas keep expanding scope | Missed submission | Social, calendar and health data are P1; feature freeze 2026-11-13 |
+| New ideas keep expanding scope (P0 is now 10 features plus a stretch, with no code yet) | Missed submission | Build order: core loop (F-001..F-003, F-006, F-007) → F-005 → F-015 → F-016 → F-004 → F-008 → F-013 last as a stretch; feature freeze 2026-11-13; cut from the end of that list if late |
 | Notification permission refused | F-008 unused | The app works without notifications |
 | P1 social adds accounts and a backend | Architecture rework later | System design leaves a seam for optional sync |
 
@@ -296,7 +368,9 @@ analytics; on-device data is shared only with the participant's consent.
 | Q6 | Personal Rewards (F-009) was set to P1 to limit the P0 count. Promote it? | Owner | Nothing |
 | Q7 | Which activity categories go in library v1 (e.g. walking, running, gym, home workouts, racket sports, team sports, dance)? | Owner + Dzelle | TASK-004 |
 | Q8 | Confirm the friend-streak guardrails (BR-021) and how a streak counts (daily or weekly) | Owner | F-010, F-012 design |
-| Q9 | Is F-013 (calendar) attempted before the 2026-11-13 freeze? Decide by 2026-11-06 | Owner | Nothing in P0 |
+| Q9 | Is F-013 (calendar sync) attempted before the 2026-11-13 freeze? Decide by 2026-11-06 | Owner | Nothing in P0 |
+| Q10 | ~~One suggestion across activities or one per activity?~~ Resolved 2026-10-25: **one per activity** (F-002) | — | — |
+| Q11 | ~~Which achievements exist?~~ Resolved 2026-10-25 with the recommended set in F-015 acceptance; Dzelle may suggest changes | — | — |
 
 ## 14. Traceability
 | Feature | Story / journey | Rules | Tests |
@@ -312,6 +386,9 @@ analytics; on-device data is shared only with the participant's consent.
 | F-009 | — (P1) | BR-001, BR-007 | — |
 | F-010 | — (P1) | BR-018, BR-021 | — |
 | F-011 | — (P1) | BR-018 | — |
-| F-012 | — (P1) | BR-018, BR-021 | — |
-| F-013 | — (P1, stretch) | BR-022 | — |
+| F-012 | — (P1) | BR-018, BR-021, BR-024 | — |
+| F-013 | UJ-002 (P0 stretch) | BR-015, BR-022 | TC placeholder |
 | F-014 | — (P1) | BR-015, BR-018 | — |
+| F-015 | UJ-002 | BR-007, BR-015, BR-023, BR-024 | TC placeholder |
+| F-016 | UJ-002 | BR-007, BR-023 | TC placeholder |
+| F-017 | — (P1) | All P0 rules | — |
