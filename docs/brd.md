@@ -55,7 +55,7 @@ I can care for my health alongside my responsibilities and personal priorities.*
 - **Also in the prototype (Android):** sharing achievement cards to social media.
 - **Next phase (designed and pitched, not built for the challenge):**
   - calendar sync and a home-screen widget;
-  - friends and circles, and friend streaks;
+  - friends and circles, with shared "together days" (no streaks; ADR-010);
   - a Challenges tab with invites by link, QR code or join code;
   - iPhone, Apple Watch and iOS widgets;
   - activity data from phones and watches.

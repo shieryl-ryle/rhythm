@@ -1,7 +1,7 @@
 # ADR-007 — Allow friend streaks in the P1 social features
 
 - **Date:** 2026-10-24
-- **Status:** Accepted (the guardrails in Decision 3 are proposed; to confirm when P1 is designed, PRD Q8)
+- **Status:** Superseded by ADR-010
 - **Owners:** Shieryl (owner), Dzelle (input)
 - **Related:** [PRD](../prd.md) F-010, F-012, BR-007, BR-018, BR-021
 

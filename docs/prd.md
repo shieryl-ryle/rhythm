@@ -123,7 +123,7 @@ entry point.
 | F-007 | Consent & My Data | As a user, I want to understand what data is used and that it stays on my phone, and export or delete all my data, so that I trust the app. | P0 |
 | F-008 | Gentle Notifications | As a user, I want occasional opt-in reminders at times I choose that never nag or guilt me, and that quiet down when I pause, so that I remember without feeling pressured. | P0 |
 | F-009 | Personal Rewards | As a user, I want to set my own reward for a goal I choose (e.g. "after 5 walks this month → movie night"), so that progress feels worthwhile. | P1 |
-| F-010 | Friends & Circles | As a user, I want to add friends or join a small circle (friends, family, a community group), share my progress if I choose, see how they are doing, cheer them on, and keep a friend streak if we opt in, so that my effort is seen and celebrated. | P1 |
+| F-010 | Friends & Circles | As a user, I want to add friends or join a small circle (friends, family, a community group), share my progress if I choose, see how they are doing, cheer them on, and see our "together days" (days we were both active, a count that only goes up) with milestone celebrations, so that my effort is seen and celebrated. | P1 |
 | F-011 | Group Rewards | As a circle creator, I want to set a shared reward for a group goal (e.g. "family dinner out"), so that the group celebrates together. | P1 |
 | F-012 | Group Challenges & Events | As a user, I want a **Challenges tab** where I can create and join group challenges and events (e.g. "pickleball this Saturday"). I want to invite people who already use Rhythm in the app, and people who don't through a link, QR code or join code that also brings them to the app. I want a suggested alternative if an event is cancelled, so that being active is something I do with others. | P1 |
 | F-013 | Calendar Sync | As a user, I want to add my planned activities to my phone's calendar if I allow it, so that they show up in Google Calendar or Apple Calendar alongside everything else. Rhythm writes to the calendar on the device, and my calendar account syncs it as usual. | P1 (moved from P0 stretch by ADR-009) |
@@ -156,12 +156,12 @@ entry point.
 |---|---|---|
 | BR-005 | No activity is planned, scheduled, or counted unless the user accepts or edits it. | F-002 |
 | BR-006 | A pause is available on every suggestion screen, takes at most 2 taps, and is never counted or displayed as a failure or a miss. | F-002, F-006 |
-| BR-007 | **Personal progress:** skipping, pausing, or lapsing never erases or resets prior progress. There are no personal streaks. Totals such as active days and returns never decrease, and no copy uses guilt or loss wording (e.g. "you broke", "you lost", "failed"). The wording list is in [DESIGN.md](DESIGN.md). Friend streaks (P1) follow BR-021. | F-003, F-005, F-006, F-008 |
+| BR-007 | **Personal progress:** skipping, pausing, or lapsing never erases or resets prior progress. There are no personal streaks. Totals such as active days and returns never decrease, and no copy uses guilt or loss wording (e.g. "you broke", "you lost", "failed"). The wording list is in [DESIGN.md](DESIGN.md). This applies to shared and friend features too: there are no streaks anywhere ([ADR-010](adr/ADR-010-together-days-instead-of-friend-streaks.md)). | F-003, F-005, F-006, F-008 |
 | BR-008 | The app never assumes why a lapse happened. It asks with neutral options that include "prefer not to say", and the question can be skipped. | F-003, F-005 |
 | BR-009 | A missing reflection is stored as "unknown", never as "skipped", and does not lower a suggestion's ranking. | F-003, F-006 |
 | BR-010 | Proposed observations affect ranking only after the user confirms them. Users can edit or delete any observation, and a deleted one stops affecting ranking. | F-004 |
 | BR-011 | Users can exclude any activity category, for personal, cultural, or religious fit. Excluded categories are never offered. | F-001, F-002 |
-| BR-021 | (P1, [ADR-007](adr/ADR-007-friend-streaks-in-social-phase.md); guardrails to confirm, Q8) Friend streaks exist only between people who opt in. When one ends, no personal total, tile or history changes. The app never shows who ended it. A member's pause doesn't end it. Ending copy is neutral and avoids the DESIGN.md "never use" list. | F-010, F-012 |
+| BR-021 | (P1, [ADR-010](adr/ADR-010-together-days-instead-of-friend-streaks.md)) Shared progress between friends only ever goes up. "Together days" counts days both people were active and never decreases or resets. Milestones are celebrated, and nothing is shown as ending, broken or lost. An optional weekly shared goal starts fresh each Monday, with no "missed" copy. Only people who opt in share it. | F-010, F-012 |
 
 ### Notifications
 | ID | Rule | Applies to |
@@ -368,7 +368,7 @@ entry point.
 | Return | The first logged activity after a lapse |
 | Commit grid | GitHub-style day tiles (small rectangles); brighter means more of the day's goal achieved |
 | Circle (P1) | A small cooperative group with a shared goal and no ranking |
-| Friend streak (P1) | A shared, opt-in run of active days between friends, governed by BR-021 |
+| Together days (P1) | The number of days two friends were both active, ever; only goes up (BR-021) |
 | Achievement | A milestone that only ever increases (e.g. 30 active days, came back after a break, first time trying an activity); shareable as a card (BR-023) |
 | Path | The situation chosen at setup: continue, add a new one, pick up again, or start fresh |
 
@@ -391,7 +391,7 @@ analytics; on-device data is shared only with the participant's consent.
   cooperative.
 - Diagnosis, clinical risk scores, or medical advice: wellness only (BR-001).
 - Healthy habits other than physical activity (sleep, hydration…) in this phase.
-- Friends, circles, group challenges, invites and friend streaks in P0: they arrive in P1
+- Friends, circles, group challenges, invites and together days in P0: they arrive in P1
   (F-010..F-012). Together (F-018) is the only P0 feature with an account.
 - Chat or messaging between users: not planned.
 - Wearable or health-platform integration in P0: planned as P1 (F-014).
@@ -425,7 +425,7 @@ analytics; on-device data is shared only with the participant's consent.
 | Q5 | The challenge rules (data use, IP, submission format): rules page unreadable on 2026-10-23 | Owner | Submission |
 | Q6 | Personal Rewards (F-009) was set to P1 to limit the P0 count. Promote it? | Owner | Nothing |
 | Q7 | Which activity categories go in library v1 (e.g. walking, running, gym, home workouts, racket sports, team sports, dance)? | Owner + Dzelle | TASK-004 |
-| Q8 | Confirm the friend-streak guardrails (BR-021) and how a streak counts (daily or weekly) | Owner | F-010, F-012 design |
+| Q8 | ~~Friend-streak guardrails?~~ Resolved 2026-10-25: no streaks; "together days" instead (ADR-010) | — | — |
 | Q9 | Is F-013 (calendar sync) attempted before the 2026-11-13 freeze? Decide by 2026-11-06 | Owner | Nothing in P0 |
 | Q10 | ~~One suggestion across activities or one per activity?~~ Resolved 2026-10-25: **one per activity** (F-002) | — | — |
 | Q11 | ~~Which achievements exist?~~ Resolved 2026-10-25 with the recommended set in F-015 acceptance; Dzelle may suggest changes | — | — |
