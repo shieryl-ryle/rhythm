@@ -102,8 +102,8 @@ entry point.
 ## 5. Features & user stories
 | ID | Feature | User story | Priority |
 |---|---|---|---|
-| F-001 | My Starting Point | As a person starting, maintaining, or returning, I want to first say which of four situations fits me, then answer follow-ups for that situation:<br>(1) **continue** an activity I already do;<br>(2) **add a new** activity alongside it;<br>(3) **pick up again** one I stopped, including why it stopped;<br>(4) **start** for the first time.<br>Then I tell it when I'm usually free, what I have access to, what gets in the way, and what to leave out, so that suggestions fit my life from day one. | P0 |
-| F-002 | Today's Suggestion | As a busy person, I want one activity suggestion that fits today, with the reason and a suggested time. I want to accept or edit it, swap it ("Something else", up to 2 more), or choose "Not today" (lighter, later, pause, or "my plan fell through"), so that I do something realistic today. I can follow more than one activity (e.g. running and pickleball) and add or remove them anytime. Suggestions may include new activities similar to ones I like. | P0 |
+| F-001 | My Starting Point | As a person starting, maintaining, or returning, I want to tick every situation that fits me, then answer one question at a time for each:<br>(1) **continue** an activity I already do;<br>(2) **add a new** activity alongside it;<br>(3) **pick up again** one I stopped, including why it stopped;<br>(4) **start** for the first time (this one can't be combined with the others).<br>Then I tell it, by tapping options, when I'm usually free, what I have access to, what gets in the way, why it matters to me, and what to leave out, so that suggestions fit my life from day one. | P0 |
+| F-002 | Today's Suggestion | As a busy person, I want one activity suggestion that fits today, with the reason and a suggested time. I want to accept or edit it, swap it ("Something else", up to 2 more), or choose "Not today" (lighter, later, pause, or "my plan fell through"), so that I do something realistic today. I can follow more than one activity (e.g. running and pickleball) and add or remove them anytime. Today also shows a few new activities to try. Each opens a detail page where I can add it or plan it. I can **plan my own** activity (pick activity, day, time, length), and it joins Today's plan next to the ones I accepted. | P0 |
 | F-003 | Quick Reflection | As a user who just tried (or skipped) an activity, I want to mark completed, partly completed, or skipped and optionally note enjoyment, effort, or a barrier (including "didn't fit my schedule"). I want to see what the app will change as a result, so that future suggestions fit better. | P0 |
 | F-004 | What Works for Me (lite) | As a user, I want to see, edit, and delete observations about what works for me, see how my suggestions have changed over time, and save activities to repeat, so that I stay in control of what the app has learned. | P0 |
 | F-005 | My Way Back | As a Returner, I want to say what changed (schedule, environment, responsibilities, energy, or something else) and then review a previously helpful approach or try a different one, so that returning feels manageable. | P0 |
@@ -213,8 +213,15 @@ entry point.
 
 ## 8. Acceptance criteria
 ### F-001 — My Starting Point
-- [ ] The first question offers the 4 paths (continue, add a new one, pick up again, start fresh).
-  Each path shows only its own follow-ups.
+- [ ] The first question offers the 4 paths as checkboxes. Several can be ticked, except "start
+  fresh", which clears the others. Next stays disabled until one is ticked, so no error screen is
+  needed.
+- [ ] Follow-ups appear one question at a time. A single-choice answer moves on automatically, and
+  earlier answers fold into a summary that can be changed.
+- [ ] "Other" opens an activity search over the library, with "Can't find it? Type it" as the only
+  free text (red-flag checked, BR-003).
+- [ ] Setup has no other free text. "Why it matters" is a set of tap options, including "Prefer not
+  to say".
 - [ ] Path (3) asks why the activity stopped, with neutral options, "prefer not to say", and skip
   (BR-008).
 - [ ] The user can complete setup in ≤ 2 minutes. It covers at least one activity (or "not sure
@@ -233,6 +240,10 @@ entry point.
 - [ ] The user can follow more than one activity, and add or remove them from Settings or Discover.
 - [ ] Today shows one suggestion card per followed activity, each with its own reason, time,
   swap and "Not today".
+- [ ] Today has "Try something new" (activities with reasons), "+ Add an activity" and "+ Plan your
+  own". A custom plan appears in Today's plan with the accepted suggestions (BR-005: the user made
+  it).
+- [ ] Opening the app shows the grid as empty outlines while loading, then fills it in.
 
 ### F-003 — Quick Reflection
 - [ ] Completed, partly completed, or skipped, plus optional enjoyment, effort, or barrier, saved
