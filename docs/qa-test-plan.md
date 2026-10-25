@@ -73,6 +73,8 @@ tests; TC-042 runs manually against the free tier with synthetic data only.
 | TC-040 | Public deployment | Open the deployed URL in a clean browser → consent → setup → Today shows options → reflect → Progress shows a lit tile | Playwright MCP via `test-runner`, else manual |
 | TC-041 | Notifications | OS permission denied → app explains and works; tapping a reminder opens `/today`; check-in opens `/way-back` | manual on Android ([Mobile QA](mobile-qa.md)) |
 | TC-042 | AI adversarial input | Synthetic preference tags with injection-like strings ("ignore rules…") → output still passes EQ-007 or falls back; never shows a new action | manual against the free tier with synthetic data |
+| TC-044 | Large text (DESIGN.md) | At 200% system text size: side-by-side buttons stack full width; label/value pairs stack; no text clipped or overlapping on Today, sheets, Settings, Together; matches wireframe 9.15 | yes: golden tests at `textScaler: 2.0` + manual on Android |
+| TC-045 | Tap targets (DESIGN.md) | Every tappable widget (chips, links, icon buttons, calendar days) has a hit area of at least 48×48 dp (calendar 44 dp) | yes: Flutter `androidTapTargetGuideline` / `meetsGuideline` widget tests |
 | TC-043 | Offline | Airplane mode → all P0 flows work; AI-on falls back to library text | manual on Android + `no_network_test.dart` |
 
 ## 3. Exit criteria

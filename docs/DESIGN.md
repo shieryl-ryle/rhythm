@@ -153,6 +153,14 @@ Wireframes v5.
 - **Large text:** at 200% text size, side-by-side buttons stack, and label/value pairs stack
   label above value.
 - **Share** through the system share sheet, never with app buttons drawn by us.
+- **Links vs buttons:**
+  - In-app actions ("Something else", "Not today", "Edit", "Skip", "See all") are **text buttons**:
+    semibold, no underline, 48 dp tall.
+  - Underlines are reserved for real links that open something outside the current flow, such as
+    a web page.
+- **Filter chips** (e.g. Discover) are **multi-select** with a ✓. Selecting none means "All".
+- **Build checks:** 200% text (TC-044) and 48 dp tap areas, including on visually 32 dp chips
+  (TC-045).
 
 ## Open decisions
 | # | Decision | Owner |
