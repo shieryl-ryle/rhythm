@@ -2,7 +2,7 @@
 
 > **Purpose:** the WHY, for the Future Health Digital Innovation Challenge judges. Owns business
 > objectives, the business model hypothesis, and business risks. Scope details live in the [PRD](prd.md).
-> **Status:** Draft v0.4 (v0.4: share cards, widget and calendar in the prototype; iPhone, Watch and invites as the next phase and a growth channel; ADR-008. v0.3: physical-activity focus, no LLM, social next, differentiation; ADR-005..007) · **Date:** 2026-10-25 · **Owner:** Shieryl
+> **Status:** Draft v0.5 (v0.5: community events and clubs are a P0 highlight with a Firebase backend, health data stays on the device; ADR-009. v0.4: share cards, widget and calendar in the prototype; iPhone, Watch and invites as the next phase and a growth channel; ADR-008. v0.3: physical-activity focus, no LLM, social next, differentiation; ADR-005..007) · **Date:** 2026-10-25 · **Owner:** Shieryl
 > **Traces to:** [PRD](prd.md) · business-model ADR: none yet (payer left open on purpose — see §5)
 > **Challenge:** [Future Health Digital Innovation Challenge](https://hack2skill.com/event/futurehealthchallenge/)
 > — **Wellbeing** track: *"help people understand changes in their health and wellbeing, sustain
@@ -47,9 +47,14 @@ I can care for my health alongside my responsibilities and personal priorities.*
   above and focused on physical activity; features are defined in the [PRD](prd.md) (`F-###`).
   Includes an explainable personalisation engine, explicit consent, data minimisation, and
   user-controlled data.
-- **Also in the prototype (Android):** sharing achievement cards to social media, a home-screen
-  widget, and adding activities to the phone's calendar (stretch).
+- **Highlight in the prototype: community (Together).**
+  - Find local events and clubs (Reclub-style), RSVP, join and host.
+  - It uses a small Firebase backend, and only the community profile and RSVPs go to the server;
+    health data stays on the phone.
+  - It is the first growth channel: hosts bring their groups in.
+- **Also in the prototype (Android):** sharing achievement cards to social media.
 - **Next phase (designed and pitched, not built for the challenge):**
+  - calendar sync and a home-screen widget;
   - friends and circles, and friend streaks;
   - a Challenges tab with invites by link, QR code or join code;
   - iPhone, Apple Watch and iOS widgets;
@@ -146,6 +151,9 @@ Source: challenge page, checked 2026-10-23. The page says dates may change.
 | RK-006 | ~~AI API cost or quota limits break the demo~~ Retired 2026-10-24: no LLM in the prototype (ADR-006) | — | — | — |
 | RK-007 | Challenge dates or rules change | L | M | Re-check the challenge page weekly; plan to the earliest date |
 | RK-008 | New ideas (social, calendar, health data) pull scope past the freeze | H | H | Those are next phase; only free-time timing is in the prototype; feature freeze 2026-11-13 |
+| RK-010 | Community launches empty (no real events nearby) | H | H | Labelled seed events and clubs; outreach to 2–3 local clubs (pickleball, run clubs) before the finals; demo account pre-joined |
+| RK-011 | Unsafe or abusive user-generated events | M | H | 18+, public venues, host guidelines, report/block, auto-hide after reports, manual review (PRD BR-027/028) |
+| RK-012 | Adding a backend slips the freeze | M | H | Calendar sync and widget moved to P1; Firebase managed services only; build order in the PRD §12 |
 | RK-009 | Without an LLM, judges score "AI" and "technical depth" lower | M | M | Present the ranking as an explainable personalisation engine with visible learning; document its design and limits; show the AI and social roadmap |
 
 ## 11. Validation plan

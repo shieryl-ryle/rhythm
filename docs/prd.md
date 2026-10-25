@@ -1,6 +1,13 @@
 # PRD — Rhythm (working name)
 
-**Status:** Draft v0.4 · **Owner:** Shieryl · **Last updated:** 2026-10-25
+**Status:** Draft v0.5 · **Owner:** Shieryl · **Last updated:** 2026-10-25
+
+v0.5 changes ([ADR-009](adr/ADR-009-community-in-p0.md)):
+- **Community is P0 (F-018).** A Together tab with events and clubs near you, RSVP, join and host.
+- The app now needs an account, but only for Together.
+- Health data stays on the device.
+- F-013 (calendar sync) and F-016 (widget) move to P1.
+- New rules: BR-025 to BR-029.
 
 v0.4 changes ([ADR-008](adr/ADR-008-phone-integrations-and-platform-roadmap.md)):
 - Setup asks which of 4 paths fits, with follow-ups for each (F-001).
@@ -72,10 +79,15 @@ and not validated in Abu Dhabi. It informs hypotheses only.
   learns from each person's own answers: activities they like and why, what they finished or
   enjoyed, what got in the way, and when they are free. Every suggestion shows its reason.
   **No LLM in P0** ([ADR-006](adr/ADR-006-no-ai-in-p0.md)).
-- **Data:** on the device only, with no account, for all P0 features. Rhythm itself sends nothing
-  anywhere. The only exceptions are actions the person takes: adding an activity to their phone's
-  calendar (which their calendar account then syncs) and sharing a card through the phone's share
-  sheet. P1 social features need an opt-in account and a backend.
+- **Data:** personal and health data (setup answers, reflections, grid, observations) stays on
+  the device, with no account needed. **Together (F-018)** is the exception:
+  - It needs an account.
+  - It stores a community profile (display name, optional photo, approximate area), clubs,
+    events, RSVPs and reports in Firebase.
+  - It never stores health data there (BR-025).
+
+  Sharing a card is a user action through the phone's share sheet
+  ([ADR-009](adr/ADR-009-community-in-p0.md)).
 - **Legal / privacy:** users are global. Explicit consent, data minimisation, user-controlled
   sharing and deletion. Wellness framing only, with no diagnosis or treatment, to stay outside
   medical-device rules. Respect cultural and religious sensitivities. The challenge rules page
@@ -114,10 +126,11 @@ entry point.
 | F-010 | Friends & Circles | As a user, I want to add friends or join a small circle (friends, family, a community group), share my progress if I choose, see how they are doing, cheer them on, and keep a friend streak if we opt in, so that my effort is seen and celebrated. | P1 |
 | F-011 | Group Rewards | As a circle creator, I want to set a shared reward for a group goal (e.g. "family dinner out"), so that the group celebrates together. | P1 |
 | F-012 | Group Challenges & Events | As a user, I want a **Challenges tab** where I can create and join group challenges and events (e.g. "pickleball this Saturday"). I want to invite people who already use Rhythm in the app, and people who don't through a link, QR code or join code that also brings them to the app. I want a suggested alternative if an event is cancelled, so that being active is something I do with others. | P1 |
-| F-013 | Calendar Sync | As a user, I want to add my planned activities to my phone's calendar if I allow it, so that they show up in Google Calendar or Apple Calendar alongside everything else. Rhythm writes to the calendar on the device, and my calendar account syncs it as usual. | P0 (stretch, Android) · Apple Calendar with F-017 |
+| F-013 | Calendar Sync | As a user, I want to add my planned activities to my phone's calendar if I allow it, so that they show up in Google Calendar or Apple Calendar alongside everything else. Rhythm writes to the calendar on the device, and my calendar account syncs it as usual. | P1 (moved from P0 stretch by ADR-009) |
 | F-014 | Activity Data Import | As a user, I want the app to learn from activities my phone or watch already records (Health Connect, Apple Health), so that I don't have to log everything by hand. | P1 |
 | F-015 | Share Achievements | As a user, I want to share an achievement card (e.g. "Came back after a break", "First pickleball game", "30 active days") through my phone's share sheet to Instagram, TikTok, Facebook or X, so that my effort is seen and celebrated. In P1 I can also share an open challenge as a link, QR code or join code (F-012). | P0 (cards) · P1 (challenge sharing) |
-| F-016 | Home-screen Widget | As a user, I want a home-screen widget that shows today's suggestion and my grid, and opens Today when tapped, so that I see it without opening the app. | P0 (Android) · P1 (iPhone) |
+| F-016 | Home-screen Widget | As a user, I want a home-screen widget that shows today's suggestion and my grid, and opens Today when tapped, so that I see it without opening the app. | P1 (moved from P0 by ADR-009) |
+| F-018 | Community (Together tab) | As someone who'd rather be active with others, I want a **Together** tab where I can find events and clubs near me, filter by activity, level and time, see who's going, RSVP so it joins Today's plan, join clubs, and host my own event at a public place, so that I find people to do it with. Like Reclub, but tied to my rhythm. | P0 ([ADR-009](adr/ADR-009-community-in-p0.md)) |
 | F-017 | iPhone & Apple Watch | As an iPhone user, I want Rhythm on my iPhone, and on my Apple Watch to see today's suggestion and log a quick check-in, so that it's with me wherever I am. | P1 |
 
 **Hard cuts (this phase):**
@@ -162,10 +175,15 @@ entry point.
 | BR-014 | Before any personal data is collected, a consent screen explains what data is used and that it stays on the device. Nothing is stored until the user agrees. | F-007 |
 | BR-015 | For P0, all personal data is stored only on the device. There is no account, no network call by Rhythm that carries personal data, and no analytics that include personal data. Data leaves only through actions the user takes: export (BR-017), calendar sync (BR-022) and sharing (BR-023). | All P0 |
 | BR-016 | (Dormant in P0, ADR-006) Data is sent to an LLM only after explicit AI opt-in, and only in de-identified minimum form. | — |
-| BR-017 | The user can export all their data and delete all their data from settings. Delete-all removes every local record and cannot be undone. | F-007 |
+| BR-017 | The user can export all their data and delete all their data from settings. Delete-all removes every local record and, if a Together account exists, deletes that account and its server data (profile, RSVPs, hosted events). It cannot be undone. | F-007, F-018 |
 | BR-018 | (P1 social) A member shares only what they opt into (by default grid brightness only, never reflections or barriers). Social views show no ranking. A paused member is shown neutrally. Leaving a circle or deleting an account removes the member's shared data. | F-010, F-011, F-012 |
 | BR-022 | Calendar sync is opt-in, and the user picks which calendar. Rhythm only adds and updates its own activity events (activity name, time, duration). It never reads, stores or exports the user's other events. Turning sync off stops new events; the user chooses whether to remove the ones already added. | F-013 |
 | BR-023 | Nothing is shared unless the user taps Share. A shared achievement card or widget shows no reflections, barriers, reasons for stopping or other free text by default. Achievements are milestones that only ever increase (e.g. active days, returns, first time trying an activity). There are no personal streak counts (BR-007). Cards, widgets and notifications use no guilt or loss wording. | F-015, F-016 |
+| BR-025 | Health data never leaves the device for Together: no setup answers, reflections, barriers, grid, observations or stop reasons. Firebase stores only the community profile (display name, optional photo, approximate area), clubs joined, events hosted, RSVPs and reports. Everything outside Together works without an account. | F-018 |
+| BR-026 | Location is approximate. The user picks an area, or allows coarse location to suggest one. Precise coordinates are never stored or shown. Event venues are public places that the host enters. | F-018 |
+| BR-027 | Together is for people aged 18+, confirmed at account creation. Hosts accept the community guidelines before posting, and events must be at public venues. | F-018 |
+| BR-028 | Every event, club and profile can be reported or blocked. Content reported by 3 or more people [assumption] is hidden until reviewed. Blocked people's events and profiles are never shown to the blocker. | F-018 |
+| BR-029 | Attendee lists show display names and avatars only, visible to signed-in users. Hosts can't see attendees' activity history. RSVP changes and cancellations show no guilt wording (BR-007). | F-018 |
 | BR-024 | (P1) An invite link, QR code or join code carries only the challenge or event details and the inviter's chosen display name. A person who isn't a user sees only that public summary until they join. | F-012, F-015 |
 
 ## 7. User journeys
@@ -210,6 +228,15 @@ entry point.
    "my plan fell through".
 2. "My plan fell through" offers an alternative that fits the same time slot.
 3. Notifications quiet down during a pause (BR-013). Progress is kept (BR-007).
+
+### UJ-005 — Find people to do it with
+1. From Together, or from "Find a session near you" on an activity, browse events near your area.
+2. Open an event → see who's going → "I'm going" → it appears in Today's plan.
+3. Afterwards, check in as usual. The grid counts it like any other activity.
+- **Edge cases:**
+  - Not signed in: sign-in is explained, health data stays local.
+  - No events nearby: clubs to join, or host one.
+  - The event is cancelled: neutral notice plus an alternative for the same slot.
 
 ## 8. Acceptance criteria
 ### F-001 — My Starting Point
@@ -278,7 +305,22 @@ entry point.
 - [ ] The app makes no network call carrying personal data (BR-015).
 - [ ] Export produces a readable file; delete-all leaves no local records (BR-017).
 
-### F-013 — Calendar Sync (P0 stretch, Android)
+### F-018 — Community (Together tab)
+- [ ] Together is the 4th tab. Signed out, it explains what's shared and offers sign-in. The rest
+  of the app never requires an account (BR-025).
+- [ ] It lists events and clubs near the chosen area, filterable by activity, level and day. Each
+  event shows its time, public venue, level, host and spots left.
+- [ ] "I'm going" RSVPs and adds the event to Today's plan. Cancelling uses neutral copy
+  (BR-029).
+- [ ] Clubs can be joined, and a club page lists its upcoming sessions.
+- [ ] A signed-in adult can host an event: activity, title, date and time, public venue, level
+  and spots, after accepting the guidelines (BR-027).
+- [ ] Report and block work on events, clubs and profiles (BR-028).
+- [ ] Firestore security rules allow writing only one's own profile, RSVPs and hosted events.
+  Rule tests pass.
+- [ ] Seeded events and clubs are labelled as samples.
+
+### F-013 — Calendar Sync (P1)
 - [ ] Off by default. Turning it on asks for the calendar permission and which calendar to use
   (BR-022).
 - [ ] An accepted or edited activity appears in that calendar with its name, time and duration.
@@ -304,7 +346,7 @@ entry point.
   mini grid (off by default) and the Rhythm mark with a download link or QR code. It never shows
   times, places, notes or reasons for stopping.
 
-### F-016 — Home-screen Widget (Android)
+### F-016 — Home-screen Widget (P1)
 - [ ] Shows today's suggestion (or the planned activity) and a compact grid. Tapping opens Today.
 - [ ] While paused, it shows the paused state neutrally. No guilt wording (BR-007, BR-023).
 
@@ -349,7 +391,9 @@ analytics; on-device data is shared only with the participant's consent.
   cooperative.
 - Diagnosis, clinical risk scores, or medical advice: wellness only (BR-001).
 - Healthy habits other than physical activity (sleep, hydration…) in this phase.
-- Social features, accounts and sync in P0: on-device first; they arrive with P1 (F-010..F-012).
+- Friends, circles, group challenges, invites and friend streaks in P0: they arrive in P1
+  (F-010..F-012). Together (F-018) is the only P0 feature with an account.
+- Chat or messaging between users: not planned.
 - Wearable or health-platform integration in P0: planned as P1 (F-014).
 - iPhone, Apple Watch, iOS widgets and Apple Calendar in P0: planned as P1 (F-017,
   [ADR-008](adr/ADR-008-phone-integrations-and-platform-roadmap.md)).
@@ -364,7 +408,10 @@ analytics; on-device data is shared only with the participant's consent.
 | Setup asks more (liked activities, access, free times) and feels long | Drop-off at first run | ≤ 2 minutes; most answers are taps; "not sure yet" allowed |
 | Learning shows no visible improvement within a short study | G2 unproven | After every reflection, say what changes; show "how Rhythm adjusted" on My rhythm; report honestly |
 | No LLM weakens the AI and technical-depth judging criteria | Lower score | Present the ranking as an explainable personalisation engine; document it in depth ([BRD](brd.md) RK-009) |
-| New ideas keep expanding scope (P0 is now 10 features plus a stretch, with no code yet) | Missed submission | Build order: core loop (F-001..F-003, F-006, F-007) → F-005 → F-015 → F-016 → F-004 → F-008 → F-013 last as a stretch; feature freeze 2026-11-13; cut from the end of that list if late |
+| New ideas keep expanding scope (P0 is 10 features including a backend, with no code yet) | Missed submission | Build order: core loop (F-001..F-003, F-006, F-007) → F-018 Together → F-005 → F-004 → F-015 → F-008. Feature freeze 2026-11-13; cut from the end of that list if late |
+| Together has no real events on day one (empty network) | The highlight looks empty | Labelled seed clubs and events (DS-006); outreach to 2–3 local clubs; the demo account is pre-joined |
+| User-generated events bring safety and moderation duties | Harm, or store rejection | BR-027/028: 18+, public venues, report/block, auto-hide after reports, manual review queue |
+| Firestore free-tier limits or rule mistakes | Data exposure or an outage | Security-rule tests in CI; budget alert; no health data on the server (BR-025) |
 | Notification permission refused | F-008 unused | The app works without notifications |
 | P1 social adds accounts and a backend | Architecture rework later | System design leaves a seam for optional sync |
 
@@ -403,3 +450,4 @@ analytics; on-device data is shared only with the participant's consent.
 | F-015 | UJ-002 | BR-007, BR-015, BR-023, BR-024 | TC placeholder |
 | F-016 | UJ-002 | BR-007, BR-023 | TC placeholder |
 | F-017 | — (P1) | All P0 rules | — |
+| F-018 | UJ-005 | BR-007, BR-015, BR-017, BR-025..BR-029 | TC placeholder |
