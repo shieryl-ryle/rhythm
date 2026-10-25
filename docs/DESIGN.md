@@ -121,6 +121,39 @@ gap are set in the wireframe (owner direction, 2026-10-23).
 - **Don't:** use red, warning icons, or empty grey to mean a missed day; show "days since" counts;
   compare users; use confetti for streak lengths.
 
+## Interaction and accessibility rules (UI review, 2026-10-25)
+These come from the senior UI/UX review of Wireframes v4, accepted by the owner and applied in
+Wireframes v5.
+- **Touch targets:** at least 48 dp for every button, link, icon button and chip hit area, with
+  at least 8 dp between them. Calendar day cells are 44 dp or larger.
+- **Sizes:** all buttons 48 dp tall. Chips are one height (32 dp visual) whether selected or not.
+  The profile button is a 40 dp circle.
+- **Text:** 12 sp minimum, and nothing lighter than #6B6B6B on white. Muted text never sits on a
+  grey box.
+- **Fields:** the border is at least 3:1 against the background, with a 2 px focus state. Typed
+  text is ink and hints are muted. Labels sit above fields.
+- **Search:** a 56 dp rounded search bar with a magnifier and a clear (×) button. It opens full
+  screen while typing so the keyboard doesn't hide results, and has a "no matches" state.
+- **Selection:**
+  - Cards for 4 or fewer long options; chips for many short ones.
+  - Multi-select chips show a ✓, and checkboxes show a tick.
+  - Every setup question uses a Next button (no auto-advance).
+- **One primary per screen.** Today has one expanded suggestion card with the only filled button.
+  Other followed activities are compact cards.
+- **Sheets:** the screen behind stays visible under a 32% black scrim, and every sheet has a 48 dp
+  close (×) as well as swipe (WCAG 2.5.7). Top radius 28 dp.
+- **Feedback patterns:**
+  - Snackbars for quick confirmations (with Undo or Open).
+  - Banners with an action inside for persistent states.
+  - Inline progress for running tasks.
+  - Explanations ("What changes next", "Why we suggest it") use a left rule, not a grey box.
+- **Destructive actions** use a dialog. The safe choice is the default, and the destructive
+  button uses the `danger` token.
+- **Navigation bar:** 80 dp with an active pill behind the icon and 12 sp labels.
+- **Large text:** at 200% text size, side-by-side buttons stack, and label/value pairs stack
+  label above value.
+- **Share** through the system share sheet, never with app buttons drawn by us.
+
 ## Open decisions
 | # | Decision | Owner |
 |---|---|---|

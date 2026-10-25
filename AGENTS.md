@@ -114,8 +114,9 @@ current docs for the pinned version (see [Toolbox](./docs/toolbox.md)). If unver
 Roster: [docs/sad.md](./docs/sad.md) → `.claude/agents/`: `rules-reviewer` (read-only, checks
 BR-### rules), `test-runner` (runs gates, never fixes), `flutter-ui-builder` (one screen per
 call), `store-reviewer` (read-only, store releases only), `design-reviewer` (read-only, reviews
-Figma rounds against goals, rules and flows). Add more with the `add-subagent` skill only when a
-task recurs.
+Figma rounds against goals, rules and flows), `ui-reviewer` (read-only, senior UI/UX and
+accessibility critique, screen by screen). Add more with the `add-subagent` skill only when a task
+recurs.
 
 ## References
 [Docs index](./docs/index.md) · [ADRs](./docs/adr/) · [PRD](./docs/prd.md) ·

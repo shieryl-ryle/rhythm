@@ -62,6 +62,16 @@
 - **Output:** verdict · findings `Section › Frame — severity — source — issue — fix` · coverage
   counts · what's working.
 
+### ui-reviewer
+- **Justification:** repeated-spawn and context-offload (every wireframe and visual-design round,
+  about 100 screens each); a specialist eye the team doesn't have.
+- **Tools:** Read, Grep, Glob, Figma MCP read-only; never `use_figma`
+- **Checks:** visual hierarchy, layout and spacing, Material 3 patterns, accessibility (WCAG 2.2
+  AA: contrast, 48 dp targets, text size, 200% text, dismissible sheets), content scannability.
+  It explains and defends each recommendation. It complements design-reviewer, which covers goals,
+  rules and flows.
+- **Output:** verdict · cross-cutting issues · screen by screen · top 10 fixes.
+
 ## Materialization
 | Agent | File | In sync? |
 |---|---|---|
@@ -70,3 +80,4 @@
 | flutter-ui-builder | `.claude/agents/flutter-ui-builder.md` | ✅ |
 | store-reviewer | `.claude/agents/store-reviewer.md` | ✅ |
 | design-reviewer | `.claude/agents/design-reviewer.md` | ✅ |
+| ui-reviewer | `.claude/agents/ui-reviewer.md` | ✅ |
