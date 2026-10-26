@@ -55,13 +55,15 @@ app, nothing stored (there is no decline screen); red-flag text → S-090, the t
 |---|---|---|---|---|
 | 1 | S-004 | Optionally sets time and energy | Filters and re-ranks (EQ-003) | Options fit the inputs |
 | 2 | S-004 | Accepts / edits (S-102) / replaces / pauses (S-103) | Records the offer status; reworded text has an AI label (BR-019) | The accepted option shows as today's plan |
+| 3 | S-004 | Optionally taps "I'm starting" on the planned card | Marks the time the person chose; the card shows "Under way". Nothing is recorded (ADR-014); nothing counts toward the grid yet | The card reads "Started 12:31 · about 20 min" |
 
-**Branch points:** nothing fits → empty state with "lighter option" and "adjust exclusions";
+**Branch points:** "Not started yet" undoes a mis-tap; never starting or never tapping "I'm finished" leaves the card as "Planned", then "How did it go?", with no "overdue" or "missed" (BR-007); "Under way" clears itself after about 3 hours; nothing fits → empty state with "lighter option" and "adjust exclusions";
 AI timeout → library text (BR-020).
 
 ### UF-003 — Reflect on an action
 | Step | Screen | User does | System does | Success looks like |
 |---|---|---|---|---|
+| 0 | S-004 | Taps "I'm finished" (or "How did it go?") | Opens S-101; from "I'm finished" the answer "Done" is preselected and editable | 4 taps from "I'll try this" with "I'm starting", 4 without |
 | 1 | S-101 | Marks completed / partly / skipped | Saves the reflection | ≤ 3 taps |
 | 2 | S-101 | Optionally picks enjoyment, effort, barrier | Updates the ranking inputs; may propose an observation (EQ-009) | Saved toast |
 | 3 | S-004 | Returns to Today | Grid level updated (EQ-002) | Tile brightens |

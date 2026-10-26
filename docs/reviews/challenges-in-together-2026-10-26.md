@@ -247,7 +247,7 @@ APPROVE WITH CONDITIONS.
   the earlier round and DESIGN.md was amended to include stop sharing. Owner may overrule.
 
 Applied 2026-10-26: frames 278:4715, 279:4720, 279:4801, 279:5243 and the opt-in sheets; BR-018, BR-021,
-ADR-010 (amendment), UF-012, sitemap S-008. Known trade-off: a person who gets a new phone restarts the count
+ADR-013 (replaces the earlier amendment notes on ADR-009 and ADR-010, which were removed because accepted ADRs are not edited), UF-012, sitemap S-008. Known trade-off: a person who gets a new phone restarts the count
 from the flags still shared. Not yet re-reviewed by either reviewer; no dark or 200% frames for the new
 screens.
 - Not done yet: the monthly-goal ending line; the "one entity" statement for events across F-012 and F-018; the
