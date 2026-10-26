@@ -6,8 +6,9 @@
 
 ## 1. Navigation model
 First run is a short linear wizard (consent → AI choice → My Starting Point). After that, a
-**bottom tab bar** with three tabs: **Today**, **Discover**, **My rhythm** (owner decision
-2026-10-23, from the reference mock-up; replaces the earlier 4-tab layout). Settings & My Data
+**bottom tab bar** with four tabs: **Today**, **Discover**, **My rhythm**, **Together**.
+The owner cut the bar to three tabs on 2026-10-23 (reference mock-up), then restored the fourth
+when community became P0 (F-018, [ADR-009](adr/ADR-009-community-in-p0.md)). Settings & My Data
 open from a profile icon in the header. Today shows **one hero suggestion**, with "Something
 else" (swap) and "Not today" (lighter / reschedule / pause) as secondary actions. My Way Back is
 not a tab. It opens automatically after a lapse (EQ-001), from "Returning after a break?" on My
@@ -29,6 +30,7 @@ IDs: `S-001…` main screens · `S-09x` error/blocked states · `S-1xx` dialogs/
 | S-007 | What works for me (cut: merged into S-006 on 2026-10-23) | — | F-004 | — | — | — |
 | S-008 | Settings & My Data | Notifications, AI toggle, excluded categories, export, delete-all, edit starting point | F-007, F-008 | Header profile icon | Consented | idle / exporting / export done / export error |
 | S-009 | Discover | Browse the action library ("For you", filtered by exclusions and preferences) and "Saved" actions; try or save one | F-002, F-004 | Tab | Consented | loading / list / saved empty / all excluded |
+| S-010 | Together | Events and clubs near the chosen area, filterable by activity, level and day; RSVP, join, host, report and block. Signed out it explains what is shared and offers sign-in; this is the only screen group that needs an account (BR-025) | F-018 | Tab | Tab is open; sign-in needed to RSVP, join or host | signed out / loading / list / empty / error. Detail screens (event, club, host, sign-in, report) get their own S-IDs when TASK-015 starts |
 | S-090 | Support message | Fixed, non-AI message pointing to professional or emergency help | BR-003 | Red-flag text anywhere | Any | static |
 | S-091 | Something went wrong | Recoverable error with retry; no data loss | — | Unhandled error | Any | static |
 | S-101 | Reflection sheet | Completed / partly / skipped + optional enjoyment, effort, barrier | F-003 | Today (after accept); notification | Consented | idle / saved |
@@ -48,9 +50,10 @@ Tabs
  │   ├─ Edit option (S-102) · Not today (S-103) · Reflection (S-101) · Why this (S-107)
  │   └─ My Way Back (S-005)  ← also auto-opens after a lapse
  ├─ Discover (S-009)  — For you · Saved
- └─ My rhythm (S-006)  — grid · totals · experiences · what works
-     ├─ Observation edit (S-105)
-     └─ My Way Back (S-005)  ← "Returning after a break?"
+ ├─ My rhythm (S-006)  — grid · totals · experiences · what works
+ │   ├─ Observation edit (S-105)
+ │   └─ My Way Back (S-005)  ← "Returning after a break?"
+ └─ Together (S-010)  — events · clubs · (P1) challenges
 Header profile icon → Settings & My Data (S-008)
      ├─ Notification settings (S-106)
      ├─ Edit starting point (S-003)
@@ -68,6 +71,7 @@ Anywhere: Support message (S-090) · Error (S-091)
 | `/way-back` | S-005 | — | Consented | — | no | |
 | `/rhythm` | S-006 | — | Consented | — | no | Replaces `/progress` and `/works` |
 | `/discover` | S-009 | `?tab=saved` | Consented | — | no | |
+| `/together` | S-010 | — | Consented | — | no | Browsing is open to signed-out users; RSVP, join and host redirect to sign-in. Sub-routes come with TASK-015 |
 | `/settings` | S-008 | — | Consented | — | no | |
 | `/support` | S-090 | — | Any | — | no | |
 
@@ -103,6 +107,6 @@ tabs to Today.
 | Q1 | Should My rhythm show "reported experiences" as a list or as tags on the grid? | Design |
 
 ## Self-check
-- [x] Every P0 `F-###` is served by at least one screen (F-001 S-003 · F-002 S-004/S-009 · F-003 S-101 · F-004 S-006/S-009 · F-005 S-005 · F-006 S-006 · F-007 S-001/S-002/S-008 · F-008 S-106).
+- [x] Every P0 `F-###` is served by at least one screen (F-001 S-003 · F-002 S-004/S-009 · F-003 S-101 · F-004 S-006/S-009 · F-018 S-010 · F-005 S-005 · F-006 S-006 · F-007 S-001/S-002/S-008 · F-008 S-106).
 - [x] Every screen lists its required states.
 - [x] Every non-public zone is enforced (no server data in P0; P1 circles need server rules).
