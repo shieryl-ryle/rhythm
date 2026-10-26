@@ -35,6 +35,7 @@ spacing:
   lg: 16px
   xl: 24px
   xxl: 32px
+  section: 40px
   xxxl: 48px
 rounded:
   tile: 1.5px
@@ -97,7 +98,10 @@ progress.** Nothing on screen should feel like a debt.
 | `grid-pause` | Pause-day tile: drawn exactly like `grid-0`, a filled neutral square ([ADR-012](adr/ADR-012-pause-days-look-like-empty-days.md)) | Outlines, dashes or hatches |
 
 Contrast: `ink` and `ink-muted` on `surface`, and `on-primary` on `primary`, are intended to meet
-WCAG AA (verify, D2). Grid tiles are always filled rounded squares, never outlines. Levels also
+WCAG AA (verify, D2). Grid tiles are always filled rounded squares, never outlines, with one exception: today's tile
+has a 2 px focus ring. Future days are not drawn in the 12-week grid; on week strips and the
+widget they are filled `grid-0`; in the month calendar they have no fill. The legend reads
+"Done · Partly · Rest or not shared" (a paused day is drawn as level 0, ADR-012). Levels also
 differ by semantics labels ("Oct 21: goal met", "Oct 21: paused"), not colour alone.
 
 **Activity art** (the 56 dp thumbnails) uses `art-peak`, `art-level` and `art-comeback`, which are
@@ -134,6 +138,8 @@ gap are set in the wireframe (owner direction, 2026-10-23).
 | Option card | library / AI-worded | default / accepted / edited | Shows reason (BR-004) in `ink-muted`; AI-worded label chip (BR-019) |
 | Quick chip | single / multi select | default / selected | Used for time, energy, reflection, barrier. Multi-select shows a ✓; single-select does not |
 | Segmented control | 2 or 3 segments | one selected | Single choice with short labels. 48 dp tall, tinted track, white outlined selected segment. Not for navigation tabs |
+| Tabs | 2 or 3 tabs | one selected | Navigation between sections (For you / Saved, Events / Clubs / Mine). Surface track with a hairline border; the selected tab has a tinted fill and a semibold label, the others a regular secondary label |
+| Achievement badge | earned / locked | — | 56 dp tile (`thumb` radius). Earned: the equalizer in brand colours on `selected`. Locked: a canvas tile with a solid hairline and `grid-0` bars. "Earned ·" / "Not yet ·" text always accompanies it |
 | Commit grid tile | level 0–3 / pause / today | default / focused | Semantics label e.g. "Oct 20: goal met" / "Oct 21: paused" |
 | Bottom sheet | reflection / edit / pause / observation / notifications | — | Pause reachable in ≤ 2 taps (BR-006) |
 | Activity art | Running / Walking / Pickleball / Bouldering / Gym / Swimming / Cycling / Yoga / Social / Other | — | 56 dp tile, scales with its slot (event and club detail use 56 dp). Social sits on the warm tint. Decorative |
@@ -171,7 +177,8 @@ Wireframes v5.
   tint, about 5:1).
 - **Fields:** the border is at least 3:1 against the background, with a 2 px focus state. Typed
   text is ink and hints are muted. Labels sit above fields.
-- **Search:** a 56 dp rounded search bar with a magnifier and a clear (×) button. It opens full
+- **Search:** a 56 dp rounded search bar with a magnifier and a clear (×) button. While typing it
+  shows a 48 dp back arrow in place of the magnifier, so there is always a way out. It opens full
   screen while typing so the keyboard doesn't hide results, and has a "no matches" state.
 - **Selection:**
   - **Single choice:** a segmented control for 2 or 3 short options (labels that fit on one line
@@ -191,6 +198,11 @@ Wireframes v5.
     group; in a height-capped sheet, at least 24 dp. At least 16 dp between the last chip row
     and a primary button (chip hit areas reach 8 dp below the chips).
   - Every setup question uses a Next button (no auto-advance).
+- **Setup steps:** the primary button is always at the same place at the bottom (y736–784 on an
+  800 dp screen). When an answer is required, Next is the grey disabled button with a hint above
+  it ("Pick at least one to continue."). An exclusive choice that is unavailable keeps its text
+  readable (`ink-muted`) but loses its fill. Progress bars fill with `primary` and are named
+  "step N of M" for screen readers.
 - **One primary per screen.** Today has one expanded suggestion card with the only filled button.
   Other followed activities are compact cards.
 - **Sheets:** the screen behind stays visible under a 32% black scrim, and every sheet has a 48 dp
@@ -235,12 +247,13 @@ Wireframes v5.
 - **Share** through the system share sheet, never with app buttons drawn by us.
 - **Links vs buttons:**
   - In-app actions ("Something else", "Not today", "Edit", "Skip", "See all") are **text buttons**:
-    semibold, no underline, 48 dp tall.
+    semibold, no underline, 48 dp tall. A standalone, left-aligned text button sits flush with the
+    content edge (its label on the margin) and keeps its 48 dp hit area.
   - Underlines are reserved for real links that open something outside the current flow, such as
     a web page.
 - **Filter chips** (e.g. Discover) are **multi-select** with a ✓. Selecting none means "All".
-- **Menu chips** (a pill that opens a list, e.g. the Together filters) use a short label with a ▾
-  and show the chosen value; they have no ✓. A filter row sits at least 8 dp below the tabs
+- **Menu chips** (a pill that opens a list, e.g. the Together filters) use a short label with a
+  trailing chevron icon (the Chip's Menu property) and show the chosen value; they have no ✓. A filter row sits at least 8 dp below the tabs
   above it, counting the chips' 48 dp hit area.
 - **Build checks:** 200% text (TC-044) and 48 dp tap areas, including on visually 32 dp chips
   (TC-045).
