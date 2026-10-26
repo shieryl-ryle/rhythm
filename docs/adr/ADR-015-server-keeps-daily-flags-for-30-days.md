@@ -30,8 +30,7 @@ rules and clean-up.
    in November" still works at 30 days.
 4. A new phone rebuilds the count only from the last 30 days of flags still shared; older days start again.
    The Sharing screen says so.
-5. The Sharing screen carries: "Your daily active or resting marks are kept for 30 days so friends' phones
-   can catch up, then deleted. Stopping removes them now."
+5. The Sharing screen carries: "Marks are kept 30 days so friends' phones can catch up, then deleted. Stopping removes them now. On a new phone your count starts again."
 
 ### Why this option
 It is the shortest window that still covers a month-long goal and a long offline spell (UI reviewer's

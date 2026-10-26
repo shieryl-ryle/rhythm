@@ -347,12 +347,12 @@ entry point.
 
   In P1: **Better together** (first group challenge or event) and **Brought a friend** (an invite
   joins). Nothing is based on streaks, distance, calories or speed.
-- [ ] The card shows the achievement name and one line, an activity illustration, an optional
-  mini grid (off by default) and the Rhythm mark with a download link or QR code. It never shows
+- [ ] The card shows the achievement name and one line, an activity illustration, the grid only on the Rhythm template (no toggle),
+  and the Lilt mark with a download link or QR code. It never shows
   times, places, notes or reasons for stopping.
 - [ ] The share sheet offers up to three templates for the achievement, picked with a segmented control above a 4:5 preview: **Milestone** (equalizer bars, a title and one line; fed by 10, 30 and 100 active days, Bounced back, Explorer, Back at it and Found your rhythm), **Activity** (the activity art enlarged, the activity name and one line; fed by Something new, Explorer and Back at it when an activity is named) and **Rhythm** (the grid with "Active on N days so far"). Only the templates that fit the achievement are offered. In P1, **Together** ("Better together", "12 days together", no friend names). A card for a single completed activity ("Ran today") is not a milestone and is not offered in P0 or P1 until F-015 and BR-023 are amended ([ADR-016](adr/ADR-016-share-card-templates-and-safe-zone.md)).
 - [ ] The card is one 9:16 image (1080 × 1920) with all content inside a centred 4:5 safe area (1080 × 1350), clear of Instagram and TikTok overlays and cropping cleanly to a feed post. The preview shows the 4:5 area. It follows the app theme. The code on it points to the store page only and holds nothing personal.
-- [ ] The mini grid is **off by default** on Milestone and Activity (a "Show my grid" toggle); the Rhythm template includes the grid by choice, as an all-time count.
+- [ ] The grid appears **only** in the Rhythm template, as an all-time count. There is no "Show my grid" toggle (UI reviewer, 2026-10-26). Explorer has no single activity, so it offers Milestone and Rhythm only.
 
 ### F-016 — Home-screen Widget (P1)
 - [ ] Shows today's suggestion (or the planned activity) and a compact grid. Tapping opens Today.

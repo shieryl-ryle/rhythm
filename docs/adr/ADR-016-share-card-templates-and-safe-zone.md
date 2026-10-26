@@ -30,7 +30,7 @@ by default, which is a privacy default.
 2. Each card shows only what BR-023 allows. Rhythm and every total use all-time counts, never a rolling count.
 3. A card is one 9:16 image (1080 × 1920), generated on the device, with all content inside a centred 4:5 safe
    area (1080 × 1350). The preview shows the 4:5 area. There is no format choice in P0.
-4. The mini grid is OFF by default on Milestone and Activity. The Rhythm template includes the grid by choice.
+4. The grid appears only in the Rhythm template. There is no "Show my grid" toggle (a toggle would add nothing, since Rhythm is the grid, and a default-off privacy switch is simpler as no switch). Explorer offers Milestone and Rhythm only.
 5. The QR-style code points to the store page only and holds nothing personal.
 6. A single completed-activity card is not offered until F-015 and BR-023 are amended.
 
