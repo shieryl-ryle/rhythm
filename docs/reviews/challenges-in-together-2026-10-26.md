@@ -178,5 +178,11 @@ up", "Not now"). 10.5 is a calm cancellation.
   activities you do and anything you write stay on this phone. You can stop sharing any time." (10.1) and
   "Friends you choose see which days you were active. ..." (10.7); signed-out 11.4 shows counts, not names
   (BR-029). Its notes that PRD:310 / UJ-005 and the 10.3 code were stale were wrong: both were already fixed.
+- Privacy fix applied 2026-10-26 after the owner chose "full privacy fix": BR-018 and BR-025 now agree (two
+  daily flags, "active" and "paused", opt-in, stoppable); 10.7 rows show "Active today" and "Active yesterday"
+  only; new opt-in sheet frame "10.1a Share your active days (P1)"; captions and the 11.1 sentence use the
+  design reviewer's wording. Not yet re-checked by either reviewer.
+- Still open: signed-out 11.4 should show counts, not names (BR-029); the Friends row does not open the opt-in
+  sheet; the 10.1 goal card has no tap cue or detail screen.
 - Not done yet: the monthly-goal ending line; the "one entity" statement for events across F-012 and F-018; the
   private-challenge code rule in the PRD; showing a friend's activity name on 10.7 only if they opted in.

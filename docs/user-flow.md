@@ -122,7 +122,7 @@ Not built for the challenge submission (PRD §11). Shown in the wireframes as "1
 
 | Step | Screen | User does | System does | Success looks like |
 |---|---|---|---|---|
-| 1 | S-010 (Mine) | Taps "Challenges" in the "With friends" section | Opens the Challenges screen [pushed, back returns to Mine] | 3 taps from the tab bar |
+| 1 | S-010 (Mine) | Taps "Challenges" in the "With friends" section | First time only: the "Share active days?" opt-in sheet (BR-018). "Share my active days" opens the Challenges screen [pushed, back returns to Mine]; "Not now" returns to Mine and nothing is sent | 3 taps from the tab bar, 4 the first time |
 | 2 | S-010 [create] | Taps "+ Create a challenge"; picks a type, name, goal and who can join | An event type follows BR-027 (public venue, guidelines). First use shows the one-line sharing note (BR-025 P1 clause) | Create and invite is the one primary button |
 | 3 | S-010 [invite] | Shares a link, QR code or join code | A private challenge issues a single-use or expiring code (BR-024) | The invite shows only the inviter's name, the challenge name and the people count |
 | 4 | [join page] | An invitee opens the link and taps "Get Lilt to join" | Account creation with the 18+ confirmation (BR-027), then joins | Joined challenge appears in the invitee's Mine |
