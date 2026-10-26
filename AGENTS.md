@@ -115,7 +115,8 @@ Roster: [docs/sad.md](./docs/sad.md) → `.claude/agents/`: `rules-reviewer` (re
 BR-### rules), `test-runner` (runs gates, never fixes), `flutter-ui-builder` (one screen per
 call), `store-reviewer` (read-only, store releases only), `design-reviewer` (read-only, reviews
 Figma rounds against goals, rules and flows), `ui-reviewer` (read-only, senior UI/UX and
-accessibility critique, screen by screen). Add more with the `add-subagent` skill only when a task
+accessibility critique, screen by screen), `senior-project-manager` (read-only, scope, schedule and
+business-case decision memos, hackathon and store-release tracks). Add more with the `add-subagent` skill only when a task
 recurs.
 
 ## References

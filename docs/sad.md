@@ -72,6 +72,15 @@
   rules and flows.
 - **Output:** verdict · cross-cutting issues · screen by screen · top 10 fixes.
 
+### senior-project-manager
+- **Justification:** recurring decisions on scope, schedule and the business case between two tracks (the
+  hackathon submission and the Apple and Google Play release); a specialist eye the team does not have.
+- **Tools:** Read, Grep, Glob, WebSearch, WebFetch; never edits.
+- **Checks:** schedule against dated milestones, scope growth and what it displaces, business-case
+  assumptions, risks with owners and dates, sequencing between the two tracks. It complements
+  design-reviewer (goals, rules, flows) and store-reviewer (compliance in code).
+- **Output:** decision memo · recommendation and verdict · schedule check · options · risks · needs the owner.
+
 ## Materialization
 | Agent | File | In sync? |
 |---|---|---|
@@ -81,3 +90,4 @@
 | store-reviewer | `.claude/agents/store-reviewer.md` | ✅ |
 | design-reviewer | `.claude/agents/design-reviewer.md` | ✅ |
 | ui-reviewer | `.claude/agents/ui-reviewer.md` | ✅ |
+| senior-project-manager | `.claude/agents/senior-project-manager.md` | ✅ |
