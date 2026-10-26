@@ -158,6 +158,12 @@ up", "Not now"). 10.5 is a calm cancellation.
   days with Mia" summaries, and a separate P1 frame instead of editing 11.9. Owner to confirm.
 - Docs done on branch `docs/challenges-in-together-mine`: PRD F-012, BR-025 P1 clause, F-018 Mine criterion;
   BRD next-phase line; sitemap S-010 and tree; user-flow UF-010, UF-011, EV-011..EV-014.
-- Not done yet: the Figma changes (new frame "11.9 Together · mine (P1)", 10.1 as a pushed screen, copy fixes
-  on 10.2, 10.3 and 10.7), the monthly-goal ending line, the "one entity" statement for events across F-012
-  and F-018, and the private-challenge code rule in the PRD.
+- Owner decisions, 2026-10-26: Option 1 accepted; Q2 answered: signed-out people can browse public Together
+  events, and the sign-in screen shows when they RSVP, join or host.
+- Figma done: new frame "11.9 Together · mine (P1)" (268:4569, P0 11.9 untouched); 10.1 as a pushed screen
+  with a back arrow and no tab bar, Friends row removed; 10.4 back goes to the P1 Mine frame; copy fixes
+  ("Join events", "LILT-4KP2", "3 days together this week"); a one-time sharing note on 10.1 and 10.7.
+  These frames have not been re-reviewed by either reviewer.
+- Not done yet: 11.1 is still wired as a first-visit gate from 1.16 Today, which conflicts with the Q2
+  decision; the monthly-goal ending line; the "one entity" statement for events across F-012 and F-018; the
+  private-challenge code rule in the PRD; showing a friend's activity name on 10.7 only if they opted in.
