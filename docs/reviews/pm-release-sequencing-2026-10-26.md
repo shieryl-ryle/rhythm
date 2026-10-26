@@ -283,6 +283,14 @@ not. The tester pool built for the user sessions can double as the Google closed
 
 ## Status notes (added by Claude, not the memo)
 
+- Owner decisions, 2026-10-27, on section 6: (1) sequencing: option (d); (2) BRD stance and the single
+  release-plan document: agreed; (4) Shipaton: no longer a goal ("so you have something to look forward"); it is
+  dropped as a driver here, with ADR-011 left unedited; (5) developer accounts: the team will create its own,
+  account type not yet stated; (6) app ID: chosen when TASK-001 creates the app; (7) kill criteria: the
+  recommended defaults, now written into BRD §5; (8) cloud backup: stays out of the pitch and release 1.0;
+  (9) logistics spike: decision rule requested from the project manager role (see its memo when saved);
+  (10) TASK-001 is owned by Shieryl. Still open: the employer policy check before creating a commercial store
+  account, and the account type.
 - Owner decisions, 2026-10-26: agreed with option (d), the BRD stance and the single release-plan document.
 - Done: BRD §5 and the business model canvas updated; ADR-017 written.
 - Not yet decided by the owner: items 4 to 10 in section 6 (Shipaton, account type and the Incubeta policy check,

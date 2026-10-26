@@ -114,8 +114,12 @@ All three payer options stay open as **hypotheses** to test.
   never accept paying for?" Record counts. This is stated preference from a convenience sample, not a
   conversion rate.
 - **Cost to serve:** Firebase usage per active user from the sessions.
-- **Decision rule:** the owner sets, before the sessions start, what result makes the release lead with
-  direct-to-user only (for example no named payer contact and no feature named by participants).
+- **Decision rule (set 2026-10-27, before the sessions start):** if there is no named payer contact across at
+  least three payer conversations by 2026-12-07, and no session participant names a feature they would pay for,
+  the store release leads with the optional user subscription only and the payer pilot becomes a secondary
+  hypothesis. If at least one payer names a budget owner and a pilot they would consider, the release leads
+  with the payer pilot. Anything in between is reported as "undecided", not rounded up. The thresholds are the
+  recommended defaults and can change only before the sessions start.
 
 ## 6. Success metrics
 | Metric | Target | Why it matters |
