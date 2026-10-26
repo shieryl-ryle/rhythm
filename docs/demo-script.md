@@ -23,7 +23,7 @@
 | 1:15 | Today's options | S-004 | Set time 10 min, energy low → one hero option with its reason; tap "Something else" once; open "Why this suggestion?" to show the AI-worded label | "Every option says why it's here. AI only rewords, and it's labelled." | F-002, BR-004, BR-019 |
 | 1:45 | Reflect | S-101 | Accept → Completed, enjoyed, with company | "Three taps. That's what Rhythm learns from." | F-003 |
 | 2:05 | What works | S-006 | Confirm the "walks with company" observation | "She stays in control of what it learns." | F-004, BR-010 |
-| 2:25 | Progress | S-006 | Show the grid: the lapse, the pause hatch, today's tile lit, returns +1 | "Coming back is progress. Pauses aren't failures." | F-006, BR-006 |
+| 2:25 | Progress | S-006 | Show the grid: the calm gap (lapse and pause look the same, nothing red), today's tile lit, returns +1 | "Coming back is progress. Pauses aren't failures." | F-006, BR-006 |
 | 2:45 | Trust | S-008 | Show AI toggle, export, delete-all | "Data stays on the phone. Off by default, deletable in one tap." | F-007, BR-015..017 |
 
 ### 1. Welcome back

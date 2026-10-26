@@ -23,7 +23,7 @@ projector and in a 1080p video. Max 25 words per slide.
 per slide, with the caption below. Small "Rhythm (working name)" wordmark bottom-left.
 
 ## 5. Key visual
-**The grid that forgives:** a commit grid showing three bright weeks, a gap, a hatched pause, and
+**The grid that forgives:** a commit grid showing three bright weeks, a calm neutral gap (pauses look like any quiet day), and
 today's tile lit again, with an `accent` marker at the return. Caption: "Coming back is progress."
 
 ## 6. Storyboard

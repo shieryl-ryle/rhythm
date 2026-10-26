@@ -24,7 +24,7 @@ tests; TC-042 runs manually against the free tier with synthetic data only.
 | TC-003 | F-003 | Mark completed / partly / skipped with optional details in ≤ 3 taps; saved row matches | yes: `test/features/reflection/reflection_test.dart` |
 | TC-004 | F-004 | Observations list; confirm, edit, delete work; saved actions reappear as options | yes: `test/features/what_works/what_works_test.dart` |
 | TC-005 | F-005 | With seeded lapse → app opens My Way Back with "Welcome back"; previous approach and a different one offered; choosing one gives a smaller first action | yes: `integration_test/return_test.dart` |
-| TC-006 | F-006 | Grid renders one tile per day with levels per EQ-002; pause marker distinct; totals shown | yes: `test/features/progress/grid_test.dart` (golden) |
+| TC-006 | F-006 | Grid renders one tile per day with levels per EQ-002; paused day drawn as level 0 with semantics label "paused" (ADR-012); totals shown | yes: `test/features/progress/grid_test.dart` (golden) |
 | TC-007 | F-007 | Consent before data; AI toggle both ways; export file contains all tables; delete-all leaves zero user rows | yes: `test/data/my_data_test.dart` |
 | TC-008 | F-008 | Off by default; enabling schedules within caps; disabling cancels all | yes: `test/notifications/scheduler_test.dart` + manual on device |
 
@@ -36,7 +36,7 @@ tests; TC-042 runs manually against the free tier with synthetic data only.
 | TC-011 | BR-003 | Enter a DS-002 phrase in reason, barrier "other", or what-changed → S-090 shown, no suggestion, text not stored, no AI call | yes: `test/domain/red_flag_test.dart` + widget test |
 | TC-012 | BR-004 | Every rendered option has non-empty reason text | yes: widget test in TC-002 file |
 | TC-013 | BR-005 | Offered-but-untouched options are never counted in EQ-002, EQ-010 accepted, or reflections | yes: `test/domain/counting_test.dart` |
-| TC-014 | BR-006 | Pause reachable in ≤ 2 taps from Today; a paused day renders the pause marker, not level 0 | yes: widget test |
+| TC-014 | BR-006 | Pause reachable in ≤ 2 taps from Today; a paused day is stored as pause, never counted as a lapse, and its tile's semantics label says "paused" | yes: widget test |
 | TC-015 | BR-007 | Seed a 10-day lapse → active days and returns unchanged or higher; no string from the guilt-word list on Today, Progress, Way Back, or notification copy | yes: `test/content/guilt_words_test.dart` + `counting_test.dart` |
 | TC-016 | BR-008 | What-changed question includes "prefer not to say" and can be skipped; no copy states a cause | yes: widget test |
 | TC-017 | BR-009 | Accepted option with no reflection → status `unknown`; ranking score unchanged vs. no offer | yes: `test/domain/ranking_test.dart` |

@@ -211,7 +211,7 @@ entry point.
 3. Accept, edit, swap ("Something else", up to 2 more), or "Not today".
 4. Later: Quick Reflection (optional) → the app says what it will change next time.
 5. The grid tile brightens according to the share of the goal achieved (F-006).
-- **Edge cases:** no reflection (stays unknown, BR-009); pause (neutral tile, BR-006); all
+- **Edge cases:** no reflection (stays unknown, BR-009); pause (neutral level-0 tile, labelled "paused" for screen readers; BR-006, ADR-012); all
   categories excluded (prompt to adjust).
 
 ### UJ-003 — Return after a break (primary)
@@ -295,7 +295,8 @@ entry point.
   shows the full history.
 - [ ] The grid shows one small rectangle per day; brightness level follows the goal-achievement
   levels in [Methods](methods.md).
-- [ ] Pause days have a distinct neutral marker, not an empty or "failed" tile (BR-006).
+- [ ] Pause days show as a neutral filled tile, the same as a day with no activity, never a
+  "failed" tile; the semantics label says "paused" (BR-006, ADR-012).
 - [ ] Active-day and return totals never decrease after a skip or lapse (BR-007).
 - [ ] No guilt or loss wording appears anywhere on the screen (BR-007).
 
