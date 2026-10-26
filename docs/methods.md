@@ -28,7 +28,7 @@ or `partly`. "Paused day" = a day inside a `pause` of kind `pause`.
 | `EQ-###` | Output | Formula / method | Inputs | Confidence | Reference |
 |---|---|---|---|---|---|
 | EQ-001 | Lapse detected | `lapsed` iff the user has ≥ 1 reflected day ever **and** the last **3** consecutive local days [assumption] before today are neither reflected days nor paused days. The lapse starts on the first such day. | reflection, pause | High | BR-007, F-005 |
-| EQ-002 | Grid level for a day (0–3, plus pause) | `s` = (count of `completed`) + 0.5 × (count of `partly`) that day; `r = s / daily_goal`. Level **0** if r = 0, **1** if 0 < r < 0.5, **2** if 0.5 ≤ r < 1, **3** if r ≥ 1 [assumption]. Paused day with r = 0 → **pause marker** (not level 0). `unknown` and `skipped` add 0 but never darken a day below its level. | reflection, profile.daily_goal, pause | High | F-006, BR-006, BR-009 |
+| EQ-002 | Grid level for a day (0–3, plus pause) | `s` = (count of `completed`) + 0.5 × (count of `partly`) that day; `r = s / daily_goal`. Level **0** if r = 0, **1** if 0 < r < 0.5, **2** if 0.5 ≤ r < 1, **3** if r ≥ 1 [assumption]. Paused day with r = 0 → **pause** state (drawn like level 0 per ADR-012; labelled "paused"). `unknown` and `skipped` add 0 but never darken a day below its level. | reflection, profile.daily_goal, pause | High | F-006, BR-006, BR-009 |
 | EQ-003 | Option ranking | **Filter:** drop actions in excluded categories (BR-011); if a time input exists, drop `duration_min` > time; if energy = low, drop `energy_needed` = high. **Score** per action *a* using only reflections with status ≠ `unknown` (BR-009): `fit = (done + 1) / (n + 2)` where done = completed + 0.5 × partly and n = known reflections of *a* (Laplace smoothing); `enjoy = (sum of enjoyment − n_e) / (2 × n_e + 1)`, or 0 if n_e = 0 (scale 0–1); `hard = share of effort = hard`; `bonus = 0.2 if saved + 0.2 per confirmed observation whose tag matches *a*` (only `confirmed`, BR-010). **score = 0.5 × fit + 0.3 × enjoy − 0.2 × hard + bonus** [assumption: weights]. Take the top 3 with at most one per tag group; if the user has no history, take starters (`is_starter`). Lighter mode (UJ-004): restrict to `duration_min` ≤ 10 and `energy_needed` = low. | action, reflection, saved_action, observation, preference | High | F-002, F-005 |
 | EQ-004 | Reason shown with an option | The term with the largest positive contribution to EQ-003 picks a template: `fit` → "You managed this before"; `enjoy` → "You said this felt good"; `bonus` (observation) → the observation text; `bonus` (saved) → "You saved this"; starter → "A small way to begin"; lighter mode → "Short and gentle for today". | EQ-003 terms | High | BR-004 |
 | EQ-005 | Notification caps | Max **1** scheduled reminder per day and **5** per rolling 7 days [assumption]. None during quiet hours (default 21:00–08:00 [assumption]) or on paused days. While lapsed (EQ-001): only the weekly check-in, max **1** per 7 days, and only if `lapse_checkin_enabled`. | notification_setting, pause, EQ-001 | High | BR-012, BR-013 |
@@ -44,7 +44,7 @@ or `partly`. "Paused day" = a day inside a `pause` of kind `pause`.
 |---|---|---|
 | Lapse window | 3 days | [assumption] EQ-001 |
 | Options per day | 1–3 | PRD F-002 |
-| Grid levels | 0–3 + pause marker | [assumption] EQ-002 |
+| Grid levels | 0–3 + pause state (drawn as level 0, ADR-012) | [assumption] EQ-002 |
 | Default daily goal | 1 action | [assumption] Data Model |
 | Pause reach | ≤ 2 taps | PRD BR-006 |
 | Reflection | ≤ 3 taps | PRD F-003 acceptance |
