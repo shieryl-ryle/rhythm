@@ -17,6 +17,8 @@
 | UF-007 | Set up gentle notifications | All | S-106 | S-008 | F-008 | Must-Have | once |
 | UF-008 | Export or delete my data | All | S-008 | S-008 / S-001 | F-007 | Must-Have | rare |
 | UF-009 | Check progress | All | S-006 | S-006 | F-006 | Must-Have | weekly |
+| UF-010 | Find people to do it with | All | S-010 | S-004 | F-018 (UJ-005) | Must-Have | weekly |
+| UF-011 | Create or join a challenge (P1) | All | S-010 (Mine) | S-010 (Mine) | F-012 (UJ-005) | Later (P1) | occasional |
 
 **Coverage:** every P0 F-### appears in at least one flow (F-001 UF-001 · F-002 UF-002/005 · F-003 UF-003 · F-004 UF-006 · F-005 UF-004 · F-006 UF-003/004/009 · F-007 UF-001/008 · F-008 UF-005/007).
 
@@ -106,6 +108,27 @@ pause and goes to S-004 (paused state).
 |---|---|---|---|---|
 | 1 | S-006 | Opens My rhythm | Renders the grid (EQ-002) and totals (EQ-011) | Pause days marked neutrally; totals never decrease |
 
+### UF-010 — Find people to do it with
+Detail screens have no S-IDs yet (TASK-015); they are named in brackets.
+
+| Step | Screen | User does | System does | Success looks like |
+|---|---|---|---|---|
+| 1 | S-010 | Opens Together | Signed out: explains what is shared and offers sign-in (BR-025). Signed in: lists events and clubs near the chosen area | Sample items are labelled |
+| 2 | S-010 | Filters by activity, level or day; opens an event [event detail] | Shows time, public venue, level, host, who is going and spots left | Everything needed to decide is on one screen |
+| 3 | S-010 | Taps "I'm going" | Saves the RSVP; adds the event to Today's plan (F-018) | The event appears on S-004 |
+
+### UF-011 — Create or join a challenge (P1)
+Not built for the challenge submission (PRD §11). Shown in the wireframes as "11.9 Together · mine (P1)".
+
+| Step | Screen | User does | System does | Success looks like |
+|---|---|---|---|---|
+| 1 | S-010 (Mine) | Taps "Challenges" in the "With friends" section | Opens the Challenges screen [pushed, back returns to Mine] | 3 taps from the tab bar |
+| 2 | S-010 [create] | Taps "+ Create a challenge"; picks a type, name, goal and who can join | An event type follows BR-027 (public venue, guidelines). First use shows the one-line sharing note (BR-025 P1 clause) | Create and invite is the one primary button |
+| 3 | S-010 [invite] | Shares a link, QR code or join code | A private challenge issues a single-use or expiring code (BR-024) | The invite shows only the inviter's name, the challenge name and the people count |
+| 4 | [join page] | An invitee opens the link and taps "Get Lilt to join" | Account creation with the 18+ confirmation (BR-027), then joins | Joined challenge appears in the invitee's Mine |
+
+**Not drawn yet:** challenge detail, leave a challenge, join with a typed code, add a friend, an invalid or expired code, and the empty state of the Challenges screen.
+
 ## 5. Edge cases and breaks
 | ID | Flow | Break | User sees | Recovery | Work lost? |
 |---|---|---|---|---|---|
@@ -119,6 +142,10 @@ pause and goes to S-004 (paused state).
 | EV-008 | UF-002 | Offline | Normal options (library text) | Automatic | No |
 | EV-009 | UF-003 | AI-drafted observation fails the safety check | No observation proposed | Automatic (EQ-007) | No |
 | EV-010 | All | Device date changes or timezone travel | Days computed in local time | Grid follows local dates | No |
+| EV-011 | UF-010 | Not signed in | Sign-in is explained; health data stays local | Sign in, or leave Together | No |
+| EV-012 | UF-010 | No events nearby | Clubs to join, or host one | Choose either | No |
+| EV-013 | UF-010 | The event is cancelled | Neutral notice and an alternative for the same slot (BR-029) | Pick the alternative | No |
+| EV-014 | UF-010, UF-011 | Report or block an event, club or profile | Blocked people's events and profiles are never shown to the blocker; content reported by 3 or more people is hidden until reviewed (BR-028) | Continue | No |
 
 ## 6. Instrumentation
 **No analytics SDKs and no events leave the device** (BR-015). Study metrics ([PRD](prd.md) §10)

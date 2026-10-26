@@ -30,7 +30,7 @@ IDs: `S-001…` main screens · `S-09x` error/blocked states · `S-1xx` dialogs/
 | S-007 | What works for me (cut: merged into S-006 on 2026-10-23) | — | F-004 | — | — | — |
 | S-008 | Settings & My Data | Notifications, AI toggle, excluded categories, export, delete-all, edit starting point | F-007, F-008 | Header profile icon | Consented | idle / exporting / export done / export error |
 | S-009 | Discover | Browse the action library ("For you", filtered by exclusions and preferences) and "Saved" actions; try or save one | F-002, F-004 | Tab | Consented | loading / list / saved empty / all excluded |
-| S-010 | Together | Events and clubs near the chosen area, filterable by activity, level and day; RSVP, join, host, report and block. Signed out it explains what is shared and offers sign-in; this is the only screen group that needs an account (BR-025) | F-018 | Tab | Tab opens for everyone; signed out it explains what is shared and offers sign-in (PRD F-018). Whether the list can be browsed before sign-in is undecided (Q2) | signed out / loading / list / empty / error. Detail screens (event, club, host, sign-in, report) get their own S-IDs when TASK-015 starts |
+| S-010 | Together | Events and clubs near the chosen area, filterable by activity, level and day; RSVP, join, host, report and block. Signed out it explains what is shared and offers sign-in; this is the only screen group that needs an account (BR-025) | F-018 | Tab | Tab opens for everyone; signed out it explains what is shared and offers sign-in (PRD F-018). Whether the list can be browsed before sign-in is undecided (Q2) | signed out / loading / list / empty / error. Segments: Events, Clubs, Mine. Detail screens (event, club, host, sign-in, report; P1: challenges, friends, invite, join) get their own S-IDs when TASK-015 starts |
 | S-090 | Support message | Fixed, non-AI message pointing to professional or emergency help | BR-003 | Red-flag text anywhere | Any | static |
 | S-091 | Something went wrong | Recoverable error with retry; no data loss | — | Unhandled error | Any | static |
 | S-101 | Reflection sheet | Completed / partly / skipped + optional enjoyment, effort, barrier | F-003 | Today (after accept); notification | Consented | idle / saved |
@@ -50,7 +50,8 @@ Tabs
  │   ├─ Edit option (S-102) · Not today (S-103) · Reflection (S-101) · Why this (S-107)
  │   └─ My Way Back (S-005)  ← also auto-opens after a lapse
  ├─ Discover (S-009)  — For you · Saved
- ├─ Together (S-010)  — events · clubs · (P1) challenges
+ ├─ Together (S-010)  — Events · Clubs · Mine
+ │   └─ Mine: Going · Hosting · My clubs · (P1) With friends → Challenges · Friends (pushed screens, no tab bar)
  └─ My rhythm (S-006)  — grid · totals · experiences · what works
      ├─ Observation edit (S-105)
      └─ My Way Back (S-005)  ← "Returning after a break?"
