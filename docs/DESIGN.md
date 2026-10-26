@@ -93,7 +93,7 @@ progress.** Nothing on screen should feel like a debt.
 | `line` | Dividers, card borders, pause pattern stroke | Text |
 | `field` | Field and chip borders (3:1 against `canvas`) | Dividers |
 | `accent` | "Welcome back" moments, returns count (text #B84A00; decorative marks may use #FF7A1A) | Errors, missed days |
-| `danger` | Destructive actions that remove data: delete-all and stop sharing | **Missed, skipped, or lapsed days, ever** |
+| `danger` | Delete-all only (the one irreversible action) | **Missed, skipped, or lapsed days, ever** |
 | `grid-0`..`grid-3` | Commit grid levels (EQ-002) | Anything else |
 | `grid-pause` | Pause-day tile: drawn exactly like `grid-0`, a filled neutral square ([ADR-012](adr/ADR-012-pause-days-look-like-empty-days.md)) | Outlines, dashes or hatches |
 
@@ -144,6 +144,7 @@ gap are set in the wireframe (owner direction, 2026-10-23).
 | Bottom sheet | reflection / edit / pause / observation / notifications | — | Pause reachable in ≤ 2 taps (BR-006) |
 | Activity art | Running / Walking / Pickleball / Bouldering / Gym / Swimming / Cycling / Yoga / Social / Other | — | 56 dp tile, scales with its slot (event and club detail use 56 dp). Social sits on the warm tint. Decorative |
 | Avatar | tone: blue / warm / neutral | — | Initials circle from 32 dp up (first letter for a person, two for a club); below that, a solid dot (blue `eq-dip`, warm `eq-comeback`, neutral `field`) so three people read as three. The profile button is the blue avatar. Stacks overlap with a 2 dp ring. No dots when there are no attendees. A person keeps one tone everywhere |
+| Share card | Milestone / Activity / Rhythm (P1: Together); light / dark | 9:16 image (1080 × 1920) with all content inside a centred 4:5 safe area (1080 × 1350). Content centred, footer row with the wordmark and a QR-style code (store page only). Sheet: title "Share this", segmented control, 4:5 preview, primary "Share…". The grid appears only on the Rhythm template (no toggle). On Milestone the number is the hero (96 px) with "active days" below, so 10, 30 and 100 break the same way | Follows the app theme and meets 4.5:1. All-time totals only. At 200% the segments stack, the body scrolls and "Share…" stays pinned |
 | Plan card | planned / under way | Under the heading "Today"; a Together RSVP sits under "Coming up" with status "You're going" and "Can't make it? Cancel". Planned: status "Planned", the time, filled "I'm starting", text "Change". Under way: status "Under way", "Started 12:31 · 20 min planned" (a fixed time the person marked, never a ticking timer), filled "I'm finished", text "Not started yet" | Optional state (ADR-014). Nothing is recorded. Never "overdue" or "missed". After the planned window with no start, the primary reads "How did it go?" |
 | Support message | — | static | No AI; calm tone; buttons to call help, not dismissive (BR-003). "Call emergency services" is the screen's one filled primary; the other options are outlined buttons with a phone icon |
 | Welcome-back banner | — | — | `accent`; never shows the length of the lapse |
@@ -237,7 +238,7 @@ Wireframes v5.
   - Explanations ("What changes next", "Why we suggest it") use a left rule, not a grey box.
 - **Destructive actions** use a dialog. The safe choice is the default, and the destructive
   button uses the `danger` token. For delete-all that means an outlined button with `danger` text
-  and border, so "Keep my data" stays the only filled button. Stop sharing (P1) uses the same pattern, with "Keep sharing" as the filled default. Dialog bodies scroll at 200% text and the buttons stay pinned.
+  and border, so "Keep my data" stays the only filled button. Stop sharing (P1) is reversible (the person can opt in again), so it uses a neutral outlined button, not `danger`, with "Keep sharing" as the filled default. Dialog bodies scroll at 200% text and the buttons stay pinned.
 - **Navigation bar:** 80 dp with an active pill behind the icon and 12 sp labels. Labels scale
   with system text up to 16 sp (1.33x), then stop: they never wrap, break mid-word or ellipsise.
   The icon, the active pill and the accessible name carry the destination at larger sizes. This is
