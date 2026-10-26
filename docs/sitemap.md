@@ -30,7 +30,7 @@ IDs: `S-001…` main screens · `S-09x` error/blocked states · `S-1xx` dialogs/
 | S-007 | What works for me (cut: merged into S-006 on 2026-10-23) | — | F-004 | — | — | — |
 | S-008 | Settings & My Data | Notifications, AI toggle, excluded categories, export, delete-all, edit starting point | F-007, F-008 | Header profile icon | Consented | idle / exporting / export done / export error |
 | S-009 | Discover | Browse the action library ("For you", filtered by exclusions and preferences) and "Saved" actions; try or save one | F-002, F-004 | Tab | Consented | loading / list / saved empty / all excluded |
-| S-010 | Together | Events and clubs near the chosen area, filterable by activity, level and day; RSVP, join, host, report and block. Signed out it explains what is shared and offers sign-in; this is the only screen group that needs an account (BR-025) | F-018 | Tab | Tab opens for everyone; signed out it explains what is shared and offers sign-in (PRD F-018). Whether the list can be browsed before sign-in is undecided (Q2) | signed out / loading / list / empty / error. Segments: Events, Clubs, Mine. Detail screens (event, club, host, sign-in, report; P1: challenges, friends, invite, join) get their own S-IDs when TASK-015 starts |
+| S-010 | Together | Events and clubs near the chosen area, filterable by activity, level and day; RSVP, join, host, report and block. Signed-out people can browse public events and clubs; RSVP, join and host ask them to sign in first (owner decision 2026-10-26). This is the only screen group that needs an account (BR-025) | F-018 | Tab | Tab and public lists are open to everyone; sign-in is needed to RSVP, join or host | signed out (browse; sign-in on RSVP, join or host) / loading / list / empty / error. Segments: Events, Clubs, Mine. Detail screens (event, club, host, sign-in, report; P1: challenges, friends, invite, join) get their own S-IDs when TASK-015 starts |
 | S-090 | Support message | Fixed, non-AI message pointing to professional or emergency help | BR-003 | Red-flag text anywhere | Any | static |
 | S-091 | Something went wrong | Recoverable error with retry; no data loss | — | Unhandled error | Any | static |
 | S-101 | Reflection sheet | Completed / partly / skipped + optional enjoyment, effort, barrier | F-003 | Today (after accept); notification | Consented | idle / saved |
@@ -72,7 +72,7 @@ Anywhere: Support message (S-090) · Error (S-091)
 | `/way-back` | S-005 | — | Consented | — | no | |
 | `/rhythm` | S-006 | — | Consented | — | no | Replaces `/progress` and `/works` |
 | `/discover` | S-009 | `?tab=saved` | Consented | — | no | |
-| `/together` | S-010 | — | Consented | — | no | Signed out, the tab shows the sign-in explanation (PRD F-018). Sub-routes come with TASK-015 |
+| `/together` | S-010 | — | Consented | — | no | Public lists are open to signed-out users; RSVP, join and host show the sign-in screen first. Sub-routes come with TASK-015 |
 | `/settings` | S-008 | — | Consented | — | no | |
 | `/support` | S-090 | — | Any | — | no | |
 
@@ -106,7 +106,7 @@ tabs to Today.
 | # | Question | Owner |
 |---|---|---|
 | Q1 | Should My rhythm show "reported experiences" as a list or as tags on the grid? | Design |
-| Q2 | Can a signed-out user browse Together events and clubs, or only read the sign-in explanation? The PRD (F-018, UJ-005) says only that sign-in is explained | Owner |
+| Q2 | ~~Can a signed-out user browse Together?~~ Resolved 2026-10-26: yes, public events and clubs can be browsed; RSVP, join and host show the sign-in screen first | Owner |
 
 ## Self-check
 - [x] Every P0 `F-###` is served by at least one screen (F-001 S-003 · F-002 S-004/S-009 · F-003 S-101 · F-004 S-006/S-009 · F-018 S-010 · F-005 S-005 · F-006 S-006 · F-007 S-001/S-002/S-008 · F-008 S-106).

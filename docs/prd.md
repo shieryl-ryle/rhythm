@@ -234,7 +234,7 @@ entry point.
 2. Open an event → see who's going → "I'm going" → it appears in Today's plan.
 3. Afterwards, check in as usual. The grid counts it like any other activity.
 - **Edge cases:**
-  - Not signed in: sign-in is explained, health data stays local.
+  - Not signed in: public events can be browsed; "I'm going", Join and Host show sign-in first, which explains that health data stays local.
   - No events nearby: clubs to join, or host one.
   - The event is cancelled: neutral notice plus an alternative for the same slot.
 
@@ -307,7 +307,7 @@ entry point.
 - [ ] Export produces a readable file; delete-all leaves no local records (BR-017).
 
 ### F-018 — Community (Together tab)
-- [ ] Together is the third of four tabs (Today, Discover, Together, My rhythm). Signed out, it explains what's shared and offers sign-in. The rest
+- [ ] Together is the third of four tabs (Today, Discover, Together, My rhythm). Signed-out people can browse public events and clubs; "I'm going", Join and Host show the sign-in screen first, which explains what's shared. The rest
   of the app never requires an account (BR-025).
 - [ ] It lists events and clubs near the chosen area, filterable by activity, level and day. Each
   event shows its time, public venue, level, host and spots left.

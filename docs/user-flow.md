@@ -113,7 +113,7 @@ Detail screens have no S-IDs yet (TASK-015); they are named in brackets.
 
 | Step | Screen | User does | System does | Success looks like |
 |---|---|---|---|---|
-| 1 | S-010 | Opens Together | Signed out: explains what is shared and offers sign-in (BR-025). Signed in: lists events and clubs near the chosen area | Sample items are labelled |
+| 1 | S-010 | Opens Together | Lists public events and clubs near the chosen area, signed in or not | Sample items are labelled |
 | 2 | S-010 | Filters by activity, level or day; opens an event [event detail] | Shows time, public venue, level, host, who is going and spots left | Everything needed to decide is on one screen |
 | 3 | S-010 | Taps "I'm going" | Saves the RSVP; adds the event to Today's plan (F-018) | The event appears on S-004 |
 
@@ -142,7 +142,7 @@ Not built for the challenge submission (PRD §11). Shown in the wireframes as "1
 | EV-008 | UF-002 | Offline | Normal options (library text) | Automatic | No |
 | EV-009 | UF-003 | AI-drafted observation fails the safety check | No observation proposed | Automatic (EQ-007) | No |
 | EV-010 | All | Device date changes or timezone travel | Days computed in local time | Grid follows local dates | No |
-| EV-011 | UF-010 | Not signed in | Sign-in is explained; health data stays local | Sign in, or leave Together | No |
+| EV-011 | UF-010 | Not signed in, taps "I'm going", Join or Host | Sign-in screen that explains what is shared and that health data stays local (BR-025) | Sign in and continue, or go back to browsing | No |
 | EV-012 | UF-010 | No events nearby | Clubs to join, or host one | Choose either | No |
 | EV-013 | UF-010 | The event is cancelled | Neutral notice and an alternative for the same slot (BR-029) | Pick the alternative | No |
 | EV-014 | UF-010, UF-011 | Report or block an event, club or profile | Blocked people's events and profiles are never shown to the blocker; content reported by 3 or more people is hidden until reviewed (BR-028) | Continue | No |
