@@ -92,7 +92,6 @@ ring and the header text stay as they are.
 
 - Done 2026-10-26: ADR-014; PRD non-goal and F-003 criterion; UF-002 and UF-003; sitemap S-004; DESIGN.md
   "Plan card"; TC-046; Figma 2.5 relabelled ("Planned", "I'm starting") and new frame 2.5b (285:4791).
-- Not drawn: the Together-event card variant ("I'm starting" from 1 hour before), the "How did it go?" state
-  after the planned window passes, and the "Can't make it? Cancel" line on event cards.
-- Small leftover: on 2.5b the "Under way" card still sits under the section heading "Planned".
-- Not re-reviewed by the UI reviewer after the frames were built.
+- Round 2 (2026-10-26): the UI reviewer approved with conditions; applied: heading "Today" and "Coming up", RSVP card "You're going" and "Can't make it? Cancel", "Started 12:31 · 20 min planned", frame 2.5c (after the planned time) and a 200% frame for 2.5b. "Not started yet" kept (the reviewer allowed "Undo start" too). Still not drawn: "I'm starting" on the RSVP card from 1 hour before.
+- Still not drawn: "I'm starting" on the Together RSVP card from 1 hour before (the card now shows "You're going" and "Can't make it? Cancel").
+- Not re-reviewed since round 2 (2.5c and the 200% frame 287:4873 were added after the reviewer's last look).

@@ -31,7 +31,7 @@ start, and a judge may read the empty middle as an unfinished app.
    watch data may be imported later as an input (F-014, P1); it never replaces the reflection.
 2. The loop is: suggest, accept, do it, say how it went. Between accept and reflect the plan card has an
    optional "Under way" state. The card shows "Planned" with "I'm starting"; tapping it marks the time the
-   person chose ("Started 12:31 · about 20 min"), and "I'm finished" opens the reflection with "Done"
+   person chose ("Started 12:31 · 20 min planned"), and "I'm finished" opens the reflection with "Done"
    preselected. "Not started yet" undoes a mis-tap. There is no ticking timer, and nothing counts toward the
    grid until it is reflected (EQ-002, BR-009).
 3. Not starting, or never tapping "I'm finished", never creates an "overdue" or "missed" state or loss wording
@@ -54,4 +54,4 @@ empty middle with the smallest change. Recording is a separate product with priv
 ### Consequences
 - **Easier:** one clear answer to "why isn't this Strava?"; the demo loop has a visible middle.
 - **Harder / owed:** one new state to design, test and describe; the 200% and dark checks for it.
-- **Follow-up:** frame 2.5b done; not yet drawn: the Together-event variant (an event card offers "I'm starting" from 1 hour before) and the "How did it go?" state after the planned window passes.
+- **Follow-up:** frames 2.5, 2.5b, 2.5c and a 200% frame for 2.5b are drawn; not yet drawn: "I'm starting" on a Together RSVP card from 1 hour before.
