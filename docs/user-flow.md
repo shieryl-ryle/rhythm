@@ -114,7 +114,7 @@ Detail screens have no S-IDs yet (TASK-015); they are named in brackets.
 | Step | Screen | User does | System does | Success looks like |
 |---|---|---|---|---|
 | 1 | S-010 | Opens Together | Lists public events and clubs near the chosen area, signed in or not | Sample items are labelled |
-| 2 | S-010 | Filters by activity, level or day; opens an event [event detail] | Shows time, public venue, level, host, who is going and spots left | Everything needed to decide is on one screen |
+| 2 | S-010 | Filters by activity, level or day; opens an event [event detail] | Shows time, public venue, level, host, spots left and who is going: names and avatars when signed in, a count only when signed out (BR-029) | Everything needed to decide is on one screen |
 | 3 | S-010 | Taps "I'm going" | Saves the RSVP; adds the event to Today's plan (F-018) | The event appears on S-004 |
 
 ### UF-011 — Create or join a challenge (P1)
