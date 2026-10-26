@@ -194,5 +194,45 @@ up", "Not now"). 10.5 is a calm cancellation.
     reviewer recommends counts only); BR-018 removes shared data but BR-021 says together days never
     decrease (freeze the stored pair count, or keep it local).
   - Follow-ups: 10.7 report/block route (BR-028), monthly-goal end state, 10.1 goal card detail screen.
+
+## 3. UI reviewer: stop sharing and the pair count (2026-10-26)
+
+Asked by the owner before deciding. Claude had recommended a stored server count; the reviewer picked a
+different option and the owner followed it ("follow senior reviewer suggestion since this is for the hackathon
+first"). Monetisation is deferred to shipping time; no billing was drawn.
+
+**My pick: option D, which is option A kept on each person's phone.** Verdict on a Settings "Sharing" row:
+APPROVE WITH CONDITIONS.
+
+- Option C (let the count fall) breaks the promise on screen: 10.7 says "It never resets", and a count that
+  falls when a friend stops sharing makes the friend's choice look like a loss.
+- Option B (hide the count) makes the number vanish; the friend loses something they felt they earned.
+- Option A on a server is the risk: a stored pair count about two named people is still personal data about
+  the person who left, which sits uneasily with BR-018.
+- So the count lives on each phone. While both share, each phone updates its own high-water mark from the
+  shared flags. When one person stops, their server flags are removed (BR-018) and each phone keeps its own
+  last count, frozen. BR-021 holds, BR-018 holds, and BR-025's rule on health data is untouched.
+- The person who stops feels in control and nothing they earned is taken away. The friend sees a neutral
+  state. No notification when someone stops sharing; never "stopped", "left" or "lost" on screen.
+- Copy: opt-in sheet "Friends and challenge members see which days you were active, and when you rest. What
+  you did and wrote stays on this phone. Stop any time: your active days are removed from your account, and
+  your count of days together stays." 10.7 after someone stops: row "Mia · Not sharing right now"; card "You &
+  Mia · 12 days together" with "Your days together stay in your count. New days are added when you both
+  share." Do not show "It never resets" in that state.
+- Settings row: 7.1 Together section, directly under "Together account". Title "Sharing", subtitle "Active
+  days with friends and challenges · On" (or "· Off"). Existing row pattern; it opens a dialog, not a toggle,
+  because a toggle would hide that turning it off removes data from the server. On: dialog "Stop sharing
+  active days?" with "Your active days are removed from your Lilt account. Friends and challenges stop seeing
+  them. Your count of days together stays.", filled default "Keep sharing", outlined danger "Stop sharing".
+  Off: the row opens the opt-in sheet.
+- Danger style: yes (7.6 pattern).
+- Conditions: amend BR-018 and ADR-010 (count is a device-local high-water mark) and route the wording to
+  the design reviewer; draw "7.6b Stop sharing?" and the On and Off row states; keep "never see what you did
+  or wrote" on every sharing surface; add the 7.1 frame growth.
+
+Applied 2026-10-26: frames 278:4715, 279:4720, 279:4801, 279:5243 and the opt-in sheets; BR-018, BR-021,
+ADR-010 (amendment), UF-012, sitemap S-008. Known trade-off: a person who gets a new phone restarts the count
+from the flags still shared. Not yet re-reviewed by either reviewer; no dark or 200% frames for the new
+screens.
 - Not done yet: the monthly-goal ending line; the "one entity" statement for events across F-012 and F-018; the
   private-challenge code rule in the PRD; showing a friend's activity name on 10.7 only if they opted in.

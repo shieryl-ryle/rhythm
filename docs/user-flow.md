@@ -19,6 +19,7 @@
 | UF-009 | Check progress | All | S-006 | S-006 | F-006 | Must-Have | weekly |
 | UF-010 | Find people to do it with | All | S-010 | S-004 | F-018 (UJ-005) | Must-Have | weekly |
 | UF-011 | Create or join a challenge (P1) | All | S-010 (Mine) | S-010 (Mine) | F-012 (UJ-005) | Later (P1) | occasional |
+| UF-012 | Stop or restart sharing active days (P1) | All | S-008 | S-008 | F-010, F-012 (BR-018) | Later (P1) | rare |
 
 **Coverage:** every P0 F-### appears in at least one flow (F-001 UF-001 · F-002 UF-002/005 · F-003 UF-003 · F-004 UF-006 · F-005 UF-004 · F-006 UF-003/004/009 · F-007 UF-001/008 · F-008 UF-005/007).
 
@@ -126,6 +127,15 @@ Not built for the challenge submission (PRD §11). Shown in the wireframes as "1
 | 2 | S-010 [create] | Taps "+ Create a challenge"; picks a type, name, goal and who can join | An event type follows BR-027 (public venue, guidelines). First use shows the one-line sharing note (BR-025 P1 clause) | Create and invite is the one primary button |
 | 3 | S-010 [invite] | Shares a link, QR code or join code | A private challenge issues a single-use or expiring code (BR-024) | The invite shows only the inviter's name, the challenge name and the people count |
 | 4 | [join page] | An invitee opens the link and taps "Get Lilt to join" | Account creation with the 18+ confirmation (BR-027), then the same one-time opt-in sheet if not yet accepted (BR-018), then joins | Joined challenge appears in the invitee's Mine |
+
+### UF-012 — Stop or restart sharing active days (P1)
+| Step | Screen | User does | System does | Success looks like |
+|---|---|---|---|---|
+| 1 | S-008 | Opens Settings › Sharing (subtitle ends "· On") | Opens the "Stop sharing active days?" dialog [7.6b], with "Keep sharing" as the default | The dialog names what is removed and what stays |
+| 2 | S-008 [dialog] | Taps "Stop sharing" | Removes the user's active and paused flags from the account; friends and challenge members stop seeing them; no notification is sent. The together-days count stays, kept on each phone (BR-021) | The row now ends "· Off" |
+| 3 | S-008 | Later taps Sharing while it is off | Opens the one-time opt-in sheet again (BR-018) | Sharing restarts only after "Share my active days" |
+
+A friend who is not sharing is shown as "Not sharing right now" on the Friends screen, with no "stopped" or "left" wording.
 
 **Not drawn yet:** challenge detail, leave a challenge, join with a typed code, add a friend, an invalid or expired code, and the empty state of the Challenges screen.
 

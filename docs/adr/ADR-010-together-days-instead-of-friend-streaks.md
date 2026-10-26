@@ -50,3 +50,6 @@ which is the product's core promise.
 - **Easier:** consistent messaging; no "streak ended" states to design or moderate.
 - **Harder / owed:** none significant.
 - **Follow-up:** none.
+
+### Amendment, 2026-10-26
+The "together days" count is kept as a high-water mark on each person's own phone, not on the server. While both people share, each phone updates it from the shared daily flags. When one person stops sharing (Settings › Sharing), their flags are removed from the server (BR-018) and each phone keeps its last count, frozen, so the number never goes down (BR-021) and nothing about the person who left stays on the server. Trade-off: a new phone starts the count from the flags still shared. Recorded after the UI reviewer and design reviewer rulings in `docs/reviews/challenges-in-together-2026-10-26.md`.

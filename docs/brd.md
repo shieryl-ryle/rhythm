@@ -58,7 +58,8 @@ I can care for my health alongside my responsibilities and personal priorities.*
   - friends and circles, with shared "together days" (no streaks; ADR-010);
   - group challenges inside Together (Mine), with invites by link, QR code or join code;
   - iPhone, Apple Watch and iOS widgets;
-  - activity data from phones and watches.
+  - activity data from phones and watches;
+  - paid options (for example extra cloud backup), decided when the app is about to ship, after the challenge. The payer is still open (§5), so nothing is built or priced for the challenge.
 
   Invites to people who don't use Rhythm yet are a planned **growth channel**: every shared
   challenge or achievement brings new users in.
