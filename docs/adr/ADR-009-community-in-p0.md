@@ -80,3 +80,6 @@ optional limits the privacy cost to what community needs.
   - About a week of build time.
 - **Follow-up:** TASK-013 (`adapt-project`), TASK-014 (backend), TASK-015 (Together screens),
   TASK-016 (seed data and club outreach).
+
+### Amendment, 2026-10-26
+Decision 4 says no grid data goes to the server. For P1 (F-010, F-012), BR-018 and BR-025 allow one exception: with a one-time opt-in, two daily flags ("active" and "paused") are stored on the user's account and shown to members of the same challenge or friends. No activity names, durations, grid levels, reflections or barriers. See `docs/prd.md` BR-018 and BR-025.

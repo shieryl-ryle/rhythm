@@ -182,7 +182,17 @@ up", "Not now"). 10.5 is a calm cancellation.
   daily flags, "active" and "paused", opt-in, stoppable); 10.7 rows show "Active today" and "Active yesterday"
   only; new opt-in sheet frame "10.1a Share your active days (P1)"; captions and the 11.1 sentence use the
   design reviewer's wording. Not yet re-checked by either reviewer.
-- Still open: signed-out 11.4 should show counts, not names (BR-029); the Friends row does not open the opt-in
-  sheet; the 10.1 goal card has no tap cue or detail screen.
+- Third round (both reviewers: APPROVE WITH CONDITIONS, no blockers in the changed frames). Summary of what
+  they said and what was applied:
+  - UI reviewer: shorten the opt-in body (done); annotate that consent is per account (done); add a 200% note
+    for the sheet (annotation says the body scrolls and the primary becomes the sticky footer; no stress frame
+    yet); no control for "stop sharing" is drawn; 11.1 app-bar title and headline nearly duplicate (open).
+  - Design reviewer: B1, B2, B3 closed. Friends row must open the opt-in sheet (done: 10.1b); backdrop should be
+    Mine, not Challenges (done); define "active" by action, not by grid level (done in BR-018); invitee from
+    10.4 passes the same sheet (done in UF-011); TC-026 and ADR-009 updated (done).
+  - Open for the owner: where "stop sharing" lives; BR-029 (signed-out lists show names in 11.4 today; the
+    reviewer recommends counts only); BR-018 removes shared data but BR-021 says together days never
+    decrease (freeze the stored pair count, or keep it local).
+  - Follow-ups: 10.7 report/block route (BR-028), monthly-goal end state, 10.1 goal card detail screen.
 - Not done yet: the monthly-goal ending line; the "one entity" statement for events across F-012 and F-018; the
   private-challenge code rule in the PRD; showing a friend's activity name on 10.7 only if they opted in.
