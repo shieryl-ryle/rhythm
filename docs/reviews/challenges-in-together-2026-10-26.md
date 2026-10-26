@@ -164,6 +164,19 @@ up", "Not now"). 10.5 is a calm cancellation.
   with a back arrow and no tab bar, Friends row removed; 10.4 back goes to the P1 Mine frame; copy fixes
   ("Join events", "LILT-4KP2", "3 days together this week"); a one-time sharing note on 10.1 and 10.7.
   These frames have not been re-reviewed by either reviewer.
-- Not done yet: 11.1 is still wired as a first-visit gate from 1.16 Today, which conflicts with the Q2
-  decision; the monthly-goal ending line; the "one entity" statement for events across F-012 and F-018; the
+- Second round: the UI reviewer approved the changed frames with conditions and no blockers, and ruled that
+  11.1 becomes the sign-in step. The owner chose the narrower gate: only "I'm going" (11.5) goes to 11.1;
+  Host and Join stay direct because the demo account is pre-signed-in. Applied: 11.1 renamed and made a pushed
+  screen, 1.16 Together tab goes to 11.4, annotation added, duplicate heading removed from 10.1.
+- The design reviewer (privacy wording) returned APPROVE WITH CONDITIONS with three blockers, not yet applied
+  and awaiting the owner: (1) 10.7 rows show activity name and duration, contradicting the caption; (2) BR-018
+  ("grid brightness") and the BR-025 P1 clause ("active flag, nothing else") disagree and omit the paused flag;
+  (3) the captions say "only if you choose" but no opt-in control is drawn (proposed: one-time sheet "Share my
+  active days" / "Not now"). It also asked for: 11.1 sentence "Your display name, an optional photo, your
+  approximate area, and the events and clubs you join are shared. The activities you do, and anything you
+  write, stay on this phone."; captions "Members of this challenge see which days you were active. The
+  activities you do and anything you write stay on this phone. You can stop sharing any time." (10.1) and
+  "Friends you choose see which days you were active. ..." (10.7); signed-out 11.4 shows counts, not names
+  (BR-029). Its notes that PRD:310 / UJ-005 and the 10.3 code were stale were wrong: both were already fixed.
+- Not done yet: the monthly-goal ending line; the "one entity" statement for events across F-012 and F-018; the
   private-challenge code rule in the PRD; showing a friend's activity name on 10.7 only if they opted in.
