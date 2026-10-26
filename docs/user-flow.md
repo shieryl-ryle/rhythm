@@ -17,6 +17,9 @@
 | UF-007 | Set up gentle notifications | All | S-106 | S-008 | F-008 | Must-Have | once |
 | UF-008 | Export or delete my data | All | S-008 | S-008 / S-001 | F-007 | Must-Have | rare |
 | UF-009 | Check progress | All | S-006 | S-006 | F-006 | Must-Have | weekly |
+| UF-010 | Find people to do it with | All | S-010 | S-004 | F-018 (UJ-005) | Must-Have | weekly |
+| UF-011 | Create or join a challenge (P1) | All | S-010 (Mine) | S-010 (Mine) | F-012 (UJ-005) | Later (P1) | occasional |
+| UF-012 | Stop or restart sharing active days (P1) | All | S-008 | S-008 | F-010, F-012 (BR-018) | Later (P1) | rare |
 
 **Coverage:** every P0 F-### appears in at least one flow (F-001 UF-001 · F-002 UF-002/005 · F-003 UF-003 · F-004 UF-006 · F-005 UF-004 · F-006 UF-003/004/009 · F-007 UF-001/008 · F-008 UF-005/007).
 
@@ -52,13 +55,15 @@ app, nothing stored (there is no decline screen); red-flag text → S-090, the t
 |---|---|---|---|---|
 | 1 | S-004 | Optionally sets time and energy | Filters and re-ranks (EQ-003) | Options fit the inputs |
 | 2 | S-004 | Accepts / edits (S-102) / replaces / pauses (S-103) | Records the offer status; reworded text has an AI label (BR-019) | The accepted option shows as today's plan |
+| 3 | S-004 | Optionally taps "I'm starting" on the planned card | Marks the time the person chose; the card shows "Under way". Nothing is recorded (ADR-014); nothing counts toward the grid yet | The card reads "Started 12:31 · 20 min planned" |
 
-**Branch points:** nothing fits → empty state with "lighter option" and "adjust exclusions";
+**Branch points:** "Not started yet" undoes a mis-tap; never starting or never tapping "I'm finished" leaves the card as "Planned", then "How did it go?", with no "overdue" or "missed" (BR-007); "Under way" clears itself after about 3 hours; nothing fits → empty state with "lighter option" and "adjust exclusions";
 AI timeout → library text (BR-020).
 
 ### UF-003 — Reflect on an action
 | Step | Screen | User does | System does | Success looks like |
 |---|---|---|---|---|
+| 0 | S-004 | Taps "I'm finished" (or "How did it go?") | Opens S-101; from "I'm finished" the answer "Done" is preselected and editable | 4 taps from "I'll try this" with "I'm starting", 4 without |
 | 1 | S-101 | Marks completed / partly / skipped | Saves the reflection | ≤ 3 taps |
 | 2 | S-101 | Optionally picks enjoyment, effort, barrier | Updates the ranking inputs; may propose an observation (EQ-009) | Saved toast |
 | 3 | S-004 | Returns to Today | Grid level updated (EQ-002) | Tile brightens |
@@ -106,6 +111,36 @@ pause and goes to S-004 (paused state).
 |---|---|---|---|---|
 | 1 | S-006 | Opens My rhythm | Renders the grid (EQ-002) and totals (EQ-011) | Pause days marked neutrally; totals never decrease |
 
+### UF-010 — Find people to do it with
+Detail screens have no S-IDs yet (TASK-015); they are named in brackets.
+
+| Step | Screen | User does | System does | Success looks like |
+|---|---|---|---|---|
+| 1 | S-010 | Opens Together | Lists public events and clubs near the chosen area, signed in or not | Sample items are labelled |
+| 2 | S-010 | Filters by activity, level or day; opens an event [event detail] | Shows time, public venue, level, host, spots left and who is going: names and avatars when signed in, a count only when signed out (BR-029) | Everything needed to decide is on one screen |
+| 3 | S-010 | Taps "I'm going" | Saves the RSVP; adds the event to Today's plan (F-018) | The event appears on S-004 |
+
+### UF-011 — Create or join a challenge (P1)
+Not built for the challenge submission (PRD §11). Shown in the wireframes as "11.9 Together · mine (P1)".
+
+| Step | Screen | User does | System does | Success looks like |
+|---|---|---|---|---|
+| 1 | S-010 (Mine) | Taps "Challenges" in the "With friends" section | First time only: the "Share active days?" opt-in sheet (BR-018). "Share my active days" opens the Challenges screen [pushed, back returns to Mine]; "Not now" returns to Mine and nothing is sent | 3 taps from the tab bar, 4 the first time |
+| 2 | S-010 [create] | Taps "+ Create a challenge"; picks a type, name, goal and who can join | An event type follows BR-027 (public venue, guidelines). First use shows the one-line sharing note (BR-025 P1 clause) | Create and invite is the one primary button |
+| 3 | S-010 [invite] | Shares a link, QR code or join code | A private challenge issues a single-use or expiring code (BR-024) | The invite shows only the inviter's name, the challenge name and the people count |
+| 4 | [join page] | An invitee opens the link and taps "Get Lilt to join" | Account creation with the 18+ confirmation (BR-027), then the same one-time opt-in sheet if not yet accepted (BR-018), then joins | Joined challenge appears in the invitee's Mine |
+
+### UF-012 — Stop or restart sharing active days (P1)
+| Step | Screen | User does | System does | Success looks like |
+|---|---|---|---|---|
+| 1 | S-008 | Opens Settings › Sharing (subtitle ends "· On") | Opens the "Stop sharing active days?" dialog [7.6b], with "Keep sharing" as the default | The dialog names what is removed and what stays |
+| 2 | S-008 [dialog] | Taps "Stop sharing" | Removes the user's active and paused flags from the account; friends and challenge members stop seeing them; no notification is sent. The together-days count stays, kept on each phone (BR-021) | The row now ends "· Off" |
+| 3 | S-008 | Later taps Sharing while it is off | Opens the one-time opt-in sheet again (BR-018) | Sharing restarts only after "Share my active days" |
+
+A friend who is not sharing is shown as "Not sharing right now" on the Friends screen, with no "stopped" or "left" wording.
+
+**Not drawn yet:** challenge detail, leave a challenge, join with a typed code, add a friend, an invalid or expired code, and the empty state of the Challenges screen.
+
 ## 5. Edge cases and breaks
 | ID | Flow | Break | User sees | Recovery | Work lost? |
 |---|---|---|---|---|---|
@@ -119,6 +154,10 @@ pause and goes to S-004 (paused state).
 | EV-008 | UF-002 | Offline | Normal options (library text) | Automatic | No |
 | EV-009 | UF-003 | AI-drafted observation fails the safety check | No observation proposed | Automatic (EQ-007) | No |
 | EV-010 | All | Device date changes or timezone travel | Days computed in local time | Grid follows local dates | No |
+| EV-011 | UF-010 | Not signed in, taps "I'm going", Join or Host | Sign-in screen that explains what is shared and that health data stays local (BR-025) | Sign in and continue, or go back to browsing | No |
+| EV-012 | UF-010 | No events nearby | Clubs to join, or host one | Choose either | No |
+| EV-013 | UF-010 | The event is cancelled | Neutral notice and an alternative for the same slot (BR-029) | Pick the alternative | No |
+| EV-014 | UF-010, UF-011 | Report or block an event, club or profile | Blocked people's events and profiles are never shown to the blocker; content reported by 3 or more people is hidden until reviewed (BR-028) | Continue | No |
 
 ## 6. Instrumentation
 **No analytics SDKs and no events leave the device** (BR-015). Study metrics ([PRD](prd.md) §10)

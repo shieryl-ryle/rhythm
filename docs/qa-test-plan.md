@@ -48,7 +48,7 @@ tests; TC-042 runs manually against the free tier with synthetic data only.
 | TC-023 | BR-015 | No network calls with AI off (HTTP override fails the test on any request); no analytics packages in `pubspec.yaml` | yes: `test/privacy/no_network_test.dart` + reviewer |
 | TC-024 | BR-016 | Captured AI prompt contains only allowed fields (no reason, reflections, behaviour name); AI off → zero AI calls | yes: `test/ai/prompt_builder_test.dart` |
 | TC-025 | BR-017 | Export contains every user table; delete-all → every user table empty, notifications cancelled, route `/welcome` | yes: `my_data_test.dart` |
-| TC-026 | BR-018 | (P1 circles) Reviewer check: shared fields limited to grid level; no ranking UI | reviewer (rules-reviewer) |
+| TC-026 | BR-018 | (P1 circles) Reviewer check: shared fields limited to the two daily flags (active, paused), shared only after the one-time opt-in; no activity names or durations; no ranking UI | reviewer (rules-reviewer) |
 | TC-027 | BR-019 | AI-worded option shows the label; tap reveals library text | yes: widget test |
 | TC-028 | BR-020 | Fake AI delays 5 s → library text shown within timeout + 0.5 s, no error; no prompt/response in logs or DB | yes: `test/ai/fallback_test.dart` |
 
@@ -75,6 +75,7 @@ tests; TC-042 runs manually against the free tier with synthetic data only.
 | TC-042 | AI adversarial input | Synthetic preference tags with injection-like strings ("ignore rules…") → output still passes EQ-007 or falls back; never shows a new action | manual against the free tier with synthetic data |
 | TC-044 | Large text (DESIGN.md) | At 200% system text size: side-by-side buttons stack full width; label/value pairs stack; no text clipped or overlapping on Today, sheets, Settings, Together; matches wireframe 9.15 | yes: golden tests at `textScaler: 2.0` + manual on Android |
 | TC-045 | Tap targets (DESIGN.md) | Every tappable widget (chips, links, icon buttons, calendar days) has a hit area of at least 48×48 dp (calendar 44 dp) | yes: Flutter `androidTapTargetGuideline` / `meetsGuideline` widget tests |
+| TC-046 | Under way state (ADR-014, BR-007, BR-009, EQ-002) | Accept an option → "I'm starting" shows "Under way" and the marked time; "Not started yet" returns to "Planned"; "I'm finished" opens the reflection with "Done" preselected; dismissing leaves the result unknown; leaving it for 3 hours clears "Under way"; at day end nothing shows "overdue" or "missed"; the grid does not change until a reflection is saved | yes: widget test + manual |
 | TC-043 | Offline | Airplane mode → all P0 flows work; AI-on falls back to library text | manual on Android + `no_network_test.dart` |
 
 ## 3. Exit criteria

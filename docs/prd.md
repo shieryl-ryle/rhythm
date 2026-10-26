@@ -125,7 +125,7 @@ entry point.
 | F-009 | Personal Rewards | As a user, I want to set my own reward for a goal I choose (e.g. "after 5 walks this month → movie night"), so that progress feels worthwhile. | P1 |
 | F-010 | Friends & Circles | As a user, I want to add friends or join a small circle (friends, family, a community group), share my progress if I choose, see how they are doing, cheer them on, and see our "together days" (days we were both active, a count that only goes up) with milestone celebrations, so that my effort is seen and celebrated. | P1 |
 | F-011 | Group Rewards | As a circle creator, I want to set a shared reward for a group goal (e.g. "family dinner out"), so that the group celebrates together. | P1 |
-| F-012 | Group Challenges & Events | As a user, I want a **Challenges tab** where I can create and join group challenges and events (e.g. "pickleball this Saturday"). I want to invite people who already use Rhythm in the app, and people who don't through a link, QR code or join code that also brings them to the app. I want a suggested alternative if an event is cancelled, so that being active is something I do with others. | P1 |
+| F-012 | Group Challenges & Events | As a user, I want a **Challenges** section in **Together › Mine** (no separate tab) where I can create and join group challenges and events (e.g. "pickleball this Saturday"). I want to invite people who already use Rhythm in the app, and people who don't through a link, QR code or join code that also brings them to the app. I want a suggested alternative if an event is cancelled, so that being active is something I do with others. An event in a challenge is the same event as in Together (F-018): one record, shown in Going, Hosting and Challenges, and BR-027 (public venue, community guidelines) applies. A monthly goal ends with a neutral line, for example "November: 51 days together. Thanks, all." | P1 |
 | F-013 | Calendar Sync | As a user, I want to add my planned activities to my phone's calendar if I allow it, so that they show up in Google Calendar or Apple Calendar alongside everything else. Rhythm writes to the calendar on the device, and my calendar account syncs it as usual. | P1 (moved from P0 stretch by ADR-009) |
 | F-014 | Activity Data Import | As a user, I want the app to learn from activities my phone or watch already records (Health Connect, Apple Health), so that I don't have to log everything by hand. | P1 |
 | F-015 | Share Achievements | As a user, I want to share an achievement card (e.g. "Came back after a break", "First pickleball game", "30 active days") through my phone's share sheet to Instagram, TikTok, Facebook or X, so that my effort is seen and celebrated. In P1 I can also share an open challenge as a link, QR code or join code (F-012). | P0 (cards) · P1 (challenge sharing) |
@@ -161,7 +161,7 @@ entry point.
 | BR-009 | A missing reflection is stored as "unknown", never as "skipped", and does not lower a suggestion's ranking. | F-003, F-006 |
 | BR-010 | Proposed observations affect ranking only after the user confirms them. Users can edit or delete any observation, and a deleted one stops affecting ranking. | F-004 |
 | BR-011 | Users can exclude any activity category, for personal, cultural, or religious fit. Excluded categories are never offered. | F-001, F-002 |
-| BR-021 | (P1, [ADR-010](adr/ADR-010-together-days-instead-of-friend-streaks.md)) Shared progress between friends only ever goes up. "Together days" counts days both people were active and never decreases or resets. Milestones are celebrated, and nothing is shown as ending, broken or lost. An optional weekly shared goal starts fresh each Monday, with no "missed" copy. Only people who opt in share it. | F-010, F-012 |
+| BR-021 | (P1, [ADR-010](adr/ADR-010-together-days-instead-of-friend-streaks.md)) Shared progress between friends only ever goes up. "Together days" is your count of days you and a friend were both active, and it never decreases or resets. A challenge's group total follows the same rule: each phone keeps its highest count, and a member leaving or stopping never lowers it. The count is a high-water mark kept on each person's own phone (ADR-013): while both share, each phone updates it from the shared daily flags; when one person stops sharing, their flags are removed from the server (BR-018) and each phone keeps its last count, frozen. No pair count or group total is stored on the server. The count is a personal tally: two friends' phones may show slightly different numbers, and nothing compares or reconciles them. Counts are kept on this phone, so on a new phone they restart from the days friends still share; the Sharing screen says so. Counts are included in Export (BR-017). A friend who is not sharing is shown as "Not sharing right now", with no notification and no "stopped" or "left" wording. Milestones are celebrated, and nothing is shown as ending, broken or lost. An optional weekly shared goal starts fresh each Monday, with no "missed" copy. Only people who opt in share it. | F-010, F-012 |
 
 ### Notifications
 | ID | Rule | Applies to |
@@ -175,14 +175,14 @@ entry point.
 | BR-014 | Before any personal data is collected, a consent screen explains what data is used and that it stays on the device. Nothing is stored until the user agrees. | F-007 |
 | BR-015 | For P0, all personal data is stored only on the device. There is no account, no network call by Rhythm that carries personal data, and no analytics that include personal data. Data leaves only through actions the user takes: export (BR-017), calendar sync (BR-022) and sharing (BR-023). | All P0 |
 | BR-016 | (Dormant in P0, ADR-006) Data is sent to an LLM only after explicit AI opt-in, and only in de-identified minimum form. | — |
-| BR-017 | The user can export all their data and delete all their data from settings. Delete-all removes every local record and, if a Together account exists, deletes that account and its server data (profile, RSVPs, hosted events). It cannot be undone. | F-007, F-018 |
-| BR-018 | (P1 social) A member shares only what they opt into (by default grid brightness only, never reflections or barriers). Social views show no ranking. A paused member is shown neutrally. Leaving a circle or deleting an account removes the member's shared data. | F-010, F-011, F-012 |
+| BR-017 | The user can export all their data and delete all their data from settings. Delete-all removes every local record and, if a Together account exists, deletes that account and all its server data (profile, RSVPs, hosted events, clubs joined, challenge membership and shared daily flags). It cannot be undone. | F-007, F-018 |
+| BR-018 | (P1 social) A member shares only what they opt into. The default is two daily flags (ADR-013): "active" (a day with at least one completed or partly action; a day with no reflection is unknown, BR-009, and is not shown as active) and "paused". Brightness levels are shared only if the member chooses that, and never reflections, barriers, activity names or durations. A one-time opt-in ("Share my active days" or "Not now") comes before the first challenge or friend, and nothing is sent until it is accepted. Social views show no ranking. A paused member is shown neutrally. Stopping sharing (Settings › Sharing, with a confirmation that names what is removed), leaving a circle or challenge, or deleting an account removes the member's shared flags from the server. The "together days" count is not recomputed from them (BR-021). | F-010, F-011, F-012 |
 | BR-022 | Calendar sync is opt-in, and the user picks which calendar. Rhythm only adds and updates its own activity events (activity name, time, duration). It never reads, stores or exports the user's other events. Turning sync off stops new events; the user chooses whether to remove the ones already added. | F-013 |
 | BR-023 | Nothing is shared unless the user taps Share. A shared achievement card or widget shows no reflections, barriers, reasons for stopping or other free text by default. Achievements are milestones that only ever increase (e.g. active days, returns, first time trying an activity). There are no personal streak counts (BR-007). Cards, widgets and notifications use no guilt or loss wording. | F-015, F-016 |
-| BR-025 | Health data never leaves the device for Together: no setup answers, reflections, barriers, grid, observations or stop reasons. Firebase stores only the community profile (display name, optional photo, approximate area), clubs joined, events hosted, RSVPs and reports. Everything outside Together works without an account. | F-018 |
+| BR-025 | Health data never leaves the device for Together: no setup answers, reflections, barriers, grid, observations or stop reasons. Firebase stores only the community profile (display name, optional photo, approximate area), clubs joined, events hosted, RSVPs and reports. Everything outside Together works without an account. (P1 exception, F-010/F-012, defined in BR-018: with the user's opt-in, only two daily flags leave the device, "active" and "paused". They are visible only to members of a challenge or friendship the user has joined, and stopping sharing removes them. The flags are stored on the user's Lilt account. What the user did, wrote or felt stays on the device.) | F-018 |
 | BR-026 | Location is approximate. The user picks an area, or allows coarse location to suggest one. Precise coordinates are never stored or shown. Event venues are public places that the host enters. | F-018 |
 | BR-027 | Together is for people aged 18+, confirmed at account creation. Hosts accept the community guidelines before posting, and events must be at public venues. | F-018 |
-| BR-028 | Every event, club and profile can be reported or blocked. Content reported by 3 or more people [assumption] is hidden until reviewed. Blocked people's events and profiles are never shown to the blocker. | F-018 |
+| BR-028 | Every event, club, challenge and profile can be reported or blocked. Content reported by 3 or more people [assumption] is hidden until reviewed. Blocked people's events and profiles are never shown to the blocker. | F-018 |
 | BR-029 | Attendee lists show display names and avatars only, visible to signed-in users. Hosts can't see attendees' activity history. RSVP changes and cancellations show no guilt wording (BR-007). | F-018 |
 | BR-024 | (P1) An invite link, QR code or join code carries only the challenge or event details and the inviter's chosen display name. A person who isn't a user sees only that public summary until they join. | F-012, F-015 |
 
@@ -234,7 +234,7 @@ entry point.
 2. Open an event → see who's going → "I'm going" → it appears in Today's plan.
 3. Afterwards, check in as usual. The grid counts it like any other activity.
 - **Edge cases:**
-  - Not signed in: sign-in is explained, health data stays local.
+  - Not signed in: public events can be browsed; "I'm going", Join and Host show sign-in first, which explains that health data stays local.
   - No events nearby: clubs to join, or host one.
   - The event is cancelled: neutral notice plus an alternative for the same slot.
 
@@ -273,6 +273,7 @@ entry point.
 - [ ] Opening the app shows the grid as empty outlines while loading, then fills it in.
 
 ### F-003 — Quick Reflection
+- [ ] An accepted option shows "Planned" with "I'm starting". "I'm starting" is optional: the card then shows "Under way" with the time the person marked, and "I'm finished" opens the reflection with "Done" preselected. "Not started yet" undoes a mis-tap. There is no timer and nothing is recorded (ADR-014). Not tapping either never creates an "overdue" or "missed" state (BR-007); "Under way" clears itself after about 3 hours and the card offers "How did it go?"; nothing counts toward the grid until it is reflected (EQ-002).
 - [ ] Completed, partly completed, or skipped, plus optional enjoyment, effort, or barrier, saved
   in ≤ 3 taps.
 - [ ] Unanswered reflection is stored as unknown (BR-009).
@@ -307,7 +308,7 @@ entry point.
 - [ ] Export produces a readable file; delete-all leaves no local records (BR-017).
 
 ### F-018 — Community (Together tab)
-- [ ] Together is the third of four tabs (Today, Discover, Together, My rhythm). Signed out, it explains what's shared and offers sign-in. The rest
+- [ ] Together is the third of four tabs (Today, Discover, Together, My rhythm). Signed-out people can browse public events and clubs; "I'm going", Join and Host show the sign-in screen first, which explains what's shared. The rest
   of the app never requires an account (BR-025).
 - [ ] It lists events and clubs near the chosen area, filterable by activity, level and day. Each
   event shows its time, public venue, level, host and spots left.
@@ -320,6 +321,9 @@ entry point.
 - [ ] Firestore security rules allow writing only one's own profile, RSVPs and hosted events.
   Rule tests pass.
 - [ ] Seeded events and clubs are labelled as samples.
+- [ ] Together has three segments: Events, Clubs and Mine. Mine lists my RSVPs, the events I host and my
+  clubs. In P1 it also holds a "With friends" section with Challenges and Friends (F-010, F-012). The
+  P1 section is drawn as a separate frame, "11.9 Together · mine (P1)".
 
 ### F-013 — Calendar Sync (P1)
 - [ ] Off by default. Turning it on asks for the calendar permission and which calendar to use
@@ -396,6 +400,7 @@ analytics; on-device data is shared only with the participant's consent.
   (F-010..F-012). Together (F-018) is the only P0 feature with an account.
 - Chat or messaging between users: not planned.
 - Wearable or health-platform integration in P0: planned as P1 (F-014).
+- Recording activities (GPS, route, pace, heart rate, live tracking or a running timer) in P0 or P1 ([ADR-014](adr/ADR-014-lilt-does-not-record-activities.md)). Lilt plans, suggests and asks how it went; it does not record. Importing phone or watch data later is F-014.
 - iPhone, Apple Watch, iOS widgets and Apple Calendar in P0: planned as P1 (F-017,
   [ADR-008](adr/ADR-008-phone-integrations-and-platform-roadmap.md)).
 - Direct Google Calendar sign-in: calendar sync goes through the phone's own calendar instead
@@ -430,6 +435,7 @@ analytics; on-device data is shared only with the participant's consent.
 | Q9 | Is F-013 (calendar sync) attempted before the 2026-11-13 freeze? Decide by 2026-11-06 | Owner | Nothing in P0 |
 | Q10 | ~~One suggestion across activities or one per activity?~~ Resolved 2026-10-25: **one per activity** (F-002) | — | — |
 | Q11 | ~~Which achievements exist?~~ Resolved 2026-10-25 with the recommended set in F-015 acceptance; Dzelle may suggest changes | — | — |
+| Q12 | How long does the server keep a day's active or paused flag, so a phone that is offline for a while can still catch up? Needed before TASK-015 for P1 | Owner | Counts of days together may miss days |
 
 ## 14. Traceability
 | Feature | Story / journey | Rules | Tests |
