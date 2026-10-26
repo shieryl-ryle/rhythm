@@ -1,24 +1,32 @@
 ---
 version: alpha
-name: Rhythm
+name: Lilt
 description: >-
   A calm, warm, unhurried wellness companion on a phone (design width 360–412 dp; the web build is
   centred at 480 px max). It feels like a supportive friend who never keeps score against you.
 colors:
-  primary: "#2F7D6D"
+  primary: "#2F3BFF"
   on-primary: "#FFFFFF"
-  surface: "#FBF8F3"
-  ink: "#1F2A2E"
-  ink-muted: "#5B6770"
-  line: "#E3DED6"
-  accent: "#D98F2B"
-  danger: "#B3261E"
-  success: "#3C8D5A"
-  grid-0: "#ECE7DF"
-  grid-1: "#CDE5DE"
-  grid-2: "#8CC4B5"
-  grid-3: "#2F7D6D"
-  grid-pause: "#E3DED6"
+  canvas: "#F3F4F2"
+  surface: "#FFFFFF"
+  selected: "#E5E7EF"
+  ink: "#111418"
+  ink-muted: "#5A6168"
+  line: "#E1E3E0"
+  field: "#8A9096"
+  accent: "#B84A00"
+  danger: "#C62828"
+  grid-0: "#E5E7EF"
+  grid-1: "#B5BCFF"
+  grid-2: "#6C78FF"
+  grid-3: "#2F3BFF"
+  grid-pause: "#E1E3E0"
+  eq-peak: "#2F3BFF"
+  eq-dip: "#6C78FF"
+  eq-comeback: "#FF7A1A"
+  art-peak: "#2F3BFF"
+  art-level: "#5F6BFF"
+  art-comeback: "#D55900"
 spacing:
   xs: 4px
   sm: 8px
@@ -26,29 +34,40 @@ spacing:
   lg: 16px
   xl: 24px
   xxl: 32px
+  xxxl: 48px
 rounded:
-  tile: 3px
-  card: 16px
+  tile: 1.5px
+  sm: 8px
+  md: 12px
+  thumb: 16px
+  card: 20px
+  sheet: 28px
   pill: 9999px
 typography:
   display:
-    fontFamily: Fraunces
-    fontSize: 1.75rem
+    fontFamily: Instrument Serif
+    fontStyle: italic
+    fontSize: 2.125rem
+    fontWeight: 400
+    lineHeight: 1.18
+  celebration:
+    fontFamily: Unbounded
+    fontSize: 1.25rem
     fontWeight: 600
-    lineHeight: 1.2
+    lineHeight: 1.3
   body:
-    fontFamily: Inter
+    fontFamily: Geist
     fontSize: 1rem
     fontWeight: 400
     lineHeight: 1.5
   label:
-    fontFamily: Inter
+    fontFamily: Geist
     fontSize: 0.875rem
     fontWeight: 500
-    lineHeight: 1.4
+    lineHeight: 1.43
 ---
 
-# Design — Rhythm
+# Design — Lilt
 
 > Owns: visual tokens and component rules for the UI. Agents building screens read this before
 > writing styles. Token names above are the source of truth: code uses the names, not raw hex.
@@ -62,49 +81,63 @@ progress.** Nothing on screen should feel like a debt.
 ## Colors
 | Token | Use for | Never use for |
 |---|---|---|
-| `primary` | Main actions (Accept), selected tab, grid level 3 | Warnings |
-| `on-primary` | Text and icons on `primary` | — |
-| `surface` | App background, sheets | — |
-| `ink` | Body text, titles | — |
+| `primary` | Brand cobalt: selected states, links, focus ring, saved items, grid level 3 | Warnings |
+| `on-primary` | Text and icons on `primary` and on filled `ink` buttons | — |
+| `canvas` | App background | — |
+| `surface` | Cards, sheets, dialogs | — |
+| `selected` | Fill of a selected row, chip or tab | — |
+| `ink` | Body text, titles, filled buttons | — |
 | `ink-muted` | Reasons, helper text, timestamps | Primary actions |
 | `line` | Dividers, card borders, pause pattern stroke | Text |
-| `accent` | "Welcome back" moments, returns count, saved items | Errors, missed days |
+| `field` | Field and chip borders (3:1 against `canvas`) | Dividers |
+| `accent` | "Welcome back" moments, returns count (text #B84A00; decorative marks may use #FF7A1A) | Errors, missed days |
 | `danger` | Delete-all only (destructive) | **Missed, skipped, or lapsed days, ever** |
-| `success` | Saved / done toasts | Comparing users |
 | `grid-0`..`grid-3` | Commit grid levels (EQ-002) | Anything else |
-| `grid-pause` | Pause-day tile, drawn with a diagonal hatch in `line` | Empty days |
+| `grid-pause` | Pause-day tile: drawn exactly like `grid-0`, a filled neutral square ([ADR-012](adr/ADR-012-pause-days-look-like-empty-days.md)) | Outlines, dashes or hatches |
 
 Contrast: `ink` and `ink-muted` on `surface`, and `on-primary` on `primary`, are intended to meet
-WCAG AA (verify, D2). Grid tiles also differ by the hatch pattern and by semantics labels, not
-colour alone.
+WCAG AA (verify, D2). Grid tiles are always filled rounded squares, never outlines. Levels also
+differ by semantics labels ("Oct 21: goal met", "Oct 21: paused"), not colour alone.
+
+**Activity art** (the 56 dp thumbnails) uses `art-peak`, `art-level` and `art-comeback`, which are
+held to 3:1 against their tile. Light mode: cobalt #2F3BFF, cobalt #5F6BFF, orange #D55900. Dark
+mode: #6E7BFF, #8E98FF, #FF7A1A. The wordmark and equalizer bars (`eq-peak`, `eq-dip`,
+`eq-comeback`, orange #FF7A1A) are decorative brand marks and are not held to 3:1. Activity art
+is decorative too: the activity name is always in text beside it.
 
 ## Typography
-`display` for screen titles and the "Welcome back" heading only. `body` for options, reasons, and
-reflections. `label` for chips, tabs, and the grid legend. Max line length about 60 characters.
+`display` (Instrument Serif italic) for screen titles and the "Welcome back" heading only.
+`celebration` (Unbounded) for milestone and achievement titles and big numbers. `body` (Geist) for
+options, reasons, and reflections. `label` (Geist) for chips, tabs, and the grid legend. Max line
+length about 60 characters. Dark-mode colour values live in the Figma Color collection (Dark mode).
 Respect the system text scale up to 200% without clipping.
 
 ## Layout
 Spacing scale 4 / 8 / 12 / 16 / 24 / 32. 16 dp page padding. One primary action per screen. Option
-cards stack vertically, max 3. The grid shows 7 rows (days of the week) × N weeks, scrollable
+cards stack vertically (up to 4; five or more long options become list rows). The grid shows 7 rows (days of the week) × N weeks, scrollable
 horizontally, with the newest week at the right.
 
 ## Elevation & Depth
 Flat: cards use a 1 dp `line` border, no shadows. Bottom sheets use one soft shadow.
 
 ## Shapes
-Cards 16 dp radius; buttons and chips fully rounded (pill). Grid tiles are **small rectangles,
+Cards 20 dp radius (`card`); activity-art tiles 16 dp (`thumb`); two-line action rows (the Support message options) 12 dp
+(`md`); buttons and chips fully rounded (pill). Grid tiles are **small rectangles,
 not squares**, at GitHub contribution-graph scale (compact, not a hero element). Exact size and
 gap are set in the wireframe (owner direction, 2026-10-23).
 
 ## Components
 | Component | Variants | States | Notes |
 |---|---|---|---|
-| Button | primary / secondary / text / danger (delete-all only) | default / pressed / disabled / loading | Min height 48 dp |
+| Button | primary / secondary / text | default / pressed / disabled / loading | Min height 48 dp. Delete-all is a secondary button with `danger` text and border, never filled. The design system also has a filled danger variant; it is not used |
 | Option card | library / AI-worded | default / accepted / edited | Shows reason (BR-004) in `ink-muted`; AI-worded label chip (BR-019) |
-| Quick chip | single / multi select | default / selected | Used for time, energy, reflection, barrier |
+| Quick chip | single / multi select | default / selected | Used for time, energy, reflection, barrier. Multi-select shows a ✓; single-select does not |
+| Segmented control | 2 or 3 segments | one selected | Single choice with short labels. 48 dp tall, tinted track, white outlined selected segment. Not for navigation tabs |
 | Commit grid tile | level 0–3 / pause / today | default / focused | Semantics label e.g. "Oct 20: goal met" / "Oct 21: paused" |
 | Bottom sheet | reflection / edit / pause / observation / notifications | — | Pause reachable in ≤ 2 taps (BR-006) |
-| Support message | — | static | No AI; calm tone; buttons to call help, not dismissive (BR-003) |
+| Activity art | Running / Walking / Pickleball / Bouldering / Gym / Swimming / Cycling / Yoga / Social / Other | — | 56 dp tile, scales with its slot (event and club detail use 56 dp). Social sits on the warm tint. Decorative |
+| Avatar | tone: blue / warm / neutral | — | Initials circle from 32 dp up (first letter for a person, two for a club); below that, a plain tinted dot. Stacks overlap with a 2 dp ring. No dots when there are no attendees. A person keeps one tone everywhere |
+| Support message | — | static | No AI; calm tone; buttons to call help, not dismissive (BR-003). "Call emergency services" is the screen's one filled primary; the other options are outlined buttons with a phone icon |
 | Welcome-back banner | — | — | `accent`; never shows the length of the lapse |
 
 ## Wording list (BR-007)
@@ -125,33 +158,70 @@ gap are set in the wireframe (owner direction, 2026-10-23).
 These come from the senior UI/UX review of Wireframes v4, accepted by the owner and applied in
 Wireframes v5.
 - **Touch targets:** at least 48 dp for every button, link, icon button and chip hit area, with
-  at least 8 dp between them. Calendar day cells are 44 dp or larger.
-- **Sizes:** all buttons 48 dp tall. Chips are one height (32 dp visual) whether selected or not.
+  at least 8 dp between them. Calendar day cells are 44 dp or larger. The one exception is a
+  full-width list row (for example Report options): rows touch, each is a 48 dp target, and a
+  1 dp divider separates them.
+- **Sizes:** all buttons 48 dp tall. Chips are one height (32 dp visual) whether selected or not, with a 48 dp hit area:
+  wrapped chip rows are 56 dp apart (a 24 dp visible gap) so neighbouring hit areas stay 8 dp
+  apart, and a chip is never narrower than 48 dp.
   The profile button is a 40 dp circle.
 - **Text:** 12 sp minimum, and nothing lighter than #6B6B6B on white. Muted text never sits on a
-  grey box.
+  grey box, except the unselected labels of a segmented control (`ink-muted` on the `selected`
+  tint, about 5:1).
 - **Fields:** the border is at least 3:1 against the background, with a 2 px focus state. Typed
   text is ink and hints are muted. Labels sit above fields.
 - **Search:** a 56 dp rounded search bar with a magnifier and a clear (×) button. It opens full
   screen while typing so the keyboard doesn't hide results, and has a "no matches" state.
 - **Selection:**
-  - Cards for 4 or fewer long options; chips for many short ones.
-  - Multi-select chips show a ✓, and checkboxes show a tick.
+  - **Single choice:** a segmented control for 2 or 3 short options (labels that fit on one line
+    in a third of the width); cards for 4 or fewer longer options; 48 dp list rows with dividers
+    for 5 or more long options (for example Report); chips for many short options, selected
+    with a tint and border but **no ✓**.
+  - **Multiple choice:** chips show a ✓, and checkboxes show a tick. A ✓ always means "you can
+    pick more than one".
+  - **Pickers are actions, not options.** "Pick a time ›" or "Pick a date ›" opens a picker, so
+    it is a text button beside or below the choice, never a segment, card or chip in the group.
+  - **Spacing:** on a screen, at least 40 dp above the heading of each chip, segmented or card
+    group; in a height-capped sheet, at least 24 dp. At least 16 dp between the last chip row
+    and a primary button (chip hit areas reach 8 dp below the chips).
   - Every setup question uses a Next button (no auto-advance).
 - **One primary per screen.** Today has one expanded suggestion card with the only filled button.
   Other followed activities are compact cards.
 - **Sheets:** the screen behind stays visible under a 32% black scrim, and every sheet has a 48 dp
   close (×) as well as swipe (WCAG 2.5.7). Top radius 28 dp.
+  - **Position:** a sheet sits on the bottom edge (top = screen height − sheet height) with
+    28 dp under the last button, which covers the system gesture inset on gesture navigation.
+    Nothing is ever clipped
+    by the screen edge.
+  - **Height:** at most 90% of the screen, so the screen behind stays visible. A sheet that fits
+    does not scroll.
+  - **When content is taller (200% text, short phones):** the close (×) stays pinned, the body
+    scrolls, and a 1 dp divider sits above a sticky footer that holds the primary button. Only
+    a button that is the one primary of the sheet is sticky.
+  - **A menu sheet may have no filled primary.** Not today is a list of paths, so it has none.
+    Its pause block (a segmented length control with "1 week" preselected and an outlined
+    "Pause for 1 week" button) always stays visible and inline, never sticky and never filled,
+    so pausing is two taps from Today (BR-006) without being the heaviest thing on the sheet.
+    Do not hide the button until a length is chosen: that makes it three taps. The
+    confirmation is the Paused screen, which has "Resume now" as the undo.
+  - **Keyboard:** when a field is focused, the sticky footer sits above the keyboard.
+  - **Specs show the stress case:** a static frame never silently clips. Large-text frames name
+    their layers `scroll-body` and `sticky-footer`, show a row cut at the fold with a fade, and
+    carry a short annotation.
 - **Feedback patterns:**
-  - Snackbars for quick confirmations (with Undo or Open).
+  - Snackbars for quick confirmations (with Undo or Open). They float, 16 dp from each side,
+    16 dp above the navigation bar (or 16 dp from the bottom when there is none), and never
+    cover a destructive row or the screen's primary action.
   - Banners with an action inside for persistent states.
   - Inline progress for running tasks.
   - Explanations ("What changes next", "Why we suggest it") use a left rule, not a grey box.
 - **Destructive actions** use a dialog. The safe choice is the default, and the destructive
-  button uses the `danger` token.
+  button uses the `danger` token. For delete-all that means an outlined button with `danger` text
+  and border, so "Keep my data" stays the only filled button.
 - **Navigation bar:** 80 dp with an active pill behind the icon and 12 sp labels.
-- **Large text:** at 200% text size, side-by-side buttons stack, and label/value pairs stack
-  label above value.
+- **Large text:** at 200% text size, side-by-side buttons stack, segmented controls stack into
+  one option per row, a picker button that sits beside a control drops below it, and
+  label/value pairs stack label above value.
 - **Share** through the system share sheet, never with app buttons drawn by us.
 - **Links vs buttons:**
   - In-app actions ("Something else", "Not today", "Edit", "Skip", "See all") are **text buttons**:
@@ -162,9 +232,37 @@ Wireframes v5.
 - **Build checks:** 200% text (TC-044) and 48 dp tap areas, including on visually 32 dp chips
   (TC-045).
 
+## Brand motion: the equalizer (2026-10-25)
+Source of truth: Figma file `QEdjcVZJUBX6jpRxOVblCa`, page "Brand · Lilt" ("Lilt — brand board",
+components "Wordmark / lilt" and "Logo mark / lilt", and the prototype flows "Lilt · app opening"
+and "Lilt · reveal (video)"). Design system pages: "Lilt DS · Components" and "Lilt DS ·
+Foundations". Name decision: [ADR-011](adr/ADR-011-product-name-lilt.md). The tokens above are
+the Lilt brand tokens, synced from Figma on 2026-10-26 (the earlier teal / Fraunces / Inter
+tokens are gone).
+- **One object.** The logo mark, app icon, wordmark ("lilt": l · i · l are the bars), Today
+  header, achievements and the demo video all use the same three bars, in this order: `peak`
+  (cobalt #2F3BFF, the first l), `dip` (light cobalt #6C78FF, the i), `comeback` (orange
+  #FF7A1A, the second l). Keep these names on the layers and in the code so shared-element
+  transitions connect.
+- **Fixed ratios:** heights 1 : 0.75 : 0.87 (the l is the font's own l height, the i stem is the
+  x-height); gap = half a bar width; bars sit on one baseline. The logo mark uses the same ratio
+  (bars 44 / 33 / 38 in a 72 viewBox). The i keeps its dot; the t is tilted 12° onto its toe.
+- **Opening sequence:** icon → icon fills the screen → brand colours → bars become l · i · l →
+  the i squeezes out its dot in light cobalt → the dot pops up and settles → ink spreads through
+  it from the centre → the t drops from the sky, squashes, springs upright and tilts onto its
+  toe → one out-of-sync beat → the wordmark shrinks into the Today header. The standalone
+  "Lilt · reveal (video)" flow (bars rising one by one from below) is for the demo video.
+- **Beat:** bars never move in unison; each beat pose changes each bar by a different amount and
+  direction. The dot always rides on top of the i bar.
+- **Tempos:** spring only when bars rise or celebrate; a gentle ease for moves. With reduced
+  motion, cross-fade only.
+- **Flutter:** one `EqualizerBars` widget driven by an animated layout value, with `Hero` tags
+  `eq-peak`, `eq-dip`, `eq-comeback`. The wordmark is an exported SVG from Figma; it's never
+  rebuilt from text plus CSS.
+
 ## Open decisions
 | # | Decision | Owner |
 |---|---|---|
 | D1 | Bundle fonts vs. `google_fonts` package (offline-first favours bundling) | Team |
 | D2 | Verify contrast of all text tokens with a contrast checker and adjust | Design |
-| D3 | Dark mode palette | Design (P1) |
+| D3 | Dark mode palette: values exist in the Figma Color collection (Dark mode) and need review | Design (P1) |
