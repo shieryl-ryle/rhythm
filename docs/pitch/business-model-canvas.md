@@ -10,7 +10,7 @@ changes. Global. Size: `[need: a cited source for the share of adults who start 
 routines; do not quote a number until sourced]`.
 
 ## 1. Customer Segments
-- **Users (free):** returners and stretched starters. They care because the routine matters to
+- **Users (free in the challenge build; an optional subscription is a later, unvalidated hypothesis):** returners and stretched starters. They care because the routine matters to
   them but no longer fits their life.
 - **Payers (one of three, hypothesis):** employers' wellbeing programs; insurers / health funds;
   public health bodies. They care about sustained healthy behaviour across a population.
@@ -18,8 +18,8 @@ routines; do not quote a number until sourced]`.
 ## 2. Value Propositions
 - **For users:** a small step that fits today; coming back without guilt; seeing what actually
   works for *them*.
-- **For payers:** sustained participation (not app opens) reported as privacy-preserving
-  aggregates, with no individual data shared without consent `[need: payer interviews]`.
+- **For payers:** sustained participation (not app opens), with pilot reporting designed with the payer and opt-in
+  (no reporting mechanism exists yet; no individual data is shared without consent) `[need: payer interviews]`.
 
 ## 3. Channels
 - Employer: HR benefits / wellbeing platform `[need: 1 employer conversation]`.
@@ -31,7 +31,7 @@ routines; do not quote a number until sourced]`.
 Self-serve for users; partner-led for payers (pilot → program).
 
 ## 5. Revenue Streams
-- Per-seat (employer) or per-member (insurer) licence, or a funded public pilot. Pricing not set.
+- Per-seat (employer) or per-member (insurer) licence, a funded public pilot, or (later, store release) an optional user subscription. Nothing is priced or built for the challenge.
   `[need: willingness-to-pay signal from any payer]`
 
 ## 6. Key Activities
