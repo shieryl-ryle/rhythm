@@ -307,7 +307,7 @@ entry point.
 - [ ] Export produces a readable file; delete-all leaves no local records (BR-017).
 
 ### F-018 — Community (Together tab)
-- [ ] Together is the 4th tab. Signed out, it explains what's shared and offers sign-in. The rest
+- [ ] Together is the third of four tabs (Today, Discover, Together, My rhythm). Signed out, it explains what's shared and offers sign-in. The rest
   of the app never requires an account (BR-025).
 - [ ] It lists events and clubs near the chosen area, filterable by activity, level and day. Each
   event shows its time, public venue, level, host and spots left.

@@ -6,7 +6,7 @@
 
 ## 1. Navigation model
 First run is a short linear wizard (consent → AI choice → My Starting Point). After that, a
-**bottom tab bar** with four tabs: **Today**, **Discover**, **My rhythm**, **Together**.
+**bottom tab bar** with four tabs, in this order: **Today**, **Discover**, **Together**, **My rhythm** (as in Figma).
 The owner cut the bar to three tabs on 2026-10-23 (reference mock-up), then restored the fourth
 when community became P0 (F-018, [ADR-009](adr/ADR-009-community-in-p0.md)). Settings & My Data
 open from a profile icon in the header. Today shows **one hero suggestion**, with "Something
@@ -50,10 +50,10 @@ Tabs
  │   ├─ Edit option (S-102) · Not today (S-103) · Reflection (S-101) · Why this (S-107)
  │   └─ My Way Back (S-005)  ← also auto-opens after a lapse
  ├─ Discover (S-009)  — For you · Saved
- ├─ My rhythm (S-006)  — grid · totals · experiences · what works
- │   ├─ Observation edit (S-105)
- │   └─ My Way Back (S-005)  ← "Returning after a break?"
- └─ Together (S-010)  — events · clubs · (P1) challenges
+ ├─ Together (S-010)  — events · clubs · (P1) challenges
+ └─ My rhythm (S-006)  — grid · totals · experiences · what works
+     ├─ Observation edit (S-105)
+     └─ My Way Back (S-005)  ← "Returning after a break?"
 Header profile icon → Settings & My Data (S-008)
      ├─ Notification settings (S-106)
      ├─ Edit starting point (S-003)
