@@ -13,7 +13,8 @@ colors:
   ink: "#111418"
   ink-muted: "#5A6168"
   line: "#E1E3E0"
-  field: "#8A9096"
+  field: "#868C92"
+  sheet-line: "#E1E3E0"
   accent: "#B84A00"
   danger: "#C62828"
   grid-0: "#E5E7EF"
@@ -136,7 +137,7 @@ gap are set in the wireframe (owner direction, 2026-10-23).
 | Commit grid tile | level 0–3 / pause / today | default / focused | Semantics label e.g. "Oct 20: goal met" / "Oct 21: paused" |
 | Bottom sheet | reflection / edit / pause / observation / notifications | — | Pause reachable in ≤ 2 taps (BR-006) |
 | Activity art | Running / Walking / Pickleball / Bouldering / Gym / Swimming / Cycling / Yoga / Social / Other | — | 56 dp tile, scales with its slot (event and club detail use 56 dp). Social sits on the warm tint. Decorative |
-| Avatar | tone: blue / warm / neutral | — | Initials circle from 32 dp up (first letter for a person, two for a club); below that, a plain tinted dot. Stacks overlap with a 2 dp ring. No dots when there are no attendees. A person keeps one tone everywhere |
+| Avatar | tone: blue / warm / neutral | — | Initials circle from 32 dp up (first letter for a person, two for a club); below that, a solid dot (blue `eq-dip`, warm `eq-comeback`, neutral `field`) so three people read as three. The profile button is the blue avatar. Stacks overlap with a 2 dp ring. No dots when there are no attendees. A person keeps one tone everywhere |
 | Support message | — | static | No AI; calm tone; buttons to call help, not dismissive (BR-003). "Call emergency services" is the screen's one filled primary; the other options are outlined buttons with a phone icon |
 | Welcome-back banner | — | — | `accent`; never shows the length of the lapse |
 
@@ -145,7 +146,7 @@ gap are set in the wireframe (owner direction, 2026-10-23).
 "lost your streak", "streak lost", "failed", "failure", "missed", "behind", "lazy", "you should",
 "don't give up", "no excuses", "cheat day", "guilt".
 **Prefer:** "Welcome back", "Paused, resume anytime", "Rest counts too", "Any amount counts",
-"Want something lighter today?", "What would make this easier?".
+"Want something lighter today?", "What would make this easier?", "What got in the way?".
 
 ## Do's and Don'ts
 - **Do:** celebrate returns as much as completions; show why each option was offered; keep pause
@@ -179,6 +180,11 @@ Wireframes v5.
     with a tint and border but **no ✓**.
   - **Multiple choice:** chips show a ✓, and checkboxes show a tick. A ✓ always means "you can
     pick more than one".
+  - **Reflection barrier** ("What got in the way? (optional)") is single choice with tickless
+    chips, and "Prefer not to say" is one of the options. It appears only after "Partly" or
+    "Didn't get to it": asking after "Done" would presume difficulty (BR-008).
+  - **A sheet whose content depends on a choice** (the reflection sheet) grows upward from the
+    bottom edge and keeps its primary button in the same place in every state.
   - **Pickers are actions, not options.** "Pick a time ›" or "Pick a date ›" opens a picker, so
     it is a text button beside or below the choice, never a segment, card or chip in the group.
   - **Spacing:** on a screen, at least 40 dp above the heading of each chip, segmented or card
@@ -188,7 +194,8 @@ Wireframes v5.
 - **One primary per screen.** Today has one expanded suggestion card with the only filled button.
   Other followed activities are compact cards.
 - **Sheets:** the screen behind stays visible under a 32% black scrim, and every sheet has a 48 dp
-  close (×) as well as swipe (WCAG 2.5.7). Top radius 28 dp.
+  close (×) as well as swipe (WCAG 2.5.7). Top radius 28 dp. A 1 px `sheet-line` stroke on the top
+  and side edges keeps the sheet visible over the scrim in both modes.
   - **Position:** a sheet sits on the bottom edge (top = screen height − sheet height) with
     28 dp under the last button, which covers the system gesture inset on gesture navigation.
     Nothing is ever clipped
@@ -218,7 +225,10 @@ Wireframes v5.
 - **Destructive actions** use a dialog. The safe choice is the default, and the destructive
   button uses the `danger` token. For delete-all that means an outlined button with `danger` text
   and border, so "Keep my data" stays the only filled button.
-- **Navigation bar:** 80 dp with an active pill behind the icon and 12 sp labels.
+- **Navigation bar:** 80 dp with an active pill behind the icon and 12 sp labels. Labels scale
+  with system text up to 16 sp (1.33x), then stop: they never wrap, break mid-word or ellipsise.
+  The icon, the active pill and the accessible name carry the destination at larger sizes. This is
+  the one documented exception to 200% text.
 - **Large text:** at 200% text size, side-by-side buttons stack, segmented controls stack into
   one option per row, a picker button that sits beside a control drops below it, and
   label/value pairs stack label above value.
@@ -229,6 +239,9 @@ Wireframes v5.
   - Underlines are reserved for real links that open something outside the current flow, such as
     a web page.
 - **Filter chips** (e.g. Discover) are **multi-select** with a ✓. Selecting none means "All".
+- **Menu chips** (a pill that opens a list, e.g. the Together filters) use a short label with a ▾
+  and show the chosen value; they have no ✓. A filter row sits at least 8 dp below the tabs
+  above it, counting the chips' 48 dp hit area.
 - **Build checks:** 200% text (TC-044) and 48 dp tap areas, including on visually 32 dp chips
   (TC-045).
 
@@ -264,5 +277,5 @@ tokens are gone).
 | # | Decision | Owner |
 |---|---|---|
 | D1 | Bundle fonts vs. `google_fonts` package (offline-first favours bundling) | Team |
-| D2 | Verify contrast of all text tokens with a contrast checker and adjust | Design |
-| D3 | Dark mode palette: values exist in the Figma Color collection (Dark mode) and need review | Design (P1) |
+| D2 | Verify contrast of all text tokens with a contrast checker and adjust. Computed in [contrast.md](contrast.md) (2026-10-26): every text, control, border and art pair meets its minimum in both modes (three failures found in the first pass were fixed the same day; `border/field` on a raised surface in Dark sits exactly at 3.0) | Design |
+| D3 | Dark mode palette: values exist in the Figma Color collection (Dark mode). **Resolved 2026-10-26** (UI reviewer verified): palette accepted. Done: unselected tab labels bound to `ink-muted` (95 hard-coded greys fixed), 1 px `sheet-line` edge on sheets, ten dark evidence frames (7.6, 2.7, 2.9, 8.1, 10.11, 11.12, 9.8, 2.1, 5.1 with tabs, 3.3 with a segmented control), full contrast table with the three failures fixed. Not claimed: every one of the 99 screens has been looked at in dark (10 have) | Design (P1) |
