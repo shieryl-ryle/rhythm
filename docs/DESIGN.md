@@ -93,7 +93,7 @@ progress.** Nothing on screen should feel like a debt.
 | `line` | Dividers, card borders, pause pattern stroke | Text |
 | `field` | Field and chip borders (3:1 against `canvas`) | Dividers |
 | `accent` | "Welcome back" moments, returns count (text #B84A00; decorative marks may use #FF7A1A) | Errors, missed days |
-| `danger` | Delete-all only (destructive) | **Missed, skipped, or lapsed days, ever** |
+| `danger` | Destructive actions that remove data: delete-all and stop sharing | **Missed, skipped, or lapsed days, ever** |
 | `grid-0`..`grid-3` | Commit grid levels (EQ-002) | Anything else |
 | `grid-pause` | Pause-day tile: drawn exactly like `grid-0`, a filled neutral square ([ADR-012](adr/ADR-012-pause-days-look-like-empty-days.md)) | Outlines, dashes or hatches |
 
@@ -236,7 +236,7 @@ Wireframes v5.
   - Explanations ("What changes next", "Why we suggest it") use a left rule, not a grey box.
 - **Destructive actions** use a dialog. The safe choice is the default, and the destructive
   button uses the `danger` token. For delete-all that means an outlined button with `danger` text
-  and border, so "Keep my data" stays the only filled button.
+  and border, so "Keep my data" stays the only filled button. Stop sharing (P1) uses the same pattern, with "Keep sharing" as the filled default. Dialog bodies scroll at 200% text and the buttons stay pinned.
 - **Navigation bar:** 80 dp with an active pill behind the icon and 12 sp labels. Labels scale
   with system text up to 16 sp (1.33x), then stop: they never wrap, break mid-word or ellipsise.
   The icon, the active pill and the accessible name carry the destination at larger sizes. This is

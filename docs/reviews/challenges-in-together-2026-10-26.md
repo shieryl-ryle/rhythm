@@ -230,6 +230,22 @@ APPROVE WITH CONDITIONS.
   the design reviewer; draw "7.6b Stop sharing?" and the On and Off row states; keep "never see what you did
   or wrote" on every sharing surface; add the 7.1 frame growth.
 
+### Round 4 verdicts (both APPROVE WITH CONDITIONS)
+
+- UI reviewer: no true blockers. Settings "Sharing" row, 7.6b dialog and 10.7b verified; removing Cheer and the
+  weekly line on 10.7b is right. Asked for 200% evidence frames for the opt-in sheet and the dialog (built:
+  281:4741, 281:5126), one DESIGN.md sentence (dialog bodies scroll and buttons stay pinned at 200%), a
+  static 11.9 subtitle ("Group goals and events with friends"), an annotation that both rows open the opt-in
+  when sharing is off, and a stated purpose for 276:4660. All done.
+- Design reviewer: one blocker, challenge group totals ("42 of 60 together") were not covered by the device-local
+  rule; fixed in BR-021. Conditions applied: personal-tally sentence and new-phone line (BR-021), counts in
+  Export, BR-017 naming flags, clubs and challenge membership, BR-028 including challenges, dialog copy naming
+  "active and resting days" and what friends see, report route on 10.7, 18+ line on 10.4, private-code note
+  on 10.3, one-entity and monthly-goal end line in F-012, 10.7 "never resets" replaced. New open question Q12:
+  how long the server keeps a day's flag. Not applied: neutral (not red) outline for "Stop sharing" (the
+  design reviewer cited DESIGN.md "danger = delete-all only"); the UI reviewer had approved the danger style in
+  the earlier round and DESIGN.md was amended to include stop sharing. Owner may overrule.
+
 Applied 2026-10-26: frames 278:4715, 279:4720, 279:4801, 279:5243 and the opt-in sheets; BR-018, BR-021,
 ADR-010 (amendment), UF-012, sitemap S-008. Known trade-off: a person who gets a new phone restarts the count
 from the flags still shared. Not yet re-reviewed by either reviewer; no dark or 200% frames for the new
