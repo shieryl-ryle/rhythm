@@ -115,6 +115,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    // TC-022: with the consent screen showing, no table has a row yet.
+    expect((await userRowCounts(db)).values.every((n) => n == 0), isTrue);
+
     await tester.tap(find.text('I agree, continue'));
     await tester.pumpAndSettle();
     expect(find.text('Here’s what fits today'), findsOneWidget);

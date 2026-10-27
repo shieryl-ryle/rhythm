@@ -32,7 +32,7 @@ class DriftConsentRepository implements ConsentRepository {
     await _db.into(_db.consentRecords).insert(
           ConsentRecordsCompanion.insert(
             consentVersion: currentConsentVersion,
-            acceptedAt: DateTime.now(),
+            acceptedAt: DateTime.now().toUtc(),
           ),
         );
   }

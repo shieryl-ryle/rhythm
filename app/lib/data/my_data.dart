@@ -12,7 +12,8 @@ class MyDataService {
 
   final LiltDatabase _db;
 
-  /// Run before any local row is removed. If one throws, nothing is deleted, so the person can retry.
+  /// Run before any local row is removed. If one throws, nothing is deleted, so the person can retry; that
+  /// means every hook must be idempotent (a retry runs the hooks that already succeeded again).
   final List<DeleteAllHook> hooks;
 
   /// Children first, so foreign keys never block a delete. Must list every user table: [deleteAll]
@@ -37,17 +38,28 @@ class MyDataService {
   /// Every user table as a list of rows, exactly as stored (enums as their codes, comma sets as comma
   /// text, booleans as 0 or 1, dates as UTC ISO-8601). The library table `action` is not personal data.
   Future<Map<String, Object?>> exportData() async {
-    final tables = <String, List<Map<String, Object?>>>{};
-    for (final table in _db.userTables) {
-      final name = table.actualTableName;
-      final rows = await _db.customSelect('SELECT * FROM "$name"', readsFrom: {table}).get();
-      tables[name] = rows.map((row) => row.data).toList();
-    }
+    // One transaction, so every table comes from the same moment.
+    final tables = await _db.transaction(() async {
+      final result = <String, List<Map<String, Object?>>>{};
+      for (final table in _db.userTables) {
+        final name = table.actualTableName;
+        final rows = await _db.customSelect('SELECT * FROM "$name"', readsFrom: {table}).get();
+        result[name] = rows.map((row) => row.data).toList();
+      }
+      return result;
+    });
     return {
       'app': 'Lilt',
       'export_version': 1,
       'schema_version': _db.schemaVersion,
       'exported_at': DateTime.now().toUtc().toIso8601String(),
+      'format_notes': {
+        'enums': 'stored as lowercase snake_case codes, for example pick_up_again',
+        'comma_sets': 'hard_because, got_in_the_way, would_help and what_changed hold comma-separated codes',
+        'booleans': '0 or 1',
+        'dates': 'UTC ISO-8601 text; days (YYYY-MM-DD) and times (HH:mm) are local to the person',
+        'library': 'the activity library (table action) is not personal data and is not included',
+      },
       'tables': tables,
     };
   }

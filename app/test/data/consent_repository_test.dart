@@ -2,6 +2,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lilt/data/consent_repository.dart';
 import 'package:lilt/data/database.dart';
+import 'package:lilt/data/my_data.dart';
 
 /// TC-022 (BR-014): a fresh install has no consent row until the person agrees.
 /// Runs against the real drift repository on an in-memory database.
@@ -28,6 +29,15 @@ void main() {
     final rows = await db.select(db.consentRecords).get();
     expect(rows, hasLength(1));
     expect(rows.single.consentVersion, currentConsentVersion);
+  });
+
+  test('the consent time is stored and exported in UTC', () async {
+    await repo.agree();
+    final export = await MyDataService(db).exportData();
+    final tables = export['tables']! as Map<String, Object?>;
+    final row = (tables['consent']! as List).single as Map<String, Object?>;
+    expect(row['accepted_at'], endsWith('Z'));
+    expect(export['format_notes'], isA<Map<String, Object?>>());
   });
 
   test('a consent given for an older version does not count', () async {

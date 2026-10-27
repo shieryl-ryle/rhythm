@@ -35,7 +35,10 @@ class LiltDatabase extends _$LiltDatabase {
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        onCreate: (m) => m.createAll(),
+        onCreate: (m) async {
+          await m.createAll();
+          await _createTriggers();
+        },
         onUpgrade: (m, from, to) async {
           if (from < 2) {
             // Version 1 stored dates as integers (unix seconds); version 2 stores UTC ISO-8601 text.
@@ -48,12 +51,25 @@ class LiltDatabase extends _$LiltDatabase {
               if (entity == consentRecords) continue;
               await m.create(entity);
             }
+            await _createTriggers();
           }
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON');
+          // Deleted rows are overwritten, not just unlinked, so delete-all really removes the data (BR-017).
+          await customStatement('PRAGMA secure_delete = ON');
         },
       );
+
+  /// Rules the schema alone cannot express (docs/data-model.md §4 `preference`).
+  Future<void> _createTriggers() async {
+    // Frame 1.13: "Pick up to 3" motivations.
+    await customStatement(
+      'CREATE TRIGGER IF NOT EXISTS preference_motivation_limit BEFORE INSERT ON preference '
+      "WHEN NEW.kind = 'motivation' AND (SELECT COUNT(*) FROM preference WHERE kind = 'motivation') >= 3 "
+      "BEGIN SELECT RAISE(ABORT, 'At most 3 motivations'); END",
+    );
+  }
 
   /// The tables a person's data lives in: everything except the read-only library.
   List<TableInfo<Table, dynamic>> get userTables =>

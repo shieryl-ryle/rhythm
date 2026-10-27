@@ -275,6 +275,7 @@ class $ProfilesTable extends Profiles with TableInfo<$ProfilesTable, Profile> {
     'id',
     aliasedName,
     false,
+    check: () => id.equals('me'),
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultValue: const Constant('me'),
@@ -6353,6 +6354,7 @@ class $NotificationSettingsTable extends NotificationSettings
     'id',
     aliasedName,
     false,
+    check: () => id.equals('me'),
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultValue: const Constant('me'),
@@ -6885,9 +6887,17 @@ abstract class _$LiltDatabase extends GeneratedDatabase {
     'option_offer_day',
     'CREATE INDEX option_offer_day ON option_offer (day)',
   );
+  late final Index optionOfferNewSwap = Index(
+    'option_offer_new_swap',
+    'CREATE UNIQUE INDEX option_offer_new_swap ON option_offer (day, swap_index) WHERE followed_activity_id IS NULL',
+  );
   late final Index planItemDay = Index(
     'plan_item_day',
     'CREATE INDEX plan_item_day ON plan_item (planned_day)',
+  );
+  late final Index planItemOffer = Index(
+    'plan_item_offer',
+    'CREATE UNIQUE INDEX plan_item_offer ON plan_item (offer_id)',
   );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -6911,7 +6921,9 @@ abstract class _$LiltDatabase extends GeneratedDatabase {
     notificationSettings,
     followedActivityUnfollowed,
     optionOfferDay,
+    optionOfferNewSwap,
     planItemDay,
+    planItemOffer,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([

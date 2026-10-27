@@ -22,7 +22,9 @@ class Profiles extends Table {
   @override
   String get tableName => 'profile';
 
-  TextColumn get id => text().withDefault(const Constant('me'))();
+  // A single row: the id can only be 'me'.
+  // ignore: recursive_getters
+  TextColumn get id => text().withDefault(const Constant('me')).check(id.equals('me'))();
   IntColumn get dailyGoal => integer().withDefault(const Constant(1))();
   DateTimeColumn get setupDoneAt => dateTime().nullable()();
   DateTimeColumn get createdAt => dateTime().clientDefault(() => DateTime.now().toUtc())();
@@ -104,6 +106,12 @@ class Actions extends Table {
 
 /// One option shown on a day (F-002).
 @TableIndex(name: 'option_offer_day', columns: {#day})
+// SQLite treats NULLs as distinct, so offers that belong to no followed activity ("Try something new") get
+// their own uniqueness rule for the swap chain.
+@TableIndex.sql(
+  'CREATE UNIQUE INDEX option_offer_new_swap ON option_offer (day, swap_index) '
+  'WHERE followed_activity_id IS NULL',
+)
 class OptionOffers extends Table {
   @override
   String get tableName => 'option_offer';
@@ -153,6 +161,8 @@ class OfferReasons extends Table {
 
 /// Something on Today's plan: an accepted suggestion, a one-off, or a Together RSVP (BR-005).
 @TableIndex(name: 'plan_item_day', columns: {#plannedDay})
+// One plan item per accepted offer (option_offer 1 to 0..1 plan_item).
+@TableIndex.sql('CREATE UNIQUE INDEX plan_item_offer ON plan_item (offer_id)')
 class PlanItems extends Table {
   @override
   String get tableName => 'plan_item';
@@ -293,7 +303,9 @@ class NotificationSettings extends Table {
   @override
   String get tableName => 'notification_setting';
 
-  TextColumn get id => text().withDefault(const Constant('me'))();
+  // A single row: the id can only be 'me'.
+  // ignore: recursive_getters
+  TextColumn get id => text().withDefault(const Constant('me')).check(id.equals('me'))();
   BoolColumn get enabled => boolean().withDefault(const Constant(false))();
   // `before_free_time` or `fixed`.
   TextColumn get mode => text().withDefault(const Constant('before_free_time'))();
