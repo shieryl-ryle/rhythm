@@ -78,6 +78,15 @@ flutter:
           weight: 500
         - asset: assets/fonts/geist/Geist-SemiBold.ttf
           weight: 600
+    # Instrument Serif (screen titles) and Unbounded (milestones and big numbers), both SIL OFL 1.1, see the
+    # OFL.txt next to each file. Unbounded is a variable font: the weight comes from `FontVariation('wght')`.
+    - family: Instrument Serif
+      fonts:
+        - asset: assets/fonts/instrument-serif/InstrumentSerif-Italic.ttf
+          style: italic
+    - family: Unbounded
+      fonts:
+        - asset: assets/fonts/unbounded/Unbounded-Variable.ttf
 
   # To add assets to your application, add an assets section, like this:
   # assets:
