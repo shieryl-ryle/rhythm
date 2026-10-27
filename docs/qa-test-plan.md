@@ -25,7 +25,7 @@ tests; TC-042 runs manually against the free tier with synthetic data only.
 | TC-004 | F-004 | Observations list; confirm, edit, delete work; saved actions reappear as options | yes: `test/features/what_works/what_works_test.dart` |
 | TC-005 | F-005 | With seeded lapse → app opens My Way Back with "Welcome back"; previous approach and a different one offered; choosing one gives a smaller first action | yes: `integration_test/return_test.dart` |
 | TC-006 | F-006 | Grid renders one tile per day with levels per EQ-002; paused day drawn as level 0 with semantics label "paused" (ADR-012); totals shown | yes: `test/features/progress/grid_test.dart` (golden) |
-| TC-007 | F-007 | Consent before data; AI toggle both ways; export file contains all tables; delete-all leaves zero user rows | yes: `test/data/my_data_test.dart` |
+| TC-007 | F-007 | Consent before data; export file contains all tables; delete-all leaves zero user rows | yes: `test/data/my_data_test.dart` |
 | TC-008 | F-008 | Off by default; enabling schedules within caps; disabling cancels all | yes: `test/notifications/scheduler_test.dart` + manual on device |
 
 ### Business rules

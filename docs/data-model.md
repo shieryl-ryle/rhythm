@@ -70,7 +70,7 @@ The user's starting point (F-001) and settings. Serves BR-011, BR-014, BR-016.
 | `reason` | text 🔒 | yes | null | Free text; red-flag checked (EQ-008); never sent to AI |
 | `stage` | stage | no | — | |
 | `daily_goal` | int | no | 1 | Actions per day that count as "goal met" (EQ-002) [assumption] |
-| `ai_opt_in` | bool | no | false | BR-016 |
+| `ai_opt_in` | bool | no | false | BR-016. Dormant in P0 (ADR-006): no screen sets it, so it stays false |
 | `created_at` | datetime | no | now | |
 
 ### `consent`

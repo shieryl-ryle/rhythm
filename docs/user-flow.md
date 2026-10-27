@@ -30,7 +30,6 @@ back without guilt, choose what changed, take a smaller first step, and see the 
 grid.
 
 ## 3. Alternate / secondary flows
-- Declines AI on S-002 → every flow uses library text (BR-016).
 - Starts at stage "returning" in setup → UF-004 offered straight after UF-001.
 - Never answers reflections → the grid shows unknown days neutrally (BR-009).
 - Pauses for a week (UF-005) → no lapse is detected during the pause (EQ-001) and notifications
@@ -42,10 +41,9 @@ grid.
 ### UF-001 — First run
 | Step | Screen | User does | System does | Success looks like |
 |---|---|---|---|---|
-| 1 | S-001 | Reads and accepts consent | Stores the consent version and time | Proceeds to S-002 |
-| 2 | S-002 | Opts in or out of AI | Stores `ai_opt_in` | Proceeds to S-003 |
-| 3 | S-003 | Picks behaviour, reason, stage, daily goal, constraints, exclusions | Checks free text for red flags (EQ-008); saves the profile | Proceeds to S-004 |
-| 4 | S-004 | Sees the first options | Ranks the library (EQ-003) with reasons (EQ-004) | 1–3 options visible |
+| 1 | S-001 | Reads and accepts consent | Stores the consent version and time | Proceeds to S-003 |
+| 2 | S-003 | Answers one question at a time and taps Next each time: what brings you here, the activity and where they are with it, their week, why it matters, what to leave out. The daily goal is fixed at 1 | Checks free text for red flags (EQ-008); saves the profile | Proceeds to S-004 |
+| 3 | S-004 | Sees the first options | Ranks the library (EQ-003) with reasons (EQ-004) | 1–3 options visible |
 
 **Branch points:** wants detail → S-108 sheet, then back to S-001; doesn't agree → closes the
 app, nothing stored (there is no decline screen); red-flag text → S-090, the text is not stored.
@@ -53,7 +51,7 @@ app, nothing stored (there is no decline screen); red-flag text → S-090, the t
 ### UF-002 — Daily options
 | Step | Screen | User does | System does | Success looks like |
 |---|---|---|---|---|
-| 1 | S-004 | Optionally sets time and energy | Filters and re-ranks (EQ-003) | Options fit the inputs |
+| 1 | S-004 | Optionally taps the time or energy chip and picks a value (time: 10, 20, 30, 45 or 60 min; energy: Low, Medium, High) | Drops actions longer than the time; Low energy drops high-energy actions; re-ranks (EQ-003). The choice applies to today only and is not kept as history | Options fit the inputs; the chips show the chosen values |
 | 2 | S-004 | Accepts / edits (S-102) / replaces / pauses (S-103) | Records the offer status; reworded text has an AI label (BR-019) | The accepted option shows as today's plan |
 | 3 | S-004 | Optionally taps "I'm starting" on the planned card | Marks the time the person chose; the card shows "Under way". Nothing is recorded (ADR-014); nothing counts toward the grid yet | The card reads "Started 12:31 · 20 min planned" |
 

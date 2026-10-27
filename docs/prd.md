@@ -243,7 +243,7 @@ entry point.
 - [ ] The first question offers the 4 paths as checkboxes. Several can be ticked, except "start
   fresh", which clears the others. Next stays disabled until one is ticked, so no error screen is
   needed.
-- [ ] Follow-ups appear one question at a time. A single-choice answer moves on automatically, and
+- [ ] Follow-ups appear one question at a time. Every setup question uses a Next button, with no auto-advance (DESIGN.md); a single-choice answer selects and the person taps Next, and
   earlier answers fold into a summary that can be changed.
 - [ ] "Other" opens an activity search over the library, with "Can't find it? Type it" as the only
   free text (red-flag checked, BR-003).
@@ -263,6 +263,7 @@ entry point.
 - [ ] A new-to-you activity names the liked activity it is similar to (BR-004).
 - [ ] Accept, edit, swap, lighter, later, pause, and "my plan fell through" all work; pause takes
   ≤ 2 taps (BR-006).
+- [ ] Today has a time chip and an energy chip (defaults "20 min" and "Medium energy"). Each opens a menu: time 10, 20, 30, 45 or 60 min; energy Low, Medium or High. Choosing one drops actions longer than the time and, for Low energy, high-energy actions, then re-ranks (EQ-003). The choice applies to today only and is not stored as history.
 - [ ] Nothing is planned without accept or edit (BR-005).
 - [ ] The user can follow more than one activity, and add or remove them from Settings or Discover.
 - [ ] Today shows one suggestion card per followed activity, each with its own reason, time,

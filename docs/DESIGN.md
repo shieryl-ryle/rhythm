@@ -239,6 +239,7 @@ Wireframes v5.
 - **Destructive actions** use a dialog. The safe choice is the default, and the destructive
   button uses the `danger` token. For delete-all that means an outlined button with `danger` text
   and border, so "Keep my data" stays the only filled button. Stop sharing (P1) is reversible (the person can opt in again), so it uses a neutral outlined button, not `danger`, with "Keep sharing" as the filled default. Dialog bodies scroll at 200% text and the buttons stay pinned.
+- **Header avatar:** the round button at the top right of the main screens opens Settings (S-008). Signed in to Together it shows the initial of the display name; signed out it shows a neutral person icon, never a made-up initial. It is a 48 dp target with the label "Settings".
 - **Navigation bar:** 80 dp with an active pill behind the icon and 12 sp labels. Labels scale
   with system text up to 16 sp (1.33x), then stop: they never wrap, break mid-word or ellipsise.
   The icon, the active pill and the accessible name carry the destination at larger sizes. This is
