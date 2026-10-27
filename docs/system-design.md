@@ -70,10 +70,10 @@ the Dart MCP for current APIs.
 
 | Library / service | Pinned version | Docs URL | Verified on |
 |---|---|---|---|
-| Flutter (stable) | 3.47 (per the docs site; confirm with `flutter --version`) | https://docs.flutter.dev/release/archive | 2026-10-23 |
-| flutter_riverpod | ^3.4.3 | https://pub.dev/packages/flutter_riverpod | 2026-10-23 |
-| go_router | ^18.1.1 | https://pub.dev/packages/go_router | 2026-10-23 |
-| drift | ^2.35.2 (web needs `sqlite3.wasm` and the drift worker, see the drift web guide) | https://pub.dev/packages/drift · https://drift.simonbinder.eu/web | 2026-10-23 |
+| Flutter (stable) | 3.41.0 in use (3.47 is available; upgrading is a separate decision, see the note below) | https://docs.flutter.dev/release/archive | 2026-10-27 |
+| flutter_riverpod | ^2.6.1 in use (3.x exists; the move is a migration with breaking changes, deferred until after the challenge) | https://pub.dev/packages/flutter_riverpod | 2026-10-27 |
+| go_router | ^17.5.0 in use (18.x exists) | https://pub.dev/packages/go_router | 2026-10-27 |
+| drift, drift_flutter, drift_dev | drift ^2.34.4, drift_flutter ^0.3.1, drift_dev ^2.34.0 in use (drift 2.35 needs a newer `meta` than Flutter 3.41 allows). Web needs `sqlite3.wasm` and `drift_worker.js` in `web/` matching `pubspec.lock` (see app/README.md) | https://pub.dev/packages/drift · https://drift.simonbinder.eu/web | 2026-10-27 |
 | flutter_local_notifications | ^22.3.2 (min Flutter 3.38.1; Android compileSdk ≥ 35, core library desugaring, Java 17, AGP ≥ 8.11.1; POST_NOTIFICATIONS on Android 13+) | https://pub.dev/packages/flutter_local_notifications | 2026-10-23 |
 | firebase_ai | ^5.1.0 (Android, iOS, macOS, web) | https://pub.dev/packages/firebase_ai | 2026-10-23 |
 | Gemini model | `gemini-3.5-flash-lite` (stable; retires no earlier than 2027-07-21) | https://firebase.google.com/docs/ai-logic/models | 2026-10-23 |
