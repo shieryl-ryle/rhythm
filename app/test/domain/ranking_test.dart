@@ -175,6 +175,60 @@ void main() {
       expect(ids(day), isNot(contains('walk_dusk')));
     });
 
+    test('leaving out "Team sports" removes team-sport and basketball actions even without the tag (BR-011)', () {
+      ActionInfo untagged(String id, ActivityKind activity) => ActionInfo(
+            id: id,
+            activity: activity,
+            title: id,
+            durationMin: 15,
+            energyNeeded: Energy.low,
+            tags: const {'with_company', 'outdoors', 'free'},
+            isStarter: true,
+            similarTo: const [],
+            libraryVersion: fixtureLibraryVersion,
+          );
+      final pool = [
+        untagged('pass_ball', ActivityKind.teamSports),
+        untagged('shoot_hoops', ActivityKind.basketball),
+        untagged('stroll', ActivityKind.walking),
+      ];
+      final ranked = rankOptions(
+        actions: pool,
+        person: const PersonContext(excluded: {'team_sport'}, access: {'none'}),
+        request: const RankingRequest(),
+        libraryVersion: fixtureLibraryVersion,
+      );
+      expect(ids(ranked), ['stroll']);
+    });
+
+    test('with no history and no starter that fits, another action is offered rather than an empty card', () {
+      const lonely = ActionInfo(
+        id: 'class',
+        activity: ActivityKind.dance,
+        title: 'A class',
+        durationMin: 45,
+        energyNeeded: Energy.medium,
+        tags: {'with_company', 'indoors', 'paid'},
+        isStarter: false,
+        similarTo: [],
+        libraryVersion: fixtureLibraryVersion,
+      );
+      final ranked = rankOptions(
+        actions: [lonely],
+        person: const PersonContext(access: {'none'}),
+        request: const RankingRequest(),
+        libraryVersion: fixtureLibraryVersion,
+      );
+      expect(ids(ranked), ['class']);
+    });
+
+    test('when everything is filtered out the list is empty, and that is a normal answer', () {
+      final ranked = rank(
+        const PersonContext(access: {'none'}, excluded: {'walking', 'yoga', 'running', 'dance', 'gym'}),
+      );
+      expect(ranked, isEmpty);
+    });
+
     test('following an activity and leaving it out: the left-out one is never offered, others still are', () {
       final person = PersonContext(
         excluded: const {'swimming'},

@@ -13,11 +13,11 @@ class Reason {
   String toString() => '$code: $text';
 }
 
-/// EQ-004. The score term that adds the most picks its template; a term counts only when it rests on
+/// EQ-004. A first-time action that is similar to one the person did and enjoyed always says so (BR-004,
+/// F-002). Otherwise the score term that adds the most picks its template; a term counts only when it rests on
 /// something the person actually did or said (a first-time action has no "You managed this before"). When no
-/// term applies the order is: similar to something they enjoyed, lighter mode, company, starter, and last a
-/// neutral library line that claims nothing about the person. A reason may only cite an answer a rule uses
-/// (BR-004).
+/// term applies the order is: lighter mode, company, starter, and last a neutral library line that claims
+/// nothing about the person. A reason may only cite an answer a rule uses (BR-004).
 Reason chooseReason({
   required ActionInfo action,
   required ScoreParts parts,
@@ -25,6 +25,16 @@ Reason chooseReason({
   required RankingRequest request,
   required Map<String, ActionInfo> byId,
 }) {
+  // New to them: say which action they enjoyed that this one is like.
+  if (parts.known == 0) {
+    final liked = _enjoyedActionIds(person);
+    for (final id in action.similarTo) {
+      if (liked.contains(id) && byId[id] != null) {
+        return Reason('similar', 'Similar to ${byId[id]!.title}, which you enjoyed');
+      }
+    }
+  }
+
   // Each candidate is a term with the amount it adds to the score. Ties keep this order.
   final terms = <(double, Reason)>[
     if (parts.done > 0) (0.5 * parts.fit, const Reason('fit', 'You managed this before')),
@@ -44,20 +54,13 @@ Reason chooseReason({
     return best.$2;
   }
 
-  // New to them: say which action they enjoyed that this one is like.
-  if (parts.known == 0) {
-    final liked = _enjoyedActionIds(person);
-    for (final id in action.similarTo) {
-      if (liked.contains(id) && byId[id] != null) {
-        return Reason('similar', 'Similar to ${byId[id]!.title}, which you enjoyed');
-      }
-    }
-  }
   if (request.lighter) return const Reason('lighter', 'Short and gentle for today');
   if (action.tags.contains('with_company') && person.motivations.contains('time_with_people')) {
     return const Reason('company', 'You like company');
   }
   if (action.isStarter) return const Reason('starter', 'A small way to begin');
+  // Neither line may overstate the action: "gentle" is not said of something that needs high energy.
+  if (action.energyNeeded == Energy.high) return const Reason('neutral', 'Something different to try');
   return action.tags.contains('with_company')
       ? const Reason('neutral', 'Social and easy to learn')
       : const Reason('neutral', 'A gentle way to get moving');

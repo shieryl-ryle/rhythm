@@ -5,7 +5,7 @@ import 'package:lilt/domain/scheduler.dart';
 /// TC-033 (EQ-005, BR-012, BR-013): at most 1 reminder a day and 5 in any 7 days, quiet hours and paused days
 /// honoured, and only the weekly check-in while lapsed.
 void main() {
-  const settings = ReminderSettings();
+  const settings = ReminderSettings(enabled: true);
   const start = '2026-11-01';
 
   ReminderDecision decide(
@@ -75,6 +75,14 @@ void main() {
     expect(decide(const ReminderSlot(day: start, minute: 8 * 60), [], paused: true), ReminderDecision.paused);
   });
 
+  test('reminders are off by default (BR-012): a missing settings row means none', () {
+    expect(const ReminderSettings().enabled, isFalse);
+    expect(
+      decide(const ReminderSlot(day: start, minute: 8 * 60), [], s: const ReminderSettings()),
+      ReminderDecision.disabled,
+    );
+  });
+
   test('reminders switched off: none', () {
     expect(
       decide(const ReminderSlot(day: start, minute: 8 * 60), [], s: const ReminderSettings(enabled: false)),
@@ -99,10 +107,16 @@ void main() {
       expect(decide(week, [checkin], lapsed: true), ReminderDecision.allowed);
     });
 
+    test('a check-in booked for later counts too, so two never fall within 7 days', () {
+      final booked = ReminderSlot(day: addDays(start, 3), minute: 10 * 60, kind: ReminderKind.lapseCheckin);
+      const earlier = ReminderSlot(day: start, minute: 10 * 60, kind: ReminderKind.lapseCheckin);
+      expect(decide(earlier, [booked], lapsed: true), ReminderDecision.lapseCheckinCap);
+    });
+
     test('the check-in can be switched off', () {
       const checkin = ReminderSlot(day: start, minute: 10 * 60, kind: ReminderKind.lapseCheckin);
       expect(
-        decide(checkin, [], lapsed: true, s: const ReminderSettings(lapseCheckinEnabled: false)),
+        decide(checkin, [], lapsed: true, s: const ReminderSettings(enabled: true, lapseCheckinEnabled: false)),
         ReminderDecision.lapseCheckinOff,
       );
     });

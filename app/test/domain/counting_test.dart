@@ -39,17 +39,39 @@ void main() {
     expect(afterReturn.returns, beforeLapse.returns + 1);
   });
 
-  test('the grid does not change for past days when a lapse starts', () {
-    final days = [for (var i = 0; i < 6; i++) addDays('2026-11-01', i)];
-    GridCell cell(String day) => gridCell(
-          statuses: [ReflectionStatus.completed],
-          dailyGoal: 1,
-          paused: false,
-        );
-    final before = [for (final d in days) cell(d)];
-    // Ten empty days later, the same days still show the same levels: levels are computed per day only.
-    final later = [for (final d in days) cell(d)];
-    expect(later, before);
-    expect(before.every((c) => c.level == 3), isTrue);
+  test('the grid for past days does not change when a lapse starts or ends', () {
+    const start = '2026-11-01';
+    final days = [for (var i = 0; i < 6; i++) addDays(start, i)];
+    final history = [
+      for (var i = 0; i < 6; i++) i.isEven ? done(days[i]) : reflect(days[i], ReflectionStatus.partly),
+    ];
+
+    // The grid is built from the day's own reflections, the way the Progress screen will.
+    List<GridCell> gridAsOf(List<ReflectionRecord> reflections, Set<String> paused) => [
+          for (final d in days)
+            gridCell(
+              statuses: [
+                for (final r in reflections)
+                  if (r.day == d) r.status,
+              ],
+              dailyGoal: 1,
+              paused: paused.contains(d),
+            ),
+        ];
+
+    final before = gridAsOf(history, const {});
+    expect(before.map((c) => c.level), [3, 2, 3, 2, 3, 2]);
+
+    // Ten empty days pass (skips and unknowns), then a return: the first six days are unchanged.
+    final later = [
+      ...history,
+      for (var i = 6; i < 16; i++)
+        reflect(addDays(start, i), i.isEven ? ReflectionStatus.skipped : ReflectionStatus.unknown),
+      done(addDays(start, 16)),
+    ];
+    expect(gridAsOf(later, const {}), before);
+
+    // A pause that starts after those days does not touch them either.
+    expect(gridAsOf(later, {addDays(start, 7), addDays(start, 8)}), before);
   });
 }

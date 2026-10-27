@@ -30,11 +30,12 @@ final _fold = {
 };
 
 final _apostrophes = RegExp("['’‘ʼ`´]");
-final _notPlain = RegExp(r'[^a-z0-9\- ]');
+final _notPlain = RegExp(r'[^a-z0-9 ]');
 final _spaces = RegExp(r' +');
 
 /// EQ-008 normalisation: lowercase, accents stripped, straight and curly apostrophes removed ("don't" becomes
-/// "dont"), other punctuation except hyphens replaced by a space, runs of spaces collapsed.
+/// "dont"), all other punctuation including hyphens replaced by a space ("self-harming" becomes "self
+/// harming", so a hyphen or dash next to a phrase never hides it), runs of spaces collapsed.
 String normaliseForMatch(String text) {
   final folded = StringBuffer();
   for (final rune in text.toLowerCase().runes) {

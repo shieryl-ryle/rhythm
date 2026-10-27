@@ -96,6 +96,16 @@ void main() {
     expect(reasonFor('dance_class', person).text, 'Similar to Ten minutes of gentle stretching, which you enjoyed');
   });
 
+  test('similar wins for a new action even when it is also saved or short (BR-004, F-002)', () {
+    final person = PersonContext(
+      access: const {'none'},
+      savedActionIds: const {'dance_class'},
+      wouldHelp: const {'shorter_sessions'},
+      reflections: [reflect('2026-10-01', ReflectionStatus.completed, action: byId['yoga_stretch'], enjoyment: 3)],
+    );
+    expect(reasonFor('dance_class', person).code, 'similar');
+  });
+
   test('similar is not claimed for something they did not enjoy', () {
     final person = PersonContext(
       access: const {'none'},
@@ -129,6 +139,13 @@ void main() {
     final person = PersonContext(access: const {'none'}, reflections: [someHistory()]);
     expect(reasonFor('run_walk', person).text, 'A gentle way to get moving');
     expect(reasonFor('walk_friend', person).text, 'Social and easy to learn');
+  });
+
+  test('"gentle" is not said of an action that needs high energy', () {
+    final person = PersonContext(access: const {'courts_or_park'}, reflections: [someHistory()]);
+    final r = reasonFor('basket_game', person);
+    expect(r.code, 'neutral');
+    expect(r.text, isNot(contains('gentle')));
   });
 
   test('a skipped action never gets "You managed this before"', () {

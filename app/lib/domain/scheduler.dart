@@ -28,10 +28,11 @@ enum ReminderDecision {
   lapseCheckinCap,
 }
 
-/// The person's reminder settings (`notification_setting`).
+/// The person's reminder settings (`notification_setting`). Reminders are off until they switch them on
+/// (BR-012), so a missing row means no reminders.
 class ReminderSettings {
   const ReminderSettings({
-    this.enabled = true,
+    this.enabled = false,
     this.quietStart = '21:00',
     this.quietEnd = '07:00',
     this.lapseCheckinEnabled = true,
@@ -68,14 +69,11 @@ ReminderDecision decideReminder({
   if (isQuietMinute(slot.minute, settings.quietStart, settings.quietEnd)) return ReminderDecision.quietHours;
   if (dayIsPaused) return ReminderDecision.paused;
 
-  // The 7 days ending on the slot's day. Windows that end later are checked below for the weekly cap.
-  final weekFrom = addDays(slot.day, -6);
-  bool inWeek(ReminderSlot r) => r.day.compareTo(weekFrom) >= 0 && r.day.compareTo(slot.day) <= 0;
-
   if (lapsed) {
     if (slot.kind != ReminderKind.lapseCheckin) return ReminderDecision.lapseOnlyCheckin;
     if (!settings.lapseCheckinEnabled) return ReminderDecision.lapseCheckinOff;
-    if (existing.any((r) => r.kind == ReminderKind.lapseCheckin && inWeek(r))) {
+    // Within 6 days either side, so a check-in booked for later also counts.
+    if (existing.any((r) => r.kind == ReminderKind.lapseCheckin && daysBetween(r.day, slot.day).abs() <= 6)) {
       return ReminderDecision.lapseCheckinCap;
     }
   } else if (slot.kind == ReminderKind.lapseCheckin) {

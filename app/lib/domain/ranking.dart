@@ -119,7 +119,9 @@ const _tolerance = 1e-9;
 /// Filters, in order: the current [libraryVersion] only (a retired action is never offered again); nothing
 /// the person left out (BR-011); nothing that needs access they do not have (an empty or `none` answer drops
 /// every `needs_*` action); no outdoor action in dark hours when "after dark" is left out; today's chips;
-/// lighter mode. With no known reflection at all, only starters are offered. A person's history only counts
+/// lighter mode. With no known reflection at all, starters are offered (any action that passes the filters if
+/// there is no starter). The result can still be shorter than [limit], or empty: the screen then shows its
+/// "nothing fits today" state. An action that needs several kinds of access (`needs_*` tags) needs all of them. A person's history only counts
 /// reflections whose status is not `unknown` (BR-009), and only confirmed observations count (BR-010).
 List<RankedAction> rankOptions({
   required List<ActionInfo> actions,
@@ -131,8 +133,12 @@ List<RankedAction> rankOptions({
   final known = person.reflections.where((r) => r.isKnown).toList();
   final byId = {for (final a in actions) a.id: a};
 
-  var pool = actions.where((a) => _isOffered(a, person, request, libraryVersion));
-  if (known.isEmpty) pool = pool.where((a) => a.isStarter);
+  var pool = actions.where((a) => _isOffered(a, person, request, libraryVersion)).toList();
+  if (known.isEmpty) {
+    // Starters first; if none fit what the person allows, anything that does is better than an empty card.
+    final starters = pool.where((a) => a.isStarter).toList();
+    if (starters.isNotEmpty) pool = starters;
+  }
 
   final scored = [
     for (final a in pool) _score(a, person, known),
@@ -164,9 +170,20 @@ List<RankedAction> rankOptions({
   return picked;
 }
 
+// Leaving out "Team sports" (frame 1.14, stored as the tag `team_sport`) also removes the team-sport and
+// basketball activities, whether or not each action carries the tag (BR-011: never offered).
+const _exclusionActivities = {
+  'team_sport': ['team_sports', 'basketball'],
+};
+
+bool _isExcluded(ActionInfo a, Set<String> excluded) {
+  if (excluded.contains(a.activity.code) || a.tags.any(excluded.contains)) return true;
+  return excluded.any((e) => (_exclusionActivities[e] ?? const []).contains(a.activity.code));
+}
+
 bool _isOffered(ActionInfo a, PersonContext person, RankingRequest request, String libraryVersion) {
   if (a.libraryVersion != libraryVersion) return false;
-  if (person.excluded.contains(a.activity.code) || a.tags.any(person.excluded.contains)) return false;
+  if (_isExcluded(a, person.excluded)) return false;
 
   final granted = {for (final code in person.access) ?_accessTags[code]};
   if (a.tags.any((t) => t.startsWith('needs_') && !granted.contains(t))) return false;

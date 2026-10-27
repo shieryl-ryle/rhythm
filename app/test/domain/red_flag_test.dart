@@ -33,6 +33,21 @@ void main() {
       'so much hate my body, so much': 'disordered_eating',
       'I would like to díe, I want to die': 'self_harm', // accents are folded
       'I wanted to die!': 'self_harm', // punctuation is ignored
+      // A hyphen or dash next to a phrase does not hide it.
+      'kill myself--please': 'self_harm',
+      'I want to die-': 'self_harm',
+      'suicide-related thoughts': 'self_harm',
+      'self-harming again': 'self_harm',
+      'binge-eating': 'disordered_eating',
+      'a mini-stroke': 'medical_emergency',
+      'heat-stroke': 'medical_emergency',
+      // Plurals and spellings.
+      'seizures': 'medical_emergency',
+      'overdoses': 'self_harm',
+      'heatstroke': 'medical_emergency',
+      'I can not breathe': 'medical_emergency',
+      'I cant breath': 'medical_emergency',
+      'I collapsed while running': 'medical_emergency',
     };
     hits.forEach((text, category) {
       test('"$text" is $category', () {
@@ -55,6 +70,7 @@ void main() {
       'I stopped eating sugar',
       'I passed out on the sofa watching a film',
       'my legs want to dive in the pool',
+      'I collapsed on the sofa after work',
       'I ran 5 kms',
       'too busy this week',
       '',
@@ -82,7 +98,8 @@ void main() {
   test('normalisation: case, accents, apostrophes, punctuation and spaces', () {
     expect(normaliseForMatch("  Don’t   WANT, to — live!  "), 'dont want to live');
     expect(normaliseForMatch('Ça va très bien'), 'ca va tres bien');
-    expect(normaliseForMatch('self-harm'), 'self-harm');
+    expect(normaliseForMatch('self-harm'), 'self harm'); // hyphens become spaces
+    expect(normaliseForMatch('--hello--world--'), 'hello world');
   });
 
   test('every listed phrase flags itself, so none is dead', () async {
