@@ -5,7 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lilt/app/app.dart';
 import 'package:lilt/data/database.dart';
+import 'package:lilt/data/library/library_loader.dart';
 import 'package:lilt/data/providers.dart';
+
+import '../support/test_support.dart';
 
 /// TC-023 (BR-015): no network call carries personal data, and no analytics or advertising package is a
 /// dependency. Any HTTP request during the flow fails the test.
@@ -46,7 +49,10 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [databaseProvider.overrideWithValue(db)],
+        overrides: [
+          databaseProvider.overrideWithValue(db),
+          libraryLoaderProvider.overrideWithValue(DriftLibraryLoader(db, readAssetFile)),
+        ],
         child: const LiltApp(),
       ),
     );

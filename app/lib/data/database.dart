@@ -30,8 +30,9 @@ class LiltDatabase extends _$LiltDatabase {
   LiltDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   /// 1: the walking skeleton (only `consent`). 2: the full schema from docs/data-model.md v0.2.
+  /// 3: `action.similar_to` (TASK-004).
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -52,6 +53,8 @@ class LiltDatabase extends _$LiltDatabase {
               await m.create(entity);
             }
             await _createTriggers();
+          } else if (from < 3) {
+            await m.addColumn(actions, actions.similarTo);
           }
         },
         beforeOpen: (details) async {

@@ -1703,6 +1703,18 @@ class $ActionsTable extends Actions
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _similarToMeta = const VerificationMeta(
+    'similarTo',
+  );
+  @override
+  late final GeneratedColumn<String> similarTo = GeneratedColumn<String>(
+    'similar_to',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
   static const VerificationMeta _libraryVersionMeta = const VerificationMeta(
     'libraryVersion',
   );
@@ -1725,6 +1737,7 @@ class $ActionsTable extends Actions
     energyNeeded,
     tags,
     isStarter,
+    similarTo,
     libraryVersion,
   ];
   @override
@@ -1784,6 +1797,12 @@ class $ActionsTable extends Actions
       context.handle(
         _isStarterMeta,
         isStarter.isAcceptableOrUnknown(data['is_starter']!, _isStarterMeta),
+      );
+    }
+    if (data.containsKey('similar_to')) {
+      context.handle(
+        _similarToMeta,
+        similarTo.isAcceptableOrUnknown(data['similar_to']!, _similarToMeta),
       );
     }
     if (data.containsKey('library_version')) {
@@ -1848,6 +1867,10 @@ class $ActionsTable extends Actions
         DriftSqlType.bool,
         data['${effectivePrefix}is_starter'],
       )!,
+      similarTo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}similar_to'],
+      )!,
       libraryVersion: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}library_version'],
@@ -1878,6 +1901,7 @@ class LibraryAction extends DataClass implements Insertable<LibraryAction> {
   final Energy energyNeeded;
   final String tags;
   final bool isStarter;
+  final String similarTo;
   final String libraryVersion;
   const LibraryAction({
     required this.id,
@@ -1889,6 +1913,7 @@ class LibraryAction extends DataClass implements Insertable<LibraryAction> {
     required this.energyNeeded,
     required this.tags,
     required this.isStarter,
+    required this.similarTo,
     required this.libraryVersion,
   });
   @override
@@ -1915,6 +1940,7 @@ class LibraryAction extends DataClass implements Insertable<LibraryAction> {
     }
     map['tags'] = Variable<String>(tags);
     map['is_starter'] = Variable<bool>(isStarter);
+    map['similar_to'] = Variable<String>(similarTo);
     map['library_version'] = Variable<String>(libraryVersion);
     return map;
   }
@@ -1930,6 +1956,7 @@ class LibraryAction extends DataClass implements Insertable<LibraryAction> {
       energyNeeded: Value(energyNeeded),
       tags: Value(tags),
       isStarter: Value(isStarter),
+      similarTo: Value(similarTo),
       libraryVersion: Value(libraryVersion),
     );
   }
@@ -1955,6 +1982,7 @@ class LibraryAction extends DataClass implements Insertable<LibraryAction> {
       ),
       tags: serializer.fromJson<String>(json['tags']),
       isStarter: serializer.fromJson<bool>(json['isStarter']),
+      similarTo: serializer.fromJson<String>(json['similarTo']),
       libraryVersion: serializer.fromJson<String>(json['libraryVersion']),
     );
   }
@@ -1977,6 +2005,7 @@ class LibraryAction extends DataClass implements Insertable<LibraryAction> {
       ),
       'tags': serializer.toJson<String>(tags),
       'isStarter': serializer.toJson<bool>(isStarter),
+      'similarTo': serializer.toJson<String>(similarTo),
       'libraryVersion': serializer.toJson<String>(libraryVersion),
     };
   }
@@ -1991,6 +2020,7 @@ class LibraryAction extends DataClass implements Insertable<LibraryAction> {
     Energy? energyNeeded,
     String? tags,
     bool? isStarter,
+    String? similarTo,
     String? libraryVersion,
   }) => LibraryAction(
     id: id ?? this.id,
@@ -2002,6 +2032,7 @@ class LibraryAction extends DataClass implements Insertable<LibraryAction> {
     energyNeeded: energyNeeded ?? this.energyNeeded,
     tags: tags ?? this.tags,
     isStarter: isStarter ?? this.isStarter,
+    similarTo: similarTo ?? this.similarTo,
     libraryVersion: libraryVersion ?? this.libraryVersion,
   );
   LibraryAction copyWithCompanion(ActionsCompanion data) {
@@ -2021,6 +2052,7 @@ class LibraryAction extends DataClass implements Insertable<LibraryAction> {
           : this.energyNeeded,
       tags: data.tags.present ? data.tags.value : this.tags,
       isStarter: data.isStarter.present ? data.isStarter.value : this.isStarter,
+      similarTo: data.similarTo.present ? data.similarTo.value : this.similarTo,
       libraryVersion: data.libraryVersion.present
           ? data.libraryVersion.value
           : this.libraryVersion,
@@ -2039,6 +2071,7 @@ class LibraryAction extends DataClass implements Insertable<LibraryAction> {
           ..write('energyNeeded: $energyNeeded, ')
           ..write('tags: $tags, ')
           ..write('isStarter: $isStarter, ')
+          ..write('similarTo: $similarTo, ')
           ..write('libraryVersion: $libraryVersion')
           ..write(')'))
         .toString();
@@ -2055,6 +2088,7 @@ class LibraryAction extends DataClass implements Insertable<LibraryAction> {
     energyNeeded,
     tags,
     isStarter,
+    similarTo,
     libraryVersion,
   );
   @override
@@ -2070,6 +2104,7 @@ class LibraryAction extends DataClass implements Insertable<LibraryAction> {
           other.energyNeeded == this.energyNeeded &&
           other.tags == this.tags &&
           other.isStarter == this.isStarter &&
+          other.similarTo == this.similarTo &&
           other.libraryVersion == this.libraryVersion);
 }
 
@@ -2083,6 +2118,7 @@ class ActionsCompanion extends UpdateCompanion<LibraryAction> {
   final Value<Energy> energyNeeded;
   final Value<String> tags;
   final Value<bool> isStarter;
+  final Value<String> similarTo;
   final Value<String> libraryVersion;
   final Value<int> rowid;
   const ActionsCompanion({
@@ -2095,6 +2131,7 @@ class ActionsCompanion extends UpdateCompanion<LibraryAction> {
     this.energyNeeded = const Value.absent(),
     this.tags = const Value.absent(),
     this.isStarter = const Value.absent(),
+    this.similarTo = const Value.absent(),
     this.libraryVersion = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -2108,6 +2145,7 @@ class ActionsCompanion extends UpdateCompanion<LibraryAction> {
     required Energy energyNeeded,
     this.tags = const Value.absent(),
     this.isStarter = const Value.absent(),
+    this.similarTo = const Value.absent(),
     required String libraryVersion,
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -2128,6 +2166,7 @@ class ActionsCompanion extends UpdateCompanion<LibraryAction> {
     Expression<String>? energyNeeded,
     Expression<String>? tags,
     Expression<bool>? isStarter,
+    Expression<String>? similarTo,
     Expression<String>? libraryVersion,
     Expression<int>? rowid,
   }) {
@@ -2141,6 +2180,7 @@ class ActionsCompanion extends UpdateCompanion<LibraryAction> {
       if (energyNeeded != null) 'energy_needed': energyNeeded,
       if (tags != null) 'tags': tags,
       if (isStarter != null) 'is_starter': isStarter,
+      if (similarTo != null) 'similar_to': similarTo,
       if (libraryVersion != null) 'library_version': libraryVersion,
       if (rowid != null) 'rowid': rowid,
     });
@@ -2156,6 +2196,7 @@ class ActionsCompanion extends UpdateCompanion<LibraryAction> {
     Value<Energy>? energyNeeded,
     Value<String>? tags,
     Value<bool>? isStarter,
+    Value<String>? similarTo,
     Value<String>? libraryVersion,
     Value<int>? rowid,
   }) {
@@ -2169,6 +2210,7 @@ class ActionsCompanion extends UpdateCompanion<LibraryAction> {
       energyNeeded: energyNeeded ?? this.energyNeeded,
       tags: tags ?? this.tags,
       isStarter: isStarter ?? this.isStarter,
+      similarTo: similarTo ?? this.similarTo,
       libraryVersion: libraryVersion ?? this.libraryVersion,
       rowid: rowid ?? this.rowid,
     );
@@ -2210,6 +2252,9 @@ class ActionsCompanion extends UpdateCompanion<LibraryAction> {
     if (isStarter.present) {
       map['is_starter'] = Variable<bool>(isStarter.value);
     }
+    if (similarTo.present) {
+      map['similar_to'] = Variable<String>(similarTo.value);
+    }
     if (libraryVersion.present) {
       map['library_version'] = Variable<String>(libraryVersion.value);
     }
@@ -2231,6 +2276,7 @@ class ActionsCompanion extends UpdateCompanion<LibraryAction> {
           ..write('energyNeeded: $energyNeeded, ')
           ..write('tags: $tags, ')
           ..write('isStarter: $isStarter, ')
+          ..write('similarTo: $similarTo, ')
           ..write('libraryVersion: $libraryVersion, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -7952,6 +7998,7 @@ typedef $$ActionsTableCreateCompanionBuilder =
       required Energy energyNeeded,
       Value<String> tags,
       Value<bool> isStarter,
+      Value<String> similarTo,
       required String libraryVersion,
       Value<int> rowid,
     });
@@ -7966,6 +8013,7 @@ typedef $$ActionsTableUpdateCompanionBuilder =
       Value<Energy> energyNeeded,
       Value<String> tags,
       Value<bool> isStarter,
+      Value<String> similarTo,
       Value<String> libraryVersion,
       Value<int> rowid,
     });
@@ -8083,6 +8131,11 @@ class $$ActionsTableFilterComposer
 
   ColumnFilters<bool> get isStarter => $composableBuilder(
     column: $table.isStarter,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get similarTo => $composableBuilder(
+    column: $table.similarTo,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -8221,6 +8274,11 @@ class $$ActionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get similarTo => $composableBuilder(
+    column: $table.similarTo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get libraryVersion => $composableBuilder(
     column: $table.libraryVersion,
     builder: (column) => ColumnOrderings(column),
@@ -8269,6 +8327,9 @@ class $$ActionsTableAnnotationComposer
 
   GeneratedColumn<bool> get isStarter =>
       $composableBuilder(column: $table.isStarter, builder: (column) => column);
+
+  GeneratedColumn<String> get similarTo =>
+      $composableBuilder(column: $table.similarTo, builder: (column) => column);
 
   GeneratedColumn<String> get libraryVersion => $composableBuilder(
     column: $table.libraryVersion,
@@ -8392,6 +8453,7 @@ class $$ActionsTableTableManager
                 Value<Energy> energyNeeded = const Value.absent(),
                 Value<String> tags = const Value.absent(),
                 Value<bool> isStarter = const Value.absent(),
+                Value<String> similarTo = const Value.absent(),
                 Value<String> libraryVersion = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ActionsCompanion(
@@ -8404,6 +8466,7 @@ class $$ActionsTableTableManager
                 energyNeeded: energyNeeded,
                 tags: tags,
                 isStarter: isStarter,
+                similarTo: similarTo,
                 libraryVersion: libraryVersion,
                 rowid: rowid,
               ),
@@ -8418,6 +8481,7 @@ class $$ActionsTableTableManager
                 required Energy energyNeeded,
                 Value<String> tags = const Value.absent(),
                 Value<bool> isStarter = const Value.absent(),
+                Value<String> similarTo = const Value.absent(),
                 required String libraryVersion,
                 Value<int> rowid = const Value.absent(),
               }) => ActionsCompanion.insert(
@@ -8430,6 +8494,7 @@ class $$ActionsTableTableManager
                 energyNeeded: energyNeeded,
                 tags: tags,
                 isStarter: isStarter,
+                similarTo: similarTo,
                 libraryVersion: libraryVersion,
                 rowid: rowid,
               ),

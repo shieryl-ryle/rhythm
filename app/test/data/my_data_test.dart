@@ -5,9 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lilt/app/app.dart';
 import 'package:lilt/data/database.dart';
+import 'package:lilt/data/library/library_loader.dart';
 import 'package:lilt/data/my_data.dart';
 import 'package:lilt/data/providers.dart';
 
+import '../support/test_support.dart';
 import 'seed_helper.dart';
 
 /// TC-007 (F-007), TC-022 (BR-014) and TC-025 (BR-017): consent before data, export contains every
@@ -108,6 +110,7 @@ void main() {
       ProviderScope(
         overrides: [
           databaseProvider.overrideWithValue(db),
+          libraryLoaderProvider.overrideWithValue(DriftLibraryLoader(db, readAssetFile)),
           deleteAllHooksProvider.overrideWithValue([() async => calls.add('cancel notifications')]),
         ],
         child: const LiltApp(),
@@ -117,11 +120,14 @@ void main() {
 
     // TC-022: with the consent screen showing, no table has a row yet.
     expect((await userRowCounts(db)).values.every((n) => n == 0), isTrue);
+    // BR-014: the library is not loaded before consent either.
+    expect(await db.select(db.actions).get(), isEmpty);
 
     await tester.tap(find.text('I agree, continue'));
     await tester.pumpAndSettle();
     expect(find.text('Here’s what fits today'), findsOneWidget);
     expect((await userRowCounts(db))['consent'], 1);
+    expect(await db.select(db.actions).get(), isNotEmpty);
 
     final container = ProviderScope.containerOf(tester.element(find.byType(LiltApp)));
     await container.read(deleteEverythingProvider)();
@@ -130,5 +136,7 @@ void main() {
     expect(calls, ['cancel notifications']);
     expect(find.text('Welcome to Lilt'), findsOneWidget);
     expect((await userRowCounts(db)).values.every((n) => n == 0), isTrue);
+    // The library is not personal data: delete-all keeps it.
+    expect(await db.select(db.actions).get(), isNotEmpty);
   });
 }

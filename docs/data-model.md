@@ -147,8 +147,9 @@ Curated library (DS-001). Read-only for users.
 | `duration_min` | int | no | — | |
 | `intensity` | intensity | no | — | |
 | `energy_needed` | energy | no | — | |
-| `tags` | text | no | `""` | Comma-separated tag codes (`with_company`, `indoors`, `outdoors`, `free`, `team_sport`, `high_impact`, `after_dark`) |
+| `tags` | text | no | `""` | Comma-separated tag codes: `solo` or `with_company`; `indoors` or `outdoors`; `free` or `paid`; `team_sport`, `high_impact`, `after_dark`; access `needs_gym`, `needs_pool`, `needs_courts_or_park`, `needs_home_equipment` |
 | `is_starter` | bool | no | false | Offered when there is no history (EV-005) |
+| `similar_to` | text | no | `""` | Comma-separated ids of similar actions (ADR-005: suggest what is like something the person likes). Added in schema version 3 |
 | `library_version` | text | no | — | |
 
 ### `option_offer`
@@ -304,7 +305,7 @@ F-008. Serves BR-012, BR-013.
 | Single device, no backup | Data is lost with the device | Export (BR-017); a backup or sync is a later decision |
 | Library authoring and safety review | P0 needs content | PRD Q1; TASK-004; [seed](../seed/README.md) |
 | Encryption at rest | SQLite file is not encrypted beyond OS sandboxing | Assess before real-user study (ADR if adopted) |
-| Skeleton table `consent` already exists | The skeleton (TASK-001) only has `consent` | TASK-002 adds the other tables with migrations (schemaVersion 2) |
+| Skeleton table `consent` already exists | The skeleton (TASK-001) only has `consent` | Done: schemaVersion 2 adds the other tables (TASK-002); version 3 adds `action.similar_to` (TASK-004) |
 
 ## 7. Frame option → stored value
 The on-screen label is the source of truth for wording; the stored value is a stable code.
@@ -391,7 +392,10 @@ The on-screen label is the source of truth for wording; the stored value is a st
 
 ### Rules for the code that uses the schema (owed by later tasks)
 - **Totals never decrease (BR-007, BR-023, EQ-011):** a total is computed from `reflection` and `return_event`, which the schema can change. So no repository may lower a `completed` or `partly` reflection or delete one except through delete-all, and `achievement_earned` is written with insert-or-ignore so `earned_day` never changes (its only update is `celebrated` false to true). TASK-005 owns this and tests it.
-- **Library reload (TASK-004):** the loader must upsert and never delete rows that `option_offer`, `plan_item` or `saved_action` use (reloading must not erase a person's Saved list or fail on history). It runs after consent. TC-022 counts user tables only; `action` is the library.
+- **Library reload (TASK-004):** the loader must upsert and never delete rows that `option_offer`, `plan_item` or `saved_action` use (reloading must not erase a person's Saved list or fail on history). It runs after consent, through `libraryReadyProvider`, which has its own error state: a failed load never changes whether someone has agreed. Anything that needs actions (ranking, Today) waits on that provider. TC-022 counts user tables only; `action` is the library, and delete-all keeps it because it is not personal data.
+  - **Retired actions:** the loader never deletes, so an action removed from the library stays in `action`. The ranker and any suggestion code must offer only rows whose `library_version` is the current one (the version in `actions.json`), so a retired action is never suggested again, while history that points at it stays readable. (No `retired` column; revisit if the ranker needs it.)
+  - **Versions:** the loader skips a load when that `library_version` is already loaded with at least as many rows, so every content change, including a one-word edit, must bump `library_version`.
+  - **Tags:** `needs_home_equipment` means kit the person owns (bike, racket, ball, mat). `after_dark` is only on outdoor actions (an indoor evening class is not "outdoors after dark"). Setup (frame 1.14) has no climbing-gym access answer, so bouldering is not tagged for access; revisit if the owner adds one.
 - **Rows created after consent (TASK-005):** `profile` and `notification_setting` are inserted when setup starts, not before consent. A `reflection` row (status `unknown`) is created with each plan item by the plan repository.
 - **Resuming a pause:** the repository sets `end_day` to the resume day.
 - **Delete-all hooks:** the notification cancellation (F-008) and the Together account deletion (F-018, BR-017) must be registered through `deleteAllHooksProvider`. Each must be idempotent. A test must fail if either is missing once those features exist.
