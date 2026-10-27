@@ -1,0 +1,15 @@
+{
+  "library_version": "fixture.1",
+  "actions": [
+    { "id": "walk_10", "activity": "walking", "title": "A ten-minute easy walk", "duration_min": 10, "energy_needed": "low", "tags": ["solo", "outdoors", "free"], "is_starter": true, "similar_to": ["walk_friend"] },
+    { "id": "walk_friend", "activity": "walking", "title": "Walk and talk with a friend", "duration_min": 20, "energy_needed": "low", "tags": ["with_company", "outdoors", "free"], "is_starter": false, "similar_to": ["walk_10", "swim_easy"] },
+    { "id": "run_walk", "activity": "running", "title": "Run-walk in your neighbourhood", "duration_min": 20, "energy_needed": "medium", "tags": ["solo", "outdoors", "free", "high_impact"], "is_starter": false, "similar_to": ["walk_10"] },
+    { "id": "gym_machine", "activity": "gym", "title": "Fifteen minutes on one machine", "duration_min": 15, "energy_needed": "low", "tags": ["solo", "indoors", "paid", "needs_gym"], "is_starter": true, "similar_to": ["run_walk"] },
+    { "id": "swim_easy", "activity": "swimming", "title": "An easy 20-minute swim", "duration_min": 20, "energy_needed": "medium", "tags": ["solo", "indoors", "paid", "needs_pool"], "is_starter": false, "similar_to": ["walk_friend"] },
+    { "id": "yoga_stretch", "activity": "yoga", "title": "Ten minutes of gentle stretching", "duration_min": 10, "energy_needed": "low", "tags": ["solo", "indoors", "free"], "is_starter": true, "similar_to": ["walk_10"] },
+    { "id": "dance_class", "activity": "dance", "title": "A beginner dance class", "duration_min": 50, "energy_needed": "medium", "tags": ["with_company", "indoors", "paid"], "is_starter": false, "similar_to": ["yoga_stretch"] },
+    { "id": "basket_game", "activity": "basketball", "title": "A casual basketball game", "duration_min": 40, "energy_needed": "high", "tags": ["with_company", "outdoors", "free", "team_sport", "high_impact", "needs_courts_or_park"], "is_starter": false, "similar_to": ["run_walk"] },
+    { "id": "walk_dusk", "activity": "walking", "title": "A walk after dinner", "duration_min": 25, "energy_needed": "low", "tags": ["solo", "outdoors", "free", "after_dark"], "is_starter": false, "similar_to": ["walk_10"] },
+    { "id": "old_retired", "activity": "walking", "title": "A retired walk", "duration_min": 10, "energy_needed": "low", "tags": ["solo", "outdoors", "free"], "is_starter": true, "similar_to": [], "library_version": "fixture.0" }
+  ]
+}
