@@ -38,7 +38,8 @@ RSVPs; BR-025); health data is never part of it.
 profile (1 row)
 profile 1──* followed_activity
 profile 1──* preference
-action 1──* option_offer 1──0..1 plan_item 1──1 reflection
+action 1──* option_offer 1──* offer_reason
+option_offer 1──0..1 plan_item 1──1 reflection
 plan_item *──0..1 action            (custom one-offs and Together RSVPs have no action)
 profile 1──* pause
 profile 1──* observation
@@ -53,7 +54,7 @@ There is a single `profile` row per device. Signing in to Together adds no healt
 ## 3. Enums
 | Enum | Values | Used by |
 |---|---|---|
-| `activity_kind` | walking, running, gym, cycling, swimming, basketball, racket_sports, pickleball, yoga, dance, hiking, bouldering, pilates, other | action.activity, followed_activity.activity, plan_item.activity, preference.value (kind `excluded`, activity form) |
+| `activity_kind` | walking, running, gym, cycling, swimming, basketball, racket_sports, team_sports, pickleball, yoga, dance, hiking, bouldering, pilates, other, not_sure | action.activity, followed_activity.activity, plan_item.activity, preference.value (kind `excluded`, activity form) |
 | `path` | keep_going, pick_up_again, add_new, start_fresh | followed_activity.path |
 | `progress` | going_well, up_and_down, getting_harder | followed_activity.progress |
 | `hard_because` | finding_time, energy, getting_bored, cost, motivation | followed_activity.hard_because (comma set) |
@@ -72,7 +73,7 @@ There is a single `profile` row per device. Signing in to Together adds no healt
 | `pause_kind` | pause, lighter, reschedule | pause.kind |
 | `obs_source` | rule, ai_draft, user | observation.source (`ai_draft` dormant, ADR-006) |
 | `obs_status` | proposed, confirmed, deleted | observation.status |
-| `return_approach` | previous, different, starter | return_event.approach |
+| `return_approach` | previous, different, starter | return_event.approach. `different` = the person chose "Try something different" (4.2); `starter` = there was no previous approach, so starters are offered directly (9.4, EV-005) |
 
 The `effort` enum (easy, ok, hard) is **retired**: the reflection frames ask only how it went, enjoyment and the
 barrier. The old `stage` and `category` enums are removed (ADR-005: physical activity only; the stages became the
@@ -86,8 +87,8 @@ The device's settings row (F-001, F-007). Serves BR-011, BR-014, BR-016.
 | Column | Type | Null | Default | Notes |
 |---|---|---|---|---|
 | `id` | text | no | `"me"` | PK; single row |
-| `daily_goal` | int | no | 1 | Actions per day that count as "goal met" (EQ-002). Fixed at 1 in P0; no screen sets it [assumption] |
-| `ai_opt_in` | bool | no | false | BR-016. Dormant in P0 (ADR-006): no screen sets it, so it stays false |
+| `daily_goal` | int | no | 1 | Actions per day that count as "goal met" (EQ-002). A constant 1 in P0: no screen sets it, but EQ-002 reads it [assumption] |
+| _(no `ai_opt_in`)_ | | | | Removed with the AI fields (ADR-006). Add it back with the AI adapter and a screen that sets it (BR-016) |
 | `setup_done_at` | datetime | yes | null | Set when the person finishes the setup wizard ("Show me today") |
 | `created_at` | datetime | no | now | |
 
@@ -111,7 +112,7 @@ its own card on Today.
 | `custom_name` | text 🔒 | yes | null | The typed name when `activity` = `other` ("Can't find it? Type it", red-flag checked, EQ-008) |
 | `path` | path | no | — | Shown on 7.2 as "Keeping it going", "Picking up again", "New to try" |
 | `progress` | progress | yes | null | `keep_going` only (frame 1.7) |
-| `hard_because` | text | yes | null | Comma set of `hard_because`; only when `progress` = `getting_harder` (optional) |
+| `hard_because` | text | yes | null | Comma set of `hard_because`; asked when `progress` is `up_and_down` or `getting_harder` (frame 1.7; optional) |
 | `stopped_ago` | stopped_ago | yes | null | `pick_up_again` only (1.9) |
 | `got_in_the_way` | text | yes | null | Comma set of `what_changed` (1.10, optional) |
 | `would_help` | text | yes | null | Comma set of `what_would_help` (1.11, optional) |
@@ -159,18 +160,33 @@ One option shown on a day (F-002). Serves BR-004, BR-005.
 | `day` | text | no | — | Local `YYYY-MM-DD` |
 | `action_id` | text | no | — | FK → action |
 | `followed_activity_id` | text | yes | null | FK → followed_activity; null for "Try something new" suggestions |
-| `suggested_time` | text | yes | null | Local `HH:mm`, from the person's free times |
-| `reason_code` | text | no | — | EQ-004 code |
-| `reason_text` | text | no | — | Shown to the user (BR-004). Library text in P0 |
-| `status` | offer_status | no | offered | |
+| `suggested_day` | text | no | — | Local `YYYY-MM-DD` the suggestion is for. Today's card can say "Suggested Sat 10:00", so this can differ from `day` |
+| `suggested_time` | text | yes | null | Local `HH:mm`, from the person's free times (see the clock times in §7) |
+| `swap_index` | int | no | 1 | 1 to 3: the position in the day's "Something else" chain ("1 of 3"), so a restart cannot reshuffle the three candidates |
+| `status` | offer_status | no | offered | Set by the tap: "I'll try this" → `accepted`; Edit then "Save changes" → `edited`; "Something else" → the shown offer becomes `replaced`; "Not today" → `declined`; untouched stays `offered` |
 | `edited_duration_min` | int | yes | null | Set when edited (frame 3.2; options 10, 20, 30 or 45) |
+| `edited_day` | text | yes | null | Set when the "When" choice in frame 3.2 changes the day |
+| `edited_time` | text | yes | null | Set when the "When" choice in frame 3.2 changes the time |
 | `time_input_min` | int | yes | null | The Today time chip when the offer was made (10, 20, 30 or 45) |
 | `energy_input` | energy | yes | null | The Today energy chip when the offer was made |
 | `created_at` | datetime | no | now | |
 
-**Constraints / indexes:** index (`day`); FK `action_id` restrict.
-The two Today chips default to 20 min and Medium energy and reset each day (PRD F-002). `ai_worded` and
+**Constraints / indexes:** index (`day`); FK `action_id` restrict; unique (`day`, `followed_activity_id`, `swap_index`).
+The reasons live in `offer_reason`. The two Today chips default to 20 min and Medium energy and reset each day (PRD F-002). `ai_worded` and
 `display_text` were removed: there is no AI text in P0 (ADR-006). Add them back with the AI adapter.
+
+### `offer_reason`
+The reasons shown for one offer: the card shows rank 1, and "Why this suggestion?" (frame 3.1) lists all of them.
+Every reason must come from a rule in EQ-004 (BR-004).
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `offer_id` | text | no | — | FK → option_offer, cascade delete |
+| `rank` | int | no | — | 1 is the strongest term in EQ-003 |
+| `reason_code` | text | no | — | EQ-004 code |
+| `reason_text` | text | no | — | Shown to the user. Library text in P0 |
+
+**Constraints / indexes:** PK (`offer_id`, `rank`).
 
 ### `plan_item`
 Something on Today's plan (frames 2.5 to 2.7, 3.7, 11.6): an accepted suggestion, a one-off the person planned, or
@@ -203,7 +219,7 @@ Quick Reflection (F-003). Serves BR-008, BR-009.
 | `id` | text | no | `ref_…` | PK |
 | `plan_item_id` | text | no | — | FK → plan_item, cascade delete; unique |
 | `status` | reflection_status | no | unknown | Created as `unknown` when the plan item is created. The grid counts `completed` and `partly` only (EQ-002) |
-| `enjoyment` | int | yes | null | 1 Not for me, 2 Okay, 3 Enjoyed it 🔒 (frame 3.11b; EQ-009 treats 2 or more as positive) |
+| `enjoyment` | int | yes | null | 1 Not for me, 2 Okay, 3 Enjoyed it 🔒 (frame 3.11b). Null when not answered: neutral, never positive (EQ-003, EQ-009) |
 | `barrier` | barrier | yes | null | Only asked after `partly` or `skipped` (BR-008) 🔒 |
 | `updated_at` | datetime | no | now | |
 
@@ -264,10 +280,12 @@ F-008. Serves BR-012, BR-013.
 |---|---|---|---|---|
 | `id` | text | no | `"me"` | PK; single row |
 | `enabled` | bool | no | false | BR-012 |
-| `times` | text | no | `""` | Comma list of `HH:mm`; capped by EQ-005 |
+| `mode` | text | no | `before_free_time` | `before_free_time` (the Settings row's "Before my free time") or `fixed` (frame 7.3's "When": Morning 8:00 or a picked time). One reminder a day at most (EQ-005) |
+| `fixed_time` | text | yes | null | Local `HH:mm` when `mode` = `fixed` |
+| `lead_min` | int | no | 30 | Minutes before the start of the next free slot when `mode` = `before_free_time` [assumption] |
 | `quiet_start` | text | no | `"21:00"` | Matches frame 7.3 [assumption] |
 | `quiet_end` | text | no | `"07:00"` | Matches frame 7.3 [assumption] |
-| `lapse_checkin_enabled` | bool | no | true | Weekly check-in after a lapse; user can turn it off |
+| `lapse_checkin_enabled` | bool | no | true | Weekly check-in after a lapse. No P0 screen changes it; the default stays true |
 
 ## 5. Deliberately not modeled
 - **Users and accounts:** none on the device. Together (F-018) keeps its own server-side data (profile, events,
@@ -298,7 +316,11 @@ The on-screen label is the source of truth for wording; the stored value is a st
 | | | Pick up something I stopped | `pick_up_again` |
 | | | Add something new to what I do | `add_new` |
 | | | Start being active for the first time | `start_fresh` (can't be combined with the others) |
-| 1.5, 1.8, 1.6, 9.12, 9.13 | What do you do now? / what to pick up | Walking, Running, Gym, Cycling, Swimming, Basketball, Racket sports, Yoga, Dance, Other | `followed_activity.activity` = the matching `activity_kind` (Other opens search; a typed name goes to `custom_name`) |
+| 1.5 | What do you do now? (pick one) | Walking, Running, Gym, Cycling, Swimming, Basketball, Racket sports, Yoga, Other | `followed_activity.activity` = the matching `activity_kind` (Other opens search 1.6; a typed name goes to `custom_name`) |
+| 1.8 | What would you like to pick up again? (pick one) | Running, Gym, Swimming, Cycling, Basketball, Yoga, Dance, Other | same |
+| 9.12 | Add something new, first question | Walking, Running, Gym, Cycling, Swimming, Yoga, Other | same (the activity the person already does; what to add is chosen later in Discover or Add) |
+| 9.13 | Start fresh, first question | Dancing, Team sports, Racket sports, Not sure yet | `dance`, `team_sports`, `racket_sports`, `not_sure` (no specific activity; starters are offered, EV-005) |
+| 1.6, 9.1 | Search the library; "Not listed? Add it yourself" | A library match, or a typed name | The matching `activity_kind`; a typed name is `other` with `custom_name` (red-flag checked, EQ-008). What an `other` activity is offered: library starters |
 | 1.7 | How's the gym going? | Going well / Up and down / Getting harder | `progress` = `going_well` / `up_and_down` / `getting_harder` |
 | 1.7 | What's making it harder? (optional) | Finding time / Energy / Getting bored / Cost / Motivation | `hard_because` = `finding_time` / `energy` / `getting_bored` / `cost` / `motivation` |
 | 1.9 | When did you stop, roughly? | A few weeks ago / A few months ago / A year or more | `stopped_ago` = `weeks` / `months` / `year_plus` |
@@ -315,12 +337,19 @@ The on-screen label is the source of truth for wording; the stored value is a st
 |---|---|---|---|
 | 2.3 | Time chip | 10 / 20 / 30 / 45 min (default 20) | `option_offer.time_input_min` |
 | 2.3 | Energy chip | Low / Medium / High energy (default Medium) | `option_offer.energy_input` = `low` / `medium` / `high` |
-| 3.2 | How long | 10 / 30 / 45 min | `option_offer.edited_duration_min` |
+| 3.2 | How long | 10 / 20 / 30 / 45 min | `option_offer.edited_duration_min` |
+| 3.2 | When | Today 12:30 / Today after work / Tomorrow 12:30 / Pick a time › | `option_offer.edited_day`, `edited_time` |
+| 3.7 | What | Running / Gym / Pickleball / Other | `plan_item.activity` (`other` plus a typed `title`) |
 | 3.7 | With | Just me / With friends | `plan_item.with_whom` = `solo` / `friends` |
+| 3.7 | When | Tomorrow / a named day / Pick a date › | `plan_item.planned_day` |
+| 3.7 | Time | 9:00 / 10:00 / Pick a time › | `plan_item.planned_time` |
 | 3.7 | How long | 30 / 60 / 90 min | `plan_item.duration_min` |
 | 3.9 | Where are you with it? | I already play / I used to play / New to me, I want to try it | `followed_activity.familiarity` = `already_play` / `used_to_play` / `new_to_me` |
 | 3.3 | Pause for a while | 3 days / 1 week / 2 weeks | `pause.end_day` = start + 3 / 7 / 14 days (kind `pause`) |
-| 3.3 | Something lighter / Move it to later | — | `pause.kind` = `lighter` / `reschedule` (when a period applies) |
+| 3.3 | Something lighter | — | No row. A one-off swap to a lighter option for today (UJ-004, EQ-003 lighter mode); the shown offer becomes `replaced` |
+| 3.3, 3.4 | Move it to later | — | No row. Updates the plan time (`edited_day`, `edited_time` or `plan_item.planned_time`). In P0 only "Pause for a while" writes a `pause` row (kind `pause`); `lighter` and `reschedule` stay readable values for later |
+| 3.3 | Not today | — | The shown offer becomes `declined` |
+| 3.3 | Something else | — | The shown offer becomes `replaced`; the next candidate has `swap_index` + 1 |
 | 2.5, 2.5b | I'm starting / Not started yet | — | `plan_item.started_at` set / cleared |
 | 3.11 | How did it go? | Done / Partly / Didn't get to it | `reflection.status` = `completed` / `partly` / `skipped` |
 | 3.11 | What got in the way? (after Partly or Didn't get to it) | Time / Low energy / Didn't fit my schedule / Weather / Other / Prefer not to say | `reflection.barrier` = `time` / `low_energy` / `schedule` / `weather` / `other` / `prefer_not_to_say` |
@@ -336,5 +365,17 @@ The on-screen label is the source of truth for wording; the stored value is a st
 | Frame | Control | Stored as |
 |---|---|---|
 | 7.2 | Followed activities and their labels | `followed_activity` (`path` gives "Keeping it going", "Picking up again", "New to try") |
-| 7.3 | Daily reminder time, quiet hours | `notification_setting.times`, `quiet_start`, `quiet_end` |
+| 7.3, 7.1 | Daily reminder: "Before my free time" (the Settings row) or a fixed time (Morning 8:00 or a picked time); quiet hours | `notification_setting.mode`, `fixed_time`, `quiet_start`, `quiet_end` |
 | 7.4, 7.5 | Export my data | A JSON file with every user table; delete-all leaves zero user rows (BR-017) |
+
+### Rules a builder needs (decided 2026-10-27, owner can change)
+- **Discover follow (3.9) sets the path:** `already_play` → `keep_going`, `used_to_play` → `pick_up_again`, `new_to_me` → `add_new`.
+- **Clock times behind the free-time slots** (for `suggested_time`): `early_morning` 07:00, `lunch` 12:30, `after_work` 18:30, `weekends` Saturday 10:00 [assumption, from frames 2.3 and 3.4].
+- **"Prefer not to say" is exclusive** on every multi-choice question: picking it clears the others, and picking another clears it. "Nothing to leave out" (1.14) and "None of these" (1.12 access) are exclusive in the same way.
+- **Required or skippable:** 1.3 to 1.9 and 1.12 to 1.14 need an answer (Next stays disabled until one is picked); 1.10 and 1.11 have Skip, 1.7's "What's making it harder?" is optional.
+- **Changing a reflection from Partly or Didn't get to it to Done clears `barrier`** (it is asked only after those two answers, BR-008).
+- **Order:** followed activities and their Today cards are in `followed_at` order. The ⋮ on a Today card opens Edit (3.2). The ⋮ on 7.2 has no frame; the builder offers Unfollow.
+- **Saved (Discover):** the cards are library actions, so Saved is `saved_action`. A Together club card is not saved locally; it links to Together.
+- **Comma-set columns** (`hard_because`, `got_in_the_way`, `would_help`, `what_changed`) are acceptable in P0. The export documents them as comma-separated codes.
+- **Stored but not used by any rule in P0:** `usual_barrier`, `motivation` and `access` (except where EQ-003 and EQ-004 name them), `got_in_the_way`, `stopped_ago`, `progress`. They are kept for the person's own summary and for later; no reason text may cite them (BR-004).
+- **Motivations have no edit screen of their own in P0;** the person changes them by re-running setup from Settings (S-008 "edit starting point").
