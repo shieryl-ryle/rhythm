@@ -1,0 +1,10 @@
+{
+  "new_person_no_access": ["walk_10", "yoga_stretch"],
+  "new_person_with_gym": ["walk_10", "gym_machine", "yoga_stretch"],
+  "history": ["run_walk", "walk_friend", "dance_class"],
+  "history_time_15": ["yoga_stretch", "walk_10"],
+  "history_lighter": ["yoga_stretch", "walk_10"],
+  "history_help_shorter": ["run_walk", "walk_friend", "yoga_stretch"],
+  "history_saved_dance": ["run_walk", "dance_class", "walk_friend"],
+  "history_observation_confirmed": ["run_walk", "dance_class", "walk_friend"]
+}
