@@ -19,7 +19,7 @@ Statuses: `ready` · `in-progress` · `in-review` · `done` · `cut`
 
 | ID | Title | Traces to | Owner | Status | Write scope | Evidence (PR / result) |
 |---|---|---|---|---|---|---|
-| TASK-001 | **Deployed walking skeleton:** Flutter app (Riverpod, go_router, drift incl. web wasm assets), consent screen S-001 → Today S-004 showing 3 hard-coded library actions; `flutter analyze` + 1 widget test green; web build live on Firebase Hosting; release APK builds | ADR-002, F-007 (partial), F-002 (stub), TC-040 | unassigned | ready | `app/` (scaffold only), `firebase.json`, `.firebaserc`, `.gitignore` | |
+| TASK-001 | **Deployed walking skeleton:** Flutter app (Riverpod, go_router, drift incl. web wasm assets), consent screen S-001 → Today S-004 showing 3 hard-coded library actions; `flutter analyze` + 1 widget test green; web build live on Firebase Hosting; release APK builds | ADR-002, F-007 (partial), F-002 (stub), TC-040 | Shieryl | ready | `app/` (scaffold only), `firebase.json`, `.firebaserc`, `.gitignore` | |
 | TASK-002 | Data layer: drift schema per Data Model, migrations, consent gate, export JSON, delete-all | F-007, BR-014, BR-015, BR-017; TC-007, TC-022, TC-023, TC-025 | unassigned | ready (after TASK-001) | `app/lib/data/`, `app/test/data/`, `app/test/privacy/` | |
 | TASK-003 | Domain logic in pure Dart: lapse, grid levels, ranking + reasons, notification caps, red-flag check, observation proposals, metrics/totals | EQ-001..EQ-005, EQ-008..EQ-011; BR-003, BR-007, BR-009..BR-011; TC-017..TC-019, TC-029..TC-033, TC-036..TC-039 | unassigned | ready (after TASK-001) | `app/lib/domain/`, `app/test/domain/`, `app/test/fixtures/` | |
 | TASK-004 | Activity library v1: physical activity only (ADR-005), ~40 activities with attributes (social/solo, indoor/outdoor, cost, access/membership, duration, intensity, similar-to links), starters + red-flag list + blocked-claims list; content scan tests | ADR-005; DS-001..DS-003; BR-001, BR-002, BR-007; TC-009, TC-015 · blocked by PRD Q1 (sources), Q7 (categories) | Shieryl | ready | `app/assets/library/`, `app/test/content/` | |
@@ -40,3 +40,28 @@ Statuses: `ready` · `in-progress` · `in-review` · `done` · `cut`
 **Next up (not yet ledgered):** What works section of My rhythm S-006/S-105 + Discover S-009 (F-004), gentle notifications
 S-106 (F-008), Settings & My Data S-008, demo seed loader (`seed/README.md`), user sessions
 (BRD §11), technical documentation for the submission, deck + backup video.
+
+## 2. Checkpoints
+
+### 2026-11-06 — store-logistics spike (go / partial / skip)
+Decided 2026-10-27 on the project manager's advice ([memo](reviews/pm-logistics-spike-2026-10-27.md)). The
+store-release track is capped at 8 owner-days and mostly runs after the submission ([ADR-017](adr/ADR-017-release-model-two-revenue-hypotheses.md)).
+"Merged" means on `main` with CI green. The walkable-loop test: on a physical Android phone, a person who is not
+the builder completes consent, My Starting Point, Today, picks a step, reflects, and sees what changed (F-001 to
+F-003), from the web or APK build, in about 3 minutes, and can reach My rhythm and the grid.
+
+| Outcome | Must all be true on 2026-11-06 | Action |
+|---|---|---|
+| **GO** (at most 1 owner-day, 11-09 to 11-13) | TASK-001 live (web build, release APK installs, `flutter analyze` and the widget test green); TASK-002, 003 and 005 merged and the loop walkable; no P0 critical-path task blocked; the cut-list decision for Together is already written down (PRD §12, the "New ideas keep expanding scope" row) | Account and app ID, Play Console app record, signed build to Closed testing, tester list, recruit about 20 testers |
+| **GO PARTIALLY** (at most 0.25 day) | TASK-001 live and TASK-002 and 003 merged, but TASK-005 not walkable | Lock the app ID, create the app record, upload to Internal testing for the owner and the backup holder. No recruiting until the loop is walkable, and no later than 2026-11-16; after that, apply SKIP |
+| **SKIP** | TASK-001 not live, or TASK-002 or 003 not merged, or TASK-005 not started | Apply the PRD §12 cut list; no logistics work; the Play clock starts after 2026-11-21 |
+
+Early warning: if TASK-001 is not live by 2026-11-02, say so that day. Record the outcome here as one line with
+the date.
+
+**Outcome:** _(to be recorded on 2026-11-06)_
+
+### Ungated lead-time items (start now)
+Account type and holder decided by 2026-10-30 (holder: Shieryl; backup: Dzelle, with least-privilege roles); read
+Google's health-app article before creating the account; knockout name search for "Lilt" by 2026-11-04; create the
+Google Play account (not the app record) between 2026-10-28 and 2026-11-02. Apple enrolment not before 2026-11-21.

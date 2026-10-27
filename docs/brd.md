@@ -88,15 +88,38 @@ easy. The next phase adds Strava-style social recognition in a cooperative form.
 | Privacy regulators, platform stores | Could block | Lawful data handling, store policies | Medium |
 
 ## 5. Business model hypothesis
-All three payer options stay open as **hypotheses** to test (§11). No option is validated yet.
+In the challenge, Lilt is free to users and nothing is billed. Two revenue paths are under test, and
+**neither is validated** (§11): (1) **payer-funded pilots**, where an employer, insurer or health fund, or
+public health body funds access for its members, which is what the conversations before the finals test; and
+(2) an **optional user subscription** in the later Apple and Google Play release. What a subscription would
+include and cost is not decided, and nothing is built or priced for it in the challenge. The core comeback loop
+(suggest, reflect, come back, pause, export, delete) is not a paywall candidate. We will report what we learn,
+including a "no" ([ADR-017](adr/ADR-017-release-model-two-revenue-hypotheses.md)).
+
+All three payer options stay open as **hypotheses** to test.
 
 | Question | Answer | Validated? |
 |---|---|---|
 | Who pays? | Option A: **employers** (workplace wellbeing programs). Option B: **insurers / health funds** (a prevention benefit for members). Option C: **public health bodies** (population prevention programs). | Hypothesis (all three) |
-| For what? | Sustained engagement in healthy behaviours across their population, with privacy-preserving aggregate outcomes (no individual data shared without consent) | Hypothesis |
+| For what? | Sustained engagement in healthy behaviours across their population. Pilot reporting is designed with the payer and is opt-in; no reporting mechanism exists yet, and no individual data is shared without consent (BR-015, BR-025) | Hypothesis |
 | Through which channel? | A: wellbeing platform / HR benefits. B: member app or benefit program. C: public program or pilot via a health authority | Hypothesis |
-| Who benefits without paying? | End users (free to them in all three options) | Hypothesis |
-| Pricing idea | Not set. Per-seat or per-member pricing is a candidate to test, not a decision | Not set |
+| Who benefits without paying? | End users. The challenge build is free. In the later store release the app may stay free with an optional subscription (what it includes is undecided) | Hypothesis |
+| Pricing idea | Not set. Per-seat or per-member pricing for payers, and any user subscription price, are candidates to test, not decisions. No price, conversion or market-size figure is claimed | Not set |
+
+**Evidence to gather before the finals (2026-12-07):**
+- **Payers:** at least one conversation per payer option. Record who owns the budget, what outcome they would
+  fund, a pilot size and length they would consider, what data they would need, and their procurement
+  blockers. Grade each as none, interest, named contact or LOI.
+- **Users:** in the sessions, ask unprompted "If part of this cost money, which part?" and "What would you
+  never accept paying for?" Record counts. This is stated preference from a convenience sample, not a
+  conversion rate.
+- **Cost to serve:** Firebase usage per active user from the sessions.
+- **Decision rule (set 2026-10-27, before the sessions start):** if there is no named payer contact across at
+  least three payer conversations by 2026-12-07, and no session participant names a feature they would pay for,
+  the store release leads with the optional user subscription only and the payer pilot becomes a secondary
+  hypothesis. If at least one payer names a budget owner and a pilot they would consider, the release leads
+  with the payer pilot. Anything in between is reported as "undecided", not rounded up. The thresholds are the
+  recommended defaults and can change only before the sessions start.
 
 ## 6. Success metrics
 | Metric | Target | Why it matters |
