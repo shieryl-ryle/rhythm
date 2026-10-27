@@ -30,7 +30,6 @@ back without guilt, choose what changed, take a smaller first step, and see the 
 grid.
 
 ## 3. Alternate / secondary flows
-- Declines AI on S-002 → every flow uses library text (BR-016).
 - Starts at stage "returning" in setup → UF-004 offered straight after UF-001.
 - Never answers reflections → the grid shows unknown days neutrally (BR-009).
 - Pauses for a week (UF-005) → no lapse is detected during the pause (EQ-001) and notifications
@@ -42,10 +41,9 @@ grid.
 ### UF-001 — First run
 | Step | Screen | User does | System does | Success looks like |
 |---|---|---|---|---|
-| 1 | S-001 | Reads and accepts consent | Stores the consent version and time | Proceeds to S-002 |
-| 2 | S-002 | Opts in or out of AI | Stores `ai_opt_in` | Proceeds to S-003 |
-| 3 | S-003 | Picks behaviour, reason, stage, daily goal, constraints, exclusions | Checks free text for red flags (EQ-008); saves the profile | Proceeds to S-004 |
-| 4 | S-004 | Sees the first options | Ranks the library (EQ-003) with reasons (EQ-004) | 1–3 options visible |
+| 1 | S-001 | Reads and accepts consent | Stores the consent version and time | Proceeds to S-003 |
+| 2 | S-003 | Answers one question at a time and taps Next each time: what brings you here, the activity and where they are with it, their week, why it matters, what to leave out. The daily goal is fixed at 1 | Checks free text for red flags (EQ-008); saves the profile | Proceeds to S-004 |
+| 3 | S-004 | Sees the first options | Ranks the library (EQ-003) with reasons (EQ-004) | 1–3 options visible |
 
 **Branch points:** wants detail → S-108 sheet, then back to S-001; doesn't agree → closes the
 app, nothing stored (there is no decline screen); red-flag text → S-090, the text is not stored.
@@ -53,12 +51,12 @@ app, nothing stored (there is no decline screen); red-flag text → S-090, the t
 ### UF-002 — Daily options
 | Step | Screen | User does | System does | Success looks like |
 |---|---|---|---|---|
-| 1 | S-004 | Optionally sets time and energy | Filters and re-ranks (EQ-003) | Options fit the inputs |
-| 2 | S-004 | Accepts / edits (S-102) / replaces / pauses (S-103) | Records the offer status; reworded text has an AI label (BR-019) | The accepted option shows as today's plan |
+| 1 | S-004 | Optionally taps the time or energy chip and picks a value (time: 10, 20, 30 or 45 min; energy: Low, Medium, High) | Re-ranks the options suggested for today (EQ-003): drops actions longer than the time; Low energy drops high-energy actions. A card suggested for another day is not filtered. The chips reset each day; the offer records the values used when it was made | Options fit the inputs; the chips show the chosen values |
+| 2 | S-004 | Accepts / edits (S-102) / replaces / pauses (S-103) | Records the offer status | The accepted option shows as today's plan |
 | 3 | S-004 | Optionally taps "I'm starting" on the planned card | Marks the time the person chose; the card shows "Under way". Nothing is recorded (ADR-014); nothing counts toward the grid yet | The card reads "Started 12:31 · 20 min planned" |
 
 **Branch points:** "Not started yet" undoes a mis-tap; never starting or never tapping "I'm finished" leaves the card as "Planned", then "How did it go?", with no "overdue" or "missed" (BR-007); "Under way" clears itself after about 3 hours; nothing fits → empty state with "lighter option" and "adjust exclusions";
-AI timeout → library text (BR-020).
+(AI rewording is dormant in P0, ADR-006: there is no AI label state and no AI timeout branch.)
 
 ### UF-003 — Reflect on an action
 | Step | Screen | User does | System does | Success looks like |
@@ -73,7 +71,7 @@ AI timeout → library text (BR-020).
 ### UF-004 — Return after a lapse
 | Step | Screen | User does | System does | Success looks like |
 |---|---|---|---|---|
-| 1 | S-005 | Opens the app after a lapse | Detects the lapse (EQ-001); shows "Welcome back" | No loss or guilt wording (BR-007) |
+| 1 | S-004 → S-005 | Opens the app after a lapse | Detects the lapse (EQ-001); Today shows a "welcome back" banner with "Not now"; tapping it opens S-005 | No loss or guilt wording (BR-007); "Not now" costs nothing |
 | 2 | S-005 | Optionally picks what changed (or "prefer not to say") | Stores the answer (BR-008) | Can skip |
 | 3 | S-005 | Chooses a previous helpful approach or a different one | Offers a smaller first action | One clear option |
 | 4 | S-004 | Accepts it | Records the return event once the action is reflected (EQ-011) | Returns count +1 on S-006 |
@@ -145,7 +143,7 @@ A friend who is not sharing is shown as "Not sharing right now" on the Friends s
 | ID | Flow | Break | User sees | Recovery | Work lost? |
 |---|---|---|---|---|---|
 | EV-001 | UF-001 | Red-flag text in the reason | S-090 support message | Can edit the text and continue | No (red-flag text is not stored) |
-| EV-002 | UF-002 | AI call fails or times out | Library text, no error | Automatic (BR-020) | No |
+| EV-002 | UF-002 | (Dormant in P0, ADR-006) AI call fails or times out | Library text, no error | Automatic (BR-020) | No |
 | EV-003 | UF-002 | All categories excluded / nothing fits | Empty state with "lighter option" and "adjust exclusions" | Adjust in S-003 | No |
 | EV-004 | UF-003 | Reflection dismissed | Nothing | Stays unknown (BR-009) | No |
 | EV-005 | UF-004 | No previous helpful approach | Library starters | Choose one | No |

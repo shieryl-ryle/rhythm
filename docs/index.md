@@ -14,6 +14,7 @@ When two docs disagree, the owner wins until the other is reconciled.
 | Business objectives, business model, business risks | [BRD](brd.md) | Optional — needs a business case |
 | What we build: features `F-###`, journeys `UJ-###`, rules `BR-###` | [PRD](prd.md) | Core |
 | Screens · IA · routes · access (`S-###`) — static UX map | [Sitemap](sitemap.md) | Optional — has a UI |
+| Frame-to-screen map, build tiers, cut list (`Lilt · Screens` → `S-###`) | [Build scope](build-scope.md) | Optional — has a UI |
 | Journeys across screens (`UF-###`, edge cases `EV-###`) — dynamic UX map | [User Flow](user-flow.md) | Optional — has a UI |
 | How it's built: architecture, integrations, security, stack currency | [System Design](system-design.md) | Core |
 | Entities, tables, columns, enums | [Data Model](data-model.md) | Optional — stores data |

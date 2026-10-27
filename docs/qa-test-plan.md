@@ -25,7 +25,7 @@ tests; TC-042 runs manually against the free tier with synthetic data only.
 | TC-004 | F-004 | Observations list; confirm, edit, delete work; saved actions reappear as options | yes: `test/features/what_works/what_works_test.dart` |
 | TC-005 | F-005 | With seeded lapse → app opens My Way Back with "Welcome back"; previous approach and a different one offered; choosing one gives a smaller first action | yes: `integration_test/return_test.dart` |
 | TC-006 | F-006 | Grid renders one tile per day with levels per EQ-002; paused day drawn as level 0 with semantics label "paused" (ADR-012); totals shown | yes: `test/features/progress/grid_test.dart` (golden) |
-| TC-007 | F-007 | Consent before data; AI toggle both ways; export file contains all tables; delete-all leaves zero user rows | yes: `test/data/my_data_test.dart` |
+| TC-007 | F-007 | Consent before data; export file contains all tables; delete-all leaves zero user rows | yes: `test/data/my_data_test.dart` |
 | TC-008 | F-008 | Off by default; enabling schedules within caps; disabling cancels all | yes: `test/notifications/scheduler_test.dart` + manual on device |
 
 ### Business rules
@@ -49,8 +49,8 @@ tests; TC-042 runs manually against the free tier with synthetic data only.
 | TC-024 | BR-016 | Captured AI prompt contains only allowed fields (no reason, reflections, behaviour name); AI off → zero AI calls | yes: `test/ai/prompt_builder_test.dart` |
 | TC-025 | BR-017 | Export contains every user table; delete-all → every user table empty, notifications cancelled, route `/welcome` | yes: `my_data_test.dart` |
 | TC-026 | BR-018 | (P1 circles) Reviewer check: shared fields limited to the two daily flags (active, paused), shared only after the one-time opt-in; no activity names or durations; no ranking UI | reviewer (rules-reviewer) |
-| TC-027 | BR-019 | AI-worded option shows the label; tap reveals library text | yes: widget test |
-| TC-028 | BR-020 | Fake AI delays 5 s → library text shown within timeout + 0.5 s, no error; no prompt/response in logs or DB | yes: `test/ai/fallback_test.dart` |
+| TC-027 | BR-019 | (Dormant, ADR-006) AI-worded option shows the label; tap reveals library text | yes: widget test |
+| TC-028 | BR-020 | (Dormant, ADR-006) Fake AI delays 5 s → library text shown within timeout + 0.5 s, no error; no prompt/response in logs or DB | yes: `test/ai/fallback_test.dart` |
 
 ### Equations (Methods)
 | ID | Covers | Steps / assertion | Automated? |

@@ -135,7 +135,7 @@ gap are set in the wireframe (owner direction, 2026-10-23).
 | Component | Variants | States | Notes |
 |---|---|---|---|
 | Button | primary / secondary / text | default / pressed / disabled / loading | Min height 48 dp. Delete-all is a secondary button with `danger` text and border, never filled. The design system also has a filled danger variant; it is not used |
-| Option card | library / AI-worded | default / accepted / edited | Shows reason (BR-004) in `ink-muted`; AI-worded label chip (BR-019) |
+| Option card | library (AI-worded is dormant, ADR-006) | default / accepted / edited | Shows reason (BR-004) in `ink-muted` |
 | Quick chip | single / multi select | default / selected | Used for time, energy, reflection, barrier. Multi-select shows a ✓; single-select does not |
 | Segmented control | 2 or 3 segments | one selected | Single choice with short labels. 48 dp tall, tinted track, white outlined selected segment. Not for navigation tabs |
 | Tabs | 2 or 3 tabs | one selected | Navigation between sections (For you / Saved, Events / Clubs / Mine). Surface track with a hairline border; the selected tab has a tinted fill and a semibold label, the others a regular secondary label |
@@ -159,7 +159,7 @@ gap are set in the wireframe (owner direction, 2026-10-23).
 ## Do's and Don'ts
 - **Do:** celebrate returns as much as completions; show why each option was offered; keep pause
   one step away.
-- **Do:** label AI-worded text and synthetic demo data visibly.
+- **Do:** label synthetic demo data visibly (AI-worded text is dormant in P0, ADR-006).
 - **Don't:** use red, warning icons, or empty grey to mean a missed day; show "days since" counts;
   compare users; use confetti for streak lengths.
 
@@ -239,6 +239,7 @@ Wireframes v5.
 - **Destructive actions** use a dialog. The safe choice is the default, and the destructive
   button uses the `danger` token. For delete-all that means an outlined button with `danger` text
   and border, so "Keep my data" stays the only filled button. Stop sharing (P1) is reversible (the person can opt in again), so it uses a neutral outlined button, not `danger`, with "Keep sharing" as the filled default. Dialog bodies scroll at 200% text and the buttons stay pinned.
+- **Header avatar:** the round button at the top right of the main screens opens Settings (S-008). Signed in to Together it shows the initial of the display name; signed out it shows a neutral person icon, never a made-up initial. It is a 48 dp target with the label "Settings".
 - **Navigation bar:** 80 dp with an active pill behind the icon and 12 sp labels. Labels scale
   with system text up to 16 sp (1.33x), then stop: they never wrap, break mid-word or ellipsise.
   The icon, the active pill and the accessible name carry the destination at larger sizes. This is
