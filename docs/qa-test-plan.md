@@ -9,7 +9,7 @@
 | Typecheck / lint | `flutter analyze` | every PR |
 | Unit + widget | `flutter test` | every PR |
 | Integration (E2E) | `flutter test integration_test` (Android emulator) | merge to main |
-| Web build | `flutter build web --release` | every deploy |
+| Web build | `flutter build web --release --no-web-resources-cdn` | every deploy |
 | Deployed check | TC-040 (Playwright MCP or manual) | every deploy and the submission |
 
 Tests never call the paid Gemini tier. The AI adapter is faked in unit, widget, and integration

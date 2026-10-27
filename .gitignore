@@ -4,3 +4,8 @@ node_modules/
 !.env.example
 .claude/settings.local.json
 .DS_Store
+
+# Firebase CLI local cache and debug logs
+.firebase/
+firebase-debug.log
+firebase-debug.*.log

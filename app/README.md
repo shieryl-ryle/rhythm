@@ -35,7 +35,6 @@ request goes to the same origin.
 - Android application ID is the scaffold placeholder `com.example.lilt`. Change it before the first store upload
   (see `docs/release.md` §0).
 - The release APK is signed with the debug key until the upload keystore exists (`docs/release.md` §2).
-- `.firebaserc` holds the placeholder project `TBD-firebase-project-id`.
 
 ## Layout
 `lib/app/` shell, router and theme tokens · `lib/data/` drift database and repositories · `lib/features/<feature>/`
