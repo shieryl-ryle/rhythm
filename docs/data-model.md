@@ -129,10 +129,10 @@ Free times, access, usual barriers, motivations and leave-outs (F-001, BR-011; f
 |---|---|---|---|---|
 | `id` | text | no | `pref_…` | PK |
 | `kind` | pref_kind | no | — | See §7 for the values per kind |
-| `value` | text 🔒 | no | — | A code (see §7) or an `activity_kind` when kind is `excluded` |
+| `value` | text 🔒 | no | — | A code (see §7). For kind `excluded` it is a library tag (`after_dark`, `team_sport`, `high_impact`) or an `activity_kind` (`swimming`): the ranker must filter on both the action's tags and its `activity` |
 
 **Constraints / indexes:** unique (`kind`, `value`).
-`motivation` holds at most 3 rows (frame 1.13: "Pick up to 3"). `excluded` has no row when the person picks
+`motivation` holds at most 3 rows (frame 1.13: "Pick up to 3"), enforced by a database trigger. `excluded` has no row when the person picks
 "Nothing to leave out".
 
 ### `action`
@@ -379,3 +379,19 @@ The on-screen label is the source of truth for wording; the stored value is a st
 - **Comma-set columns** (`hard_because`, `got_in_the_way`, `would_help`, `what_changed`) are acceptable in P0. The export documents them as comma-separated codes.
 - **Stored but not used by any rule in P0:** `usual_barrier`, `motivation` and `access` (except where EQ-003 and EQ-004 name them), `got_in_the_way`, `stopped_ago`, `progress`. They are kept for the person's own summary and for later; no reason text may cite them (BR-004).
 - **Motivations have no edit screen of their own in P0;** the person changes them by re-running setup from Settings (S-008 "edit starting point").
+
+### What the schema enforces (added with TASK-002)
+- **Foreign keys are on** (`PRAGMA foreign_keys = ON`) and deleted rows are overwritten (`PRAGMA secure_delete = ON`), so delete-all really removes the data (BR-017).
+- **Delete actions:** `option_offer.followed_activity_id` set null; `plan_item.offer_id` set null; `plan_item.action_id` and `option_offer.action_id` restrict (a used library action cannot be deleted); `saved_action.action_id` cascade; `offer_reason`, `reflection` cascade from their parent.
+- **Uniqueness:** one preference per (`kind`, `value`); at most 3 `motivation` rows (trigger); one reflection per plan item; one plan item per offer; one offer per (`day`, `followed_activity_id`, `swap_index`) and, for offers with no followed activity, per (`day`, `swap_index`).
+- **Checks:** `reflection.enjoyment` is null or 1 to 3; `profile.id` and `notification_setting.id` can only be `me`.
+- **Defaults:** ids and timestamps are filled by the app, not by SQL, so raw SQL inserts must supply them. All timestamps are UTC (`DateTime.now().toUtc()`).
+- **Free-text codes in P0:** `hard_because`, `what_changed`, `what_would_help`, the preference value sets, tag codes and `notification_setting.mode` are stored as text codes without a Dart enum or a SQL check. The domain layer parses them. Add enums when a rule needs them.
+- **Export:** one JSON file made in a single transaction, with a `format_notes` block that documents enums, comma sets, booleans and dates.
+
+### Rules for the code that uses the schema (owed by later tasks)
+- **Totals never decrease (BR-007, BR-023, EQ-011):** a total is computed from `reflection` and `return_event`, which the schema can change. So no repository may lower a `completed` or `partly` reflection or delete one except through delete-all, and `achievement_earned` is written with insert-or-ignore so `earned_day` never changes (its only update is `celebrated` false to true). TASK-005 owns this and tests it.
+- **Library reload (TASK-004):** the loader must upsert and never delete rows that `option_offer`, `plan_item` or `saved_action` use (reloading must not erase a person's Saved list or fail on history). It runs after consent. TC-022 counts user tables only; `action` is the library.
+- **Rows created after consent (TASK-005):** `profile` and `notification_setting` are inserted when setup starts, not before consent. A `reflection` row (status `unknown`) is created with each plan item by the plan repository.
+- **Resuming a pause:** the repository sets `end_day` to the resume day.
+- **Delete-all hooks:** the notification cancellation (F-008) and the Together account deletion (F-018, BR-017) must be registered through `deleteAllHooksProvider`. Each must be idempotent. A test must fail if either is missing once those features exist.
