@@ -47,7 +47,14 @@ class ConsentScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: LiltSpacing.lg),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton(
+                      onPressed: () => _showWhatWeStore(context),
+                      child: const Text('See exactly what we store'),
+                    ),
+                  ),
+                  const SizedBox(height: LiltSpacing.sm),
                   Text(
                     'Lilt supports everyday wellbeing. It’s not medical advice.',
                     style: text.bodySmall?.copyWith(color: LiltColors.inkMuted),
@@ -72,6 +79,60 @@ class ConsentScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// S-108 What we store: what is used, where it is kept, what Together adds, and the person's
+/// control (BR-014). Wording from Figma frame 1.2.
+void _showWhatWeStore(BuildContext context) {
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: LiltColors.surface,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+    ),
+    builder: (context) {
+      final text = Theme.of(context).textTheme;
+      Widget section(String heading, String body) => Padding(
+            padding: const EdgeInsets.only(bottom: LiltSpacing.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(heading, style: text.titleSmall),
+                const SizedBox(height: LiltSpacing.xs),
+                Text(body, style: text.bodyMedium?.copyWith(color: LiltColors.inkMuted)),
+              ],
+            ),
+          );
+      return SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('What we store', style: text.headlineSmall),
+              const SizedBox(height: LiltSpacing.lg),
+              section(
+                'What Lilt uses',
+                'The activities you follow, when you’re free, and what you tell us about each day.',
+              ),
+              section('Where it’s kept', 'Only on this phone. No tracking, no ads.'),
+              section(
+                'Together (optional)',
+                'If you join Together: your name, optional photo, area and RSVPs are stored on our server. Never your health data.',
+              ),
+              section('Your control', 'Export or delete everything anytime in Settings.'),
+              FilledButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Got it'),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
 }
 
 class _Point extends StatelessWidget {

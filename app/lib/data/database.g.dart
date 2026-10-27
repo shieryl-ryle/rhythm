@@ -50,7 +50,7 @@ class $ConsentRecordsTable extends ConsentRecords
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'consent_records';
+  static const String $name = 'consent';
   @override
   VerificationContext validateIntegrity(
     Insertable<ConsentRecord> instance, {

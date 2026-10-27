@@ -1,7 +1,8 @@
 import 'database.dart';
 
-/// Current consent text version. Bump it when the consent screen's wording changes (BR-014).
-const currentConsentVersion = '2026-10-27';
+/// Current consent text version, `date.revision` as in docs/data-model.md. Bump it when the
+/// consent screen's wording changes (BR-014).
+const currentConsentVersion = '2026-10-27.1';
 
 /// The data layer sits behind interfaces so later features (and P1 sync) can swap implementations.
 abstract interface class ConsentRepository {

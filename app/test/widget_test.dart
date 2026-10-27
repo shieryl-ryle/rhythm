@@ -51,6 +51,33 @@ void main() {
     expect(find.text('Welcome to Lilt'), findsNothing);
   });
 
+  testWidgets('the consent screen explains what is stored without agreeing (BR-014)', (tester) async {
+    final repo = FakeConsentRepository();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [consentRepositoryProvider.overrideWithValue(repo)],
+        child: const LiltApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final link = find.text('See exactly what we store', skipOffstage: false);
+    await tester.ensureVisible(link);
+    await tester.pumpAndSettle();
+    await tester.tap(link);
+    await tester.pumpAndSettle();
+
+    expect(find.text('What we store'), findsOneWidget);
+    expect(find.text('What Lilt uses'), findsOneWidget);
+    expect(find.text('Only on this phone. No tracking, no ads.'), findsOneWidget);
+    expect(repo.writes, 0);
+
+    await tester.tap(find.text('Got it'));
+    await tester.pumpAndSettle();
+    expect(find.text('Welcome to Lilt', skipOffstage: false), findsOneWidget);
+    expect(repo.writes, 0);
+  });
+
   testWidgets('a person who already agreed goes straight to Today', (tester) async {
     final repo = FakeConsentRepository()..agreed = true;
     await tester.pumpWidget(

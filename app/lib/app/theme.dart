@@ -44,9 +44,11 @@ ThemeData buildLiltTheme() {
   );
   return ThemeData(
     useMaterial3: true,
+    fontFamily: 'Geist',
     colorScheme: scheme,
     scaffoldBackgroundColor: LiltColors.canvas,
     textTheme: Typography.blackMountainView.apply(
+      fontFamily: 'Geist',
       bodyColor: LiltColors.ink,
       displayColor: LiltColors.ink,
     ),

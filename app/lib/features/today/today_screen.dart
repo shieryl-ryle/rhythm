@@ -47,7 +47,7 @@ class _ActionCard extends StatelessWidget {
             const SizedBox(height: LiltSpacing.xs),
             Text(action.title, style: text.titleMedium),
             const SizedBox(height: LiltSpacing.xs),
-            Text(action.when, style: text.bodyMedium?.copyWith(color: LiltColors.inkMuted)),
+            Text(action.detail, style: text.bodyMedium?.copyWith(color: LiltColors.inkMuted)),
             const SizedBox(height: LiltSpacing.sm),
             Text(action.reason, style: text.bodyMedium),
           ],

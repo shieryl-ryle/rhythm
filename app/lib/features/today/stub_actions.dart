@@ -1,16 +1,19 @@
 /// Hard-coded library actions for the walking skeleton (TASK-001).
-/// TASK-004 replaces these with the real activity library and TASK-003 with the ranking.
+///
+/// The reasons and times are deliberately neutral: they claim nothing about the person, who has
+/// only just consented (BR-004). TASK-004 replaces these with the real activity library and
+/// TASK-003 with the ranking and the per-person reasons.
 class StubAction {
   const StubAction({
     required this.category,
     required this.title,
-    required this.when,
+    required this.detail,
     required this.reason,
   });
 
   final String category;
   final String title;
-  final String when;
+  final String detail;
   final String reason;
 }
 
@@ -18,19 +21,19 @@ const stubActions = <StubAction>[
   StubAction(
     category: 'Running',
     title: 'Run-walk around the park',
-    when: 'Suggested 12:30 · lunch',
-    reason: 'Lunch runs have worked well for you.',
+    detail: '20 min',
+    reason: 'A gentle way to get moving.',
   ),
   StubAction(
     category: 'Gym',
     title: 'Quick 30-minute gym session',
-    when: 'Suggested Sat 10:00 · weekends',
-    reason: 'Short sessions fit a busy week.',
+    detail: '30 min',
+    reason: 'A short session that fits most days.',
   ),
   StubAction(
     category: 'Pickleball',
     title: 'Beginner pickleball social',
-    when: '45–60 min · with others',
-    reason: 'You like company. Social and easy to learn.',
+    detail: '45–60 min · with others',
+    reason: 'Social and easy to learn.',
   ),
 ];

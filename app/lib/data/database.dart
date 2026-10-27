@@ -3,8 +3,12 @@ import 'package:drift_flutter/drift_flutter.dart';
 
 part 'database.g.dart';
 
-/// One row per consent the person gave. Nothing is written before they agree (BR-014).
+/// Append-only consent log (docs/data-model.md `consent`). No row is written before the person
+/// agrees (BR-014, TC-022). The empty local store itself is created on first launch.
 class ConsentRecords extends Table {
+  @override
+  String get tableName => 'consent';
+
   IntColumn get id => integer().autoIncrement()();
   TextColumn get consentVersion => text()();
   DateTimeColumn get acceptedAt => dateTime()();
