@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../app/theme.dart';
+import 'focus_ring.dart';
 
 class LiltTab {
   const LiltTab({required this.label, required this.icon, required this.activeIcon});
@@ -54,8 +55,9 @@ class LiltNavBar extends StatelessWidget {
                     selected: i == index,
                     label: tabs[i].label,
                     excludeSemantics: true,
-                    child: InkWell(
+                    child: LiltFocusRing(
                       onTap: () => onSelect(i),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(LiltRadius.md)),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -69,7 +71,7 @@ class LiltNavBar extends StatelessWidget {
                             child: Icon(
                               i == index ? tabs[i].activeIcon : tabs[i].icon,
                               size: 22,
-                              color: LiltColors.ink,
+                              color: i == index ? LiltColors.ink : LiltColors.inkMuted,
                             ),
                           ),
                           const SizedBox(height: LiltSpacing.xs),

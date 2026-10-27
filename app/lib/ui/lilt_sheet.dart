@@ -55,7 +55,6 @@ class LiltSheet extends StatelessWidget {
         child: Material(
           // A 1 px `sheet-line` edge keeps the sheet visible over the scrim; its bottom edge is off screen.
           color: LiltColors.surface,
-          clipBehavior: Clip.antiAlias,
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.vertical(top: Radius.circular(LiltRadius.sheet)),
             side: BorderSide(color: LiltColors.sheetLine),
@@ -66,7 +65,7 @@ class LiltSheet extends StatelessWidget {
               const SizedBox(height: LiltSpacing.sm),
               ExcludeSemantics(
                 child: Container(
-                  width: 36,
+                  width: 32,
                   height: 4,
                   decoration: BoxDecoration(
                     color: LiltColors.grid1,
@@ -82,7 +81,7 @@ class LiltSheet extends StatelessWidget {
                     Expanded(
                       child: Semantics(
                         header: true,
-                        child: Text(title, style: LiltText.display.copyWith(fontSize: 30)),
+                        child: Text(title, style: LiltText.display),
                       ),
                     ),
                     IconButton(

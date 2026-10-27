@@ -86,7 +86,7 @@ void main() {
                     Text('Friday 23 October', style: LiltText.body.copyWith(color: LiltColors.inkMuted)),
                     const Text('Here’s what fits today', style: LiltText.display),
                     const SizedBox(height: LiltSpacing.md),
-                    Wrap(spacing: LiltSpacing.sm, children: [
+                    LiltChipWrap(children: [
                       LiltChip(label: '20 min', onTap: () {}, menu: true),
                       LiltChip(label: 'Medium energy', onTap: () {}, menu: true),
                     ]),
@@ -101,7 +101,7 @@ void main() {
                     const SizedBox(height: LiltSpacing.sm),
                     LiltButton(label: 'Next', onPressed: null),
                     const SizedBox(height: LiltSpacing.lg),
-                    Wrap(spacing: LiltSpacing.sm, runSpacing: LiltSpacing.sm, children: [
+                    LiltChipWrap(children: [
                       LiltChip(label: 'Walking', onTap: () {}, selected: true, multi: true),
                       LiltChip(label: 'Running', onTap: () {}, multi: true),
                       LiltChip(label: 'Done', onTap: () {}, selected: true),
@@ -154,8 +154,8 @@ void main() {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         for (final row in ['Something lighter', 'Move it to later', 'My plan fell through'])
-                          SizedBox(
-                            height: 56,
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(minHeight: 56),
                             child: Row(children: [
                               Expanded(child: Text(row, style: LiltText.body.copyWith(fontWeight: FontWeight.w600))),
                               const Icon(Icons.chevron_right),

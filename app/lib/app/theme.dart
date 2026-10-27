@@ -90,10 +90,10 @@ abstract final class LiltText {
     color: LiltColors.ink,
   );
 
-  /// A button label: semibold body size.
+  /// A button label: semibold, 15 sp (Figma Label/L).
   static const button = TextStyle(
     fontFamily: 'Geist',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: FontWeight.w600,
     height: 1.25,
   );

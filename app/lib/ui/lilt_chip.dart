@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../app/theme.dart';
+import 'focus_ring.dart';
 
 /// A quick chip (docs/DESIGN.md Components, Interaction rules): 32 dp to look at, a 48 dp hit area, never
 /// narrower than 48 dp, and the same height whether selected or not.
@@ -8,6 +9,8 @@ import '../app/theme.dart';
 /// - Single choice: no tick. Multiple choice ([multi]): a tick when selected, which always means "you can pick
 ///   more than one".
 /// - [menu] chips open a list and show a chevron and the chosen value; they have no tick.
+///
+/// Put chips in a [LiltChipWrap] so neighbouring hit areas stay 8 dp apart.
 class LiltChip extends StatelessWidget {
   const LiltChip({
     super.key,
@@ -27,13 +30,15 @@ class LiltChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final showTick = multi && selected && !menu;
+    // Icons grow with the text, so a tick or chevron never looks tiny beside a 200% label.
+    final scaler = MediaQuery.textScalerOf(context);
     return Semantics(
       button: true,
       selected: selected,
       enabled: onTap != null,
-      child: InkWell(
+      child: LiltFocusRing(
         onTap: onTap,
-        customBorder: const StadiumBorder(),
+        shape: const StadiumBorder(),
         child: ConstrainedBox(
           constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
           child: Center(
@@ -54,13 +59,13 @@ class LiltChip extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (showTick) ...[
-                    const Icon(Icons.check, size: 16, color: LiltColors.primary),
+                    Icon(Icons.check, size: scaler.scale(16), color: LiltColors.primary),
                     const SizedBox(width: LiltSpacing.xs),
                   ],
                   Flexible(child: Text(label, style: LiltText.label, textAlign: TextAlign.center)),
                   if (menu) ...[
                     const SizedBox(width: LiltSpacing.xs),
-                    const Icon(Icons.expand_more, size: 18, color: LiltColors.ink),
+                    Icon(Icons.expand_more, size: scaler.scale(18), color: LiltColors.ink),
                   ],
                 ],
               ),
@@ -70,4 +75,20 @@ class LiltChip extends StatelessWidget {
       ),
     );
   }
+}
+
+/// A row of chips that wraps. Chips are 48 dp boxes, so 8 dp between them keeps neighbouring hit areas 8 dp
+/// apart, which is the 56 dp row pitch in docs/DESIGN.md (a 24 dp visible gap between 32 dp chips).
+class LiltChipWrap extends StatelessWidget {
+  const LiltChipWrap({super.key, required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) => Wrap(
+        spacing: LiltSpacing.sm,
+        runSpacing: LiltSpacing.sm,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: children,
+      );
 }

@@ -7,6 +7,8 @@ import 'equalizer_bars.dart';
 /// Settings (S-008). Signed in to Together it shows the initial of the display name; signed out ([initial] null)
 /// a neutral person icon, never a made-up initial. The button is a 40 dp circle with a 48 dp target.
 ///
+/// The header owns its 16 dp side margin: do not wrap it in page padding, or the margin doubles.
+///
 /// The mark here is the three equalizer bars. The full wordmark is an exported SVG from Figma (docs/DESIGN.md,
 /// Brand motion) and is swapped in when it is added to the app.
 class LiltHeader extends StatelessWidget {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../app/theme.dart';
+import 'focus_ring.dart';
 
 enum LiltButtonKind { primary, secondary, text }
 
@@ -9,9 +10,11 @@ enum LiltButtonKind { primary, secondary, text }
 /// - **primary**: filled `ink`. One per screen.
 /// - **secondary**: outlined, `ink` text. With [danger] the text and border are `danger`, never filled (the
 ///   delete-all rule).
-/// - **text**: semibold `ink`, no underline, for in-app actions such as "Something else" and "Not today".
+/// - **text**: semibold `ink`, no underline, for in-app actions such as "Something else" and "Not today". A
+///   standalone, left-aligned one is [flush]: its label sits on the content edge and the 48 dp target stays.
 ///
-/// A null [onPressed] shows the disabled look. [loading] keeps the button's place and shows a spinner.
+/// A null [onPressed] shows the disabled look. [loading] keeps the button's place and shows a spinner. Keyboard
+/// focus shows a 2 px `primary` ring.
 class LiltButton extends StatelessWidget {
   const LiltButton({
     super.key,
@@ -21,8 +24,9 @@ class LiltButton extends StatelessWidget {
     this.icon,
     this.loading = false,
     this.danger = false,
+    this.flush = false,
     this.expand,
-  });
+  }) : assert(!flush || kind == LiltButtonKind.text, 'Only a text button can be flush');
 
   final String label;
   final VoidCallback? onPressed;
@@ -30,6 +34,7 @@ class LiltButton extends StatelessWidget {
   final IconData? icon;
   final bool loading;
   final bool danger;
+  final bool flush;
 
   /// Full width. Defaults to true for primary and secondary, false for text.
   final bool? expand;
@@ -39,26 +44,37 @@ class LiltButton extends StatelessWidget {
     final fullWidth = expand ?? kind != LiltButtonKind.text;
     final VoidCallback? tap = loading ? () {} : onPressed;
 
+    // The spinner is drawn in the label's colour, so it never vanishes on a light button.
+    final spinnerColor = switch (kind) {
+      LiltButtonKind.primary => LiltColors.onPrimary,
+      LiltButtonKind.secondary => danger ? LiltColors.danger : LiltColors.ink,
+      LiltButtonKind.text => LiltColors.ink,
+    };
     final content = loading
-        ? const SizedBox(
+        ? SizedBox(
             width: 20,
             height: 20,
-            child: CircularProgressIndicator(strokeWidth: 2.5, color: LiltColors.onPrimary),
+            child: CircularProgressIndicator(strokeWidth: 2.5, color: spinnerColor),
           )
         : Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               if (icon != null) ...[Icon(icon, size: 20), const SizedBox(width: LiltSpacing.sm)],
-              Flexible(child: Text(label, textAlign: TextAlign.center)),
+              Flexible(child: Text(label, textAlign: flush ? TextAlign.start : TextAlign.center)),
             ],
           );
 
-    final shape = const StadiumBorder();
+    const shape = StadiumBorder();
     final padding = EdgeInsets.symmetric(
-      horizontal: kind == LiltButtonKind.text ? LiltSpacing.md : LiltSpacing.xl,
+      horizontal: flush ? 0 : (kind == LiltButtonKind.text ? LiltSpacing.md : LiltSpacing.xl),
       vertical: LiltSpacing.md,
     );
     final minimum = Size(fullWidth ? double.infinity : 48, 48);
+    final alignment = flush ? Alignment.centerLeft : Alignment.center;
+
+    // Focus shows a 2 px primary ring; otherwise the button keeps its own edge, if it has one.
+    WidgetStateProperty<BorderSide?> side(BorderSide? resting) =>
+        WidgetStateProperty.resolveWith((states) => states.contains(WidgetState.focused) ? focusRingSide : resting);
 
     final Widget button = switch (kind) {
       LiltButtonKind.primary => FilledButton(
@@ -72,7 +88,7 @@ class LiltButton extends StatelessWidget {
             disabledBackgroundColor: LiltColors.selected,
             disabledForegroundColor: LiltColors.inkMuted,
             textStyle: LiltText.button,
-          ),
+          ).copyWith(side: side(null)),
           child: content,
         ),
       LiltButtonKind.secondary => OutlinedButton(
@@ -83,8 +99,9 @@ class LiltButton extends StatelessWidget {
             shape: shape,
             foregroundColor: danger ? LiltColors.danger : LiltColors.ink,
             disabledForegroundColor: LiltColors.inkMuted,
-            side: BorderSide(color: danger ? LiltColors.danger : LiltColors.field, width: 1.5),
             textStyle: LiltText.button,
+          ).copyWith(
+            side: side(BorderSide(color: danger ? LiltColors.danger : LiltColors.field, width: 1.5)),
           ),
           child: content,
         ),
@@ -93,11 +110,12 @@ class LiltButton extends StatelessWidget {
           style: TextButton.styleFrom(
             minimumSize: minimum,
             padding: padding,
+            alignment: alignment,
             shape: shape,
             foregroundColor: LiltColors.ink,
             disabledForegroundColor: LiltColors.inkMuted,
             textStyle: LiltText.button,
-          ),
+          ).copyWith(side: side(null)),
           child: content,
         ),
     };

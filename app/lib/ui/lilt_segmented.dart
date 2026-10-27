@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../app/theme.dart';
+import 'focus_ring.dart';
 
 class LiltSegment<T> {
   const LiltSegment({required this.value, required this.label});
@@ -30,9 +31,9 @@ class LiltSegmented<T> extends StatelessWidget {
         button: true,
         selected: selected,
         inMutuallyExclusiveGroup: true,
-        child: InkWell(
+        child: LiltFocusRing(
           onTap: () => onChanged(s.value),
-          customBorder: const StadiumBorder(),
+          shape: const StadiumBorder(),
           child: Container(
             constraints: const BoxConstraints(minHeight: 48),
             alignment: Alignment.center,

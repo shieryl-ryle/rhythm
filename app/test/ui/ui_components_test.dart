@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lilt/app/theme.dart';
 import 'package:lilt/ui/ui.dart';
@@ -41,9 +42,7 @@ Widget _gallery({ValueChanged<String>? onChip}) => Padding(
           const SizedBox(height: LiltSpacing.sm),
           LiltButton(label: 'Something else', onPressed: () {}, kind: LiltButtonKind.text),
           const SizedBox(height: LiltSpacing.sm),
-          Wrap(
-            spacing: LiltSpacing.sm,
-            runSpacing: LiltSpacing.sm,
+          LiltChipWrap(
             children: [
               LiltChip(label: '20 min', onTap: () => onChip?.call('20'), menu: true),
               LiltChip(label: 'Walking', onTap: () {}, selected: true, multi: true),
@@ -127,6 +126,124 @@ void main() {
       final size = tester.getSize(find.byType(TextButton));
       expect(size.height, greaterThanOrEqualTo(48));
       expect(size.width, lessThan(_phone.width));
+    });
+  });
+
+  group('keyboard focus ring (DESIGN.md: primary is the focus ring)', () {
+    testWidgets('a button shows a 2 px primary border while focused', (tester) async {
+      await _pump(tester, LiltButton(label: 'Go', onPressed: () {}));
+      final button = tester.widget<FilledButton>(find.byType(FilledButton));
+      expect(button.style!.side!.resolve({WidgetState.focused})!.color, LiltColors.primary);
+      expect(button.style!.side!.resolve({WidgetState.focused})!.width, 2);
+      expect(button.style!.side!.resolve({}), isNull);
+    });
+
+    testWidgets('a secondary button keeps its own edge until focused', (tester) async {
+      await _pump(tester, LiltButton(label: 'Go', onPressed: () {}, kind: LiltButtonKind.secondary));
+      final side = tester.widget<OutlinedButton>(find.byType(OutlinedButton)).style!.side!;
+      expect(side.resolve({})!.color, LiltColors.field);
+      expect(side.resolve({WidgetState.focused})!.color, LiltColors.primary);
+    });
+
+    final focusable = <String, Widget>{
+      'chip': LiltChip(label: 'Walking', onTap: () {}),
+      'segmented control': LiltSegmented<int>(
+        segments: const [LiltSegment(value: 1, label: 'One'), LiltSegment(value: 2, label: 'Two')],
+        value: 1,
+        onChanged: (_) {},
+      ),
+      'nav bar': LiltNavBar(index: 0, onSelect: (_) {}),
+    };
+    for (final entry in focusable.entries) {
+      testWidgets('a ${entry.key} shows the ring when it takes keyboard focus', (tester) async {
+        await _pump(tester, entry.value);
+        expect(find.byKey(const Key('lilt-focus-ring')), findsNothing);
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.pump();
+        expect(find.byKey(const Key('lilt-focus-ring')), findsOneWidget);
+      });
+    }
+  });
+
+  group('LiltButton details', () {
+    testWidgets('the loading spinner takes the label colour, so it never vanishes on a light button', (tester) async {
+      Color spinner() => tester.widget<CircularProgressIndicator>(find.byType(CircularProgressIndicator)).color!;
+      final cases = <(LiltButtonKind, bool, Color)>[
+        (LiltButtonKind.primary, false, LiltColors.onPrimary),
+        (LiltButtonKind.secondary, false, LiltColors.ink),
+        (LiltButtonKind.secondary, true, LiltColors.danger),
+        (LiltButtonKind.text, false, LiltColors.ink),
+      ];
+      for (final (kind, danger, expected) in cases) {
+        await _pump(
+          tester,
+          LiltButton(label: 'Go', onPressed: () {}, kind: kind, danger: danger, loading: true),
+          settle: false,
+        );
+        expect(spinner(), expected, reason: '${kind.name} danger=$danger');
+      }
+    });
+
+    testWidgets('a flush text button puts its label on the content edge and keeps a 48 dp target', (tester) async {
+      await _pump(
+        tester,
+        Padding(
+          padding: const EdgeInsets.all(LiltSpacing.lg),
+          child: LiltButton(label: 'Edit', onPressed: () {}, kind: LiltButtonKind.text, flush: true),
+        ),
+      );
+      expect(tester.getTopLeft(find.text('Edit')).dx, closeTo(LiltSpacing.lg, 0.5));
+      expect(tester.getSize(find.byType(TextButton)).height, greaterThanOrEqualTo(48));
+      expect(tester.getSize(find.byType(TextButton)).width, greaterThanOrEqualTo(48));
+    });
+
+    test('only a text button can be flush', () {
+      expect(() => LiltButton(label: 'x', onPressed: () {}, flush: true), throwsAssertionError);
+    });
+
+    test('button labels are 15 sp (Figma Label/L) and titles use the 34 sp display style', () {
+      expect(LiltText.button.fontSize, 15);
+      expect(LiltText.display.fontSize, 34);
+    });
+  });
+
+  group('LiltChipWrap', () {
+    testWidgets('keeps neighbouring hit areas at least 8 dp apart, also at 200% text', (tester) async {
+      for (final scale in [1.0, 2.0]) {
+        await _pump(
+          tester,
+          LiltChipWrap(
+            children: [
+              for (final label in ['20 min', 'Medium energy', 'Walking', 'Running', 'Swimming'])
+                LiltChip(label: label, onTap: () {}, menu: true),
+            ],
+          ),
+          textScale: scale,
+        );
+        final rects = [
+          for (final e in find.byType(InkWell).evaluate()) tester.getRect(find.byWidget(e.widget)),
+        ];
+        expect(rects.length, 5);
+        double gap(double aStart, double aEnd, double bStart, double bEnd) =>
+            aStart >= bEnd ? aStart - bEnd : (bStart >= aEnd ? bStart - aEnd : -1);
+        for (var i = 0; i < rects.length; i++) {
+          for (var j = i + 1; j < rects.length; j++) {
+            final gapX = gap(rects[i].left, rects[i].right, rects[j].left, rects[j].right);
+            final gapY = gap(rects[i].top, rects[i].bottom, rects[j].top, rects[j].bottom);
+            expect(gapX >= 8 || gapY >= 8, isTrue, reason: 'scale $scale: chips $i and $j');
+          }
+        }
+      }
+    });
+
+    testWidgets('chip icons grow with the text', (tester) async {
+      Future<double> tick(double scale) async {
+        await _pump(tester, LiltChip(label: 'A', onTap: () {}, selected: true, multi: true), textScale: scale);
+        return tester.widget<Icon>(find.byIcon(Icons.check)).size!;
+      }
+
+      expect(await tick(1), 16);
+      expect(await tick(2), 32);
     });
   });
 
