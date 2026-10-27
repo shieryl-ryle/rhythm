@@ -147,8 +147,9 @@ Curated library (DS-001). Read-only for users.
 | `duration_min` | int | no | — | |
 | `intensity` | intensity | no | — | |
 | `energy_needed` | energy | no | — | |
-| `tags` | text | no | `""` | Comma-separated tag codes (`with_company`, `indoors`, `outdoors`, `free`, `team_sport`, `high_impact`, `after_dark`) |
+| `tags` | text | no | `""` | Comma-separated tag codes: `solo` or `with_company`; `indoors` or `outdoors`; `free` or `paid`; `team_sport`, `high_impact`, `after_dark`; access `needs_gym`, `needs_pool`, `needs_courts_or_park`, `needs_home_equipment` |
 | `is_starter` | bool | no | false | Offered when there is no history (EV-005) |
+| `similar_to` | text | no | `""` | Comma-separated ids of similar actions (ADR-005: suggest what is like something the person likes). Added in schema version 3 |
 | `library_version` | text | no | — | |
 
 ### `option_offer`
@@ -304,7 +305,7 @@ F-008. Serves BR-012, BR-013.
 | Single device, no backup | Data is lost with the device | Export (BR-017); a backup or sync is a later decision |
 | Library authoring and safety review | P0 needs content | PRD Q1; TASK-004; [seed](../seed/README.md) |
 | Encryption at rest | SQLite file is not encrypted beyond OS sandboxing | Assess before real-user study (ADR if adopted) |
-| Skeleton table `consent` already exists | The skeleton (TASK-001) only has `consent` | TASK-002 adds the other tables with migrations (schemaVersion 2) |
+| Skeleton table `consent` already exists | The skeleton (TASK-001) only has `consent` | Done: schemaVersion 2 adds the other tables (TASK-002); version 3 adds `action.similar_to` (TASK-004) |
 
 ## 7. Frame option → stored value
 The on-screen label is the source of truth for wording; the stored value is a stable code.

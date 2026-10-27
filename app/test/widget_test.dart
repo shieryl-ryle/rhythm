@@ -6,6 +6,8 @@ import 'package:lilt/data/consent_repository.dart';
 import 'package:lilt/data/providers.dart';
 import 'package:lilt/features/today/stub_actions.dart';
 
+import 'support/test_support.dart';
+
 /// In-memory stand-in for the drift repository (the interface seam, ADR-002 decision 6).
 class FakeConsentRepository implements ConsentRepository {
   bool agreed = false;
@@ -27,7 +29,10 @@ void main() {
     final repo = FakeConsentRepository();
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [consentRepositoryProvider.overrideWithValue(repo)],
+        overrides: [
+          consentRepositoryProvider.overrideWithValue(repo),
+          libraryLoaderProvider.overrideWithValue(NoopLibraryLoader()),
+        ],
         child: const LiltApp(),
       ),
     );
@@ -55,7 +60,10 @@ void main() {
     final repo = FakeConsentRepository();
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [consentRepositoryProvider.overrideWithValue(repo)],
+        overrides: [
+          consentRepositoryProvider.overrideWithValue(repo),
+          libraryLoaderProvider.overrideWithValue(NoopLibraryLoader()),
+        ],
         child: const LiltApp(),
       ),
     );
@@ -82,7 +90,10 @@ void main() {
     final repo = FakeConsentRepository()..agreed = true;
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [consentRepositoryProvider.overrideWithValue(repo)],
+        overrides: [
+          consentRepositoryProvider.overrideWithValue(repo),
+          libraryLoaderProvider.overrideWithValue(NoopLibraryLoader()),
+        ],
         child: const LiltApp(),
       ),
     );

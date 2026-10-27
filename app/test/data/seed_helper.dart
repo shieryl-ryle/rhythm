@@ -12,7 +12,9 @@ Future<void> seedEverything(LiltDatabase db) async {
         ),
       );
   await db.into(db.profiles).insert(ProfilesCompanion.insert(setupDoneAt: Value(DateTime.utc(2026, 10, 27, 8, 5))));
+  // The library may already be loaded; keep the existing row if so.
   await db.into(db.actions).insert(
+        mode: InsertMode.insertOrIgnore,
         ActionsCompanion.insert(
           id: 'act_run_walk_20',
           activity: ActivityKind.running,

@@ -1,0 +1,22 @@
+{
+  "dataset": "DS-003",
+  "version": "2026-10-27.1",
+  "status": "draft: team-authored (docs/methods.md DS-003); BR-001 and BR-002 say no diagnosis, treatment, medical claims, promise of results, or numeric body targets",
+  "matching": "Case-insensitive, on word boundaries (EQ-007 a, TC-009). Every user-visible string in the library, the suggestion templates, the notification copy and the observation templates is scanned.",
+  "terms": [
+    "cure", "cures", "cured",
+    "treat", "treats", "treated", "treatment",
+    "diagnose", "diagnosis", "diagnosed",
+    "therapy", "therapeutic",
+    "heal", "heals", "healing",
+    "prevent", "prevents", "prevention",
+    "medication", "medicine", "prescribe", "prescription",
+    "supplement", "supplements",
+    "guarantee", "guarantees", "guaranteed",
+    "proven", "clinically proven", "doctor-approved", "miracle",
+    "detox",
+    "lose weight", "weight loss", "burn fat", "fat burning", "burn calories", "calories",
+    "slim down", "get ripped", "six-pack",
+    "lower blood pressure", "lower cholesterol", "reduce your risk", "boost immunity", "anti-aging"
+  ]
+}

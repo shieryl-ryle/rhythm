@@ -98,6 +98,8 @@ class Actions extends Table {
   // Comma-separated tag codes (with_company, indoors, outdoors, free, team_sport, high_impact, after_dark).
   TextColumn get tags => text().withDefault(const Constant(''))();
   BoolColumn get isStarter => boolean().withDefault(const Constant(false))();
+  // Comma-separated ids of similar actions (ADR-005: suggest what is like something the person likes).
+  TextColumn get similarTo => text().withDefault(const Constant(''))();
   TextColumn get libraryVersion => text()();
 
   @override
