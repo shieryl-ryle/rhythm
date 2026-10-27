@@ -1,0 +1,7 @@
+targets:
+  $default:
+    builders:
+      drift_dev:
+        options:
+          # Dates are stored as UTC ISO-8601 text (docs/data-model.md §1), so an export is readable.
+          store_date_time_values_as_text: true
