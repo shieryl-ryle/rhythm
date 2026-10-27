@@ -51,7 +51,7 @@ flutter run                                  # Android device/emulator
 flutter run -d chrome                        # web
 flutter run --dart-define=DEMO=true          # demo build (synthetic seed loader)
 flutter build apk --release                  # APK for judges/testers
-flutter build web --release && firebase deploy --only hosting   # deploy web demo (see Ops)
+flutter build web --release --no-web-resources-cdn && firebase deploy --only hosting   # deploy web demo (see Ops)
 ```
 
 ## Test
