@@ -146,11 +146,26 @@ Per the UI reviewer, in this order if the freeze is at risk:
 3. **Dark theme implementation:** the palette is signed off in Figma; build it after the freeze if time allows.
 4. The PRD's own order for what else goes first: F-015 (share cards), F-008 (notifications), F-004 (What works).
 
+Three more cut candidates inside TASK-005, proposed by the senior reviewer on 2026-10-27 for the owner's 2026-11-06
+decision (not cut yet; they are built last): the optional "I'm starting", under way and after-window states (2.5b,
+2.5c; the planned card's primary would then read "How did it go?"); S-114 and S-115; and S-107 (keep the inline
+reason).
+
 ## 4. Recommended build order
 1. TASK-001 skeleton (done).
 2. In parallel: TASK-004 activity library (the biggest content dependency), TASK-002 data layer, TASK-003
-   domain logic.
-3. Setup (S-003) and the Today loop (S-004, S-101, S-102, S-103, the plan states), with the grid.
+   domain logic (all done).
+3. TASK-005, one pull request per piece (senior review 2026-10-27):
+   - **PR 0:** Instrument Serif and Unbounded bundled, text styles, shared widgets (buttons, chips, segmented
+     control, sheet, header, 4-tab shell), tested against TC-044 and TC-045 once per component.
+   - **(a) Setup S-003** with the "no profile, go to /setup" redirect, shipped with S-090 and its check in the same
+     pull request, because setup has free text. If time is short: the shared spine first (1.3, 1.4, then 1.12 to
+     1.15), the path follow-ups after.
+   - **(b1) Today:** options, reasons, chips, "I'll try this", "Something else", the nothing-fits states, the week
+     strip and "Not today" with pause (BR-006).
+   - **(c) Reflection S-101**, then the **demo seed loader** (so "You managed this before" and a filled grid show),
+     then **(b2)** Edit S-102, Why this S-107, S-114, S-115 and the under way states.
+   Today's grid strip stands for "the grid" on the 2026-11-06 checkpoint unless the owner asks for a minimal S-006.
 4. Pause and My Way Back (TASK-006).
 5. Discover and What works.
 6. Settings, export and delete-all (S-008, S-104).

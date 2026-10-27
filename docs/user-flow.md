@@ -144,7 +144,7 @@ A friend who is not sharing is shown as "Not sharing right now" on the Friends s
 |---|---|---|---|---|---|
 | EV-001 | UF-001 | Red-flag text in the reason | S-090 support message | Can edit the text and continue | No (red-flag text is not stored) |
 | EV-002 | UF-002 | (Dormant in P0, ADR-006) AI call fails or times out | Library text, no error | Automatic (BR-020) | No |
-| EV-003 | UF-002 | All categories excluded / nothing fits | Empty state with "lighter option" and "adjust exclusions" | Adjust in S-003 | No |
+| EV-003 | UF-002 | All categories excluded / nothing fits | Empty state (N2 or N3, spec in sitemap.md "S-004 when few or no options fit"): relax today's time or energy chips, or review leave-outs, add an activity, or Not today | Adjust in S-003 (`/setup?edit=1`, leave-out step) | No |
 | EV-004 | UF-003 | Reflection dismissed | Nothing | Stays unknown (BR-009) | No |
 | EV-005 | UF-004 | No previous helpful approach | Library starters | Choose one | No |
 | EV-006 | UF-007 | OS notification permission denied | Explanation and a link to OS settings | User enables it in the OS | No |
