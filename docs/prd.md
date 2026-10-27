@@ -263,7 +263,7 @@ entry point.
 - [ ] A new-to-you activity names the liked activity it is similar to (BR-004).
 - [ ] Accept, edit, swap, lighter, later, pause, and "my plan fell through" all work; pause takes
   ≤ 2 taps (BR-006).
-- [ ] Today has a time chip and an energy chip (defaults "20 min" and "Medium energy"). Each opens a menu: time 10, 20, 30 or 45 min (as in the Edit sheet 3.2); energy Low, Medium or High. Choosing one drops actions longer than the time and, for Low energy, high-energy actions, then re-ranks (EQ-003). The choice applies to today only and is not stored as history.
+- [ ] Today has a time chip and an energy chip (defaults "20 min" and "Medium energy"). Each opens a menu: time 10, 20, 30 or 45 min (as in the Edit sheet 3.2); energy Low, Medium or High. Choosing one drops actions longer than the time and, for Low energy, high-energy actions, then re-ranks (EQ-003). The chips reset each day; the offer records the values used when it was made.
 - [ ] Nothing is planned without accept or edit (BR-005).
 - [ ] The user can follow more than one activity, and add or remove them from Settings or Discover.
 - [ ] Today shows one suggestion card per followed activity, each with its own reason, time,

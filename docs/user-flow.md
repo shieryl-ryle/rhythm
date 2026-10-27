@@ -51,7 +51,7 @@ app, nothing stored (there is no decline screen); red-flag text → S-090, the t
 ### UF-002 — Daily options
 | Step | Screen | User does | System does | Success looks like |
 |---|---|---|---|---|
-| 1 | S-004 | Optionally taps the time or energy chip and picks a value (time: 10, 20, 30 or 45 min; energy: Low, Medium, High) | Drops actions longer than the time; Low energy drops high-energy actions; re-ranks (EQ-003). The choice applies to today only and is not kept as history | Options fit the inputs; the chips show the chosen values |
+| 1 | S-004 | Optionally taps the time or energy chip and picks a value (time: 10, 20, 30 or 45 min; energy: Low, Medium, High) | Drops actions longer than the time; Low energy drops high-energy actions; re-ranks (EQ-003). The chips reset each day; the offer records the values used when it was made | Options fit the inputs; the chips show the chosen values |
 | 2 | S-004 | Accepts / edits (S-102) / replaces / pauses (S-103) | Records the offer status | The accepted option shows as today's plan |
 | 3 | S-004 | Optionally taps "I'm starting" on the planned card | Marks the time the person chose; the card shows "Under way". Nothing is recorded (ADR-014); nothing counts toward the grid yet | The card reads "Started 12:31 · 20 min planned" |
 
