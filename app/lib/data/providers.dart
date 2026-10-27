@@ -27,19 +27,21 @@ final consentProvider = AsyncNotifierProvider<ConsentNotifier, bool>(ConsentNoti
 
 class ConsentNotifier extends AsyncNotifier<bool> {
   @override
-  Future<bool> build() async {
-    final agreed = await ref.watch(consentRepositoryProvider).hasAgreed();
-    // The library is loaded only after consent (BR-014).
-    if (agreed) await ref.read(libraryLoaderProvider).load();
-    return agreed;
-  }
+  Future<bool> build() => ref.watch(consentRepositoryProvider).hasAgreed();
 
   Future<void> agree() async {
     await ref.read(consentRepositoryProvider).agree();
-    await ref.read(libraryLoaderProvider).load();
     state = const AsyncData(true);
   }
 }
+
+/// The activity library in the database. It loads only once the person has agreed (BR-014) and has its own
+/// error state, so a failed load never changes whether someone has consented. Anything that needs actions
+/// (ranking, Today) waits on this provider.
+final libraryReadyProvider = FutureProvider<void>((ref) async {
+  final agreed = ref.watch(consentProvider).valueOrNull ?? false;
+  if (agreed) await ref.read(libraryLoaderProvider).load();
+});
 
 /// Steps that run before delete-all removes anything (cancel notifications, delete a Together
 /// account). The features that own them override this provider.

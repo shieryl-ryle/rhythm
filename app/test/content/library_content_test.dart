@@ -42,10 +42,19 @@ void main() {
     expect(covered, isNot(contains(ActivityKind.notSure)));
   });
 
-  test('no activity is intense and every duration is short enough to start (BR-002)', () {
+  test('no activity is intense and no session is longer than an hour (BR-002)', () {
+    const allowed = {Intensity.veryLow, Intensity.low, Intensity.moderate};
     for (final a in library.actions) {
-      expect(Intensity.values, contains(a.intensity));
-      expect(a.durationMin, inInclusiveRange(5, 90), reason: a.id);
+      expect(allowed, contains(a.intensity), reason: a.id);
+      expect(a.durationMin, inInclusiveRange(5, 60), reason: a.id);
+    }
+  });
+
+  test('group and team games do not promise how others play, and are never starters', () {
+    final games = library.actions.where((a) => a.tags.contains('team_sport') || a.id.contains('_group'));
+    for (final a in games) {
+      expect(a.isStarter, isFalse, reason: a.id);
+      expect(a.description.toLowerCase(), contains('look for'), reason: '${a.id} should hedge');
     }
   });
 
@@ -73,6 +82,33 @@ void main() {
     expect(withTag('team_sport'), greaterThanOrEqualTo(2));
     expect(withTag('high_impact'), greaterThanOrEqualTo(2));
     expect(library.actions.where((a) => a.activity == ActivityKind.swimming), isNotEmpty);
+  });
+
+  test('"Outdoors after dark" removes only outdoor actions, not indoor evening options', () {
+    for (final a in library.actions.where((a) => a.tags.contains('after_dark'))) {
+      expect(a.tags, contains('outdoors'), reason: a.id);
+    }
+  });
+
+  test('anything that includes jogging is tagged high impact', () {
+    final jogging = library.actions.where((a) => RegExp(r'\b(jog|jogging|run)\b', caseSensitive: false)
+        .hasMatch('${a.title} ${a.description}'));
+    expect(jogging, isNotEmpty);
+    for (final a in jogging) {
+      expect(a.tags, contains('high_impact'), reason: a.id);
+    }
+  });
+
+  test('every tag the library declares is used, so no setup answer is a dead end', () {
+    final used = library.actions.expand((a) => a.tags).toSet();
+    expect(library.tagCodes.toSet().difference(used), isEmpty);
+    expect(used.difference(library.tagCodes.toSet()), isEmpty);
+  });
+
+  test('there are seated options for people who do not want to stand', () {
+    final seated = library.actions.where((a) => RegExp(r'\b(seated|chair|sit comfortably|stand or sit)\b', caseSensitive: false)
+        .hasMatch('${a.title} ${a.description}'));
+    expect(seated.length, greaterThanOrEqualTo(2));
   });
 
   test('there are enough starters and lighter options for a person with no history (EQ-003, EV-005)', () {

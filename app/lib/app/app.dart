@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../data/providers.dart';
 import 'router.dart';
 import 'theme.dart';
 
@@ -9,6 +10,8 @@ class LiltApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Starts the library load once the person has agreed. Its errors stay in its own provider.
+    ref.listen(libraryReadyProvider, (_, _) {});
     return MaterialApp.router(
       title: 'Lilt',
       debugShowCheckedModeBanner: false,

@@ -14,8 +14,8 @@ void main() {
     library = parseActionLibrary(await readAssetFile(LibraryAssets.actions));
   });
 
-  test('has about 50 phrases in the three groups BR-003 names', () {
-    expect(flags.phrases.length, inInclusiveRange(40, 70));
+  test('has the three groups BR-003 names', () {
+    expect(flags.phrases.length, inInclusiveRange(40, 140));
     expect(flags.phrases.map((p) => p.category).toSet(), {'self_harm', 'disordered_eating', 'medical_emergency'});
   });
 
@@ -27,6 +27,24 @@ void main() {
       expect(p.phrase.trim(), p.phrase);
       expect(seen.add(p.phrase), isTrue, reason: 'duplicate "${p.phrase}"');
     }
+  });
+
+  test('phrases that would fire on ordinary exercise talk are not on the list', () {
+    const everyday = [
+      'stroke', 'hurt myself', 'cut myself', 'short of breath', 'tight chest', 'purge', 'purging',
+      'stopped eating', 'passed out', 'passing out', 'kms',
+    ];
+    final listed = flags.phrases.map((p) => p.phrase).toSet();
+    expect(listed.intersection(everyday.toSet()), isEmpty);
+  });
+
+  test('phrases are written the way EQ-008 normalises text, so apostrophes are already gone', () {
+    for (final p in flags.phrases) {
+      expect(p.phrase, isNot(contains("'")), reason: p.phrase);
+      expect(p.phrase, isNot(contains('’')), reason: p.phrase);
+    }
+    final listed = flags.phrases.map((p) => p.phrase).toSet();
+    expect(listed, containsAll(['cant breathe', 'dont want to live']));
   });
 
   test('nothing in the library text would trigger the support message', () {

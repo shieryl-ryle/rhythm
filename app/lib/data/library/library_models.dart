@@ -60,11 +60,30 @@ class LibraryAction {
 }
 
 class ActionLibrary {
-  const ActionLibrary({required this.version, required this.tagCodes, required this.actions});
+  const ActionLibrary({
+    required this.version,
+    required this.tagCodes,
+    required this.actions,
+    this.status = '',
+    this.reviewedBy,
+    this.reviewedOn,
+  });
 
   final String version;
   final List<String> tagCodes;
   final List<LibraryAction> actions;
+
+  /// Free-text state of the content, such as "draft: ...".
+  final String status;
+
+  /// Who reviewed the content for safety and culture, and when. Both are null until a review is done
+  /// (BR-002 says "reviewed text"; ADR-004 requires review before sessions with real people).
+  final String? reviewedBy;
+  final String? reviewedOn;
+
+  /// A release build may ship the library only when this is true.
+  bool get isReviewed =>
+      reviewedBy != null && reviewedOn != null && !status.toLowerCase().startsWith('draft');
 }
 
 /// A phrase that routes the person to the support message instead of a suggestion (BR-003, DS-002).
@@ -109,6 +128,9 @@ ActionLibrary parseActionLibrary(String source) {
     actions: (json['actions']! as List)
         .map((e) => LibraryAction.fromJson(e! as Map<String, Object?>))
         .toList(),
+    status: json['status'] as String? ?? '',
+    reviewedBy: json['reviewed_by'] as String?,
+    reviewedOn: json['reviewed_on'] as String?,
   );
 }
 

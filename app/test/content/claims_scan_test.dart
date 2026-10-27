@@ -29,7 +29,7 @@ void main() {
       ];
 
   test('the blocked-claims list has about 40 terms', () {
-    expect(claims.terms.length, inInclusiveRange(35, 60));
+    expect(claims.terms.length, inInclusiveRange(35, 100));
     expect(claims.terms.map((t) => t.toLowerCase()).toSet(), hasLength(claims.terms.length));
   });
 
@@ -49,10 +49,16 @@ void main() {
     expect(_term('cure').hasMatch('secure the door'), isFalse);
     expect(_term('treat').hasMatch('treatment'), isFalse); // "treatment" is its own term
     expect(claims.terms, containsAll(['cure', 'treatment', 'diagnose', 'guaranteed', 'lose weight']));
+    // Word boundaries mean inflections need their own entry.
+    expect(_term('calorie').hasMatch('a calorie count'), isTrue);
+    expect(claims.terms, containsAll(['losing weight', 'lost weight', 'burning calories', 'calorie']));
   });
 
   test('no text states a body number target (BR-002)', () {
-    final numeric = RegExp(r'\b\d+\s*(kg|lbs?|kcal|calories|bpm|mg|%)', caseSensitive: false);
+    final numeric = RegExp(
+      r'\b\d+\s*(kg|kilos?|lbs?|pounds?|stone|kcal|calories|bpm|mg|steps|%)|\b(bmi|heart rate|zone \d)\b',
+      caseSensitive: false,
+    );
     final hits = [
       for (final e in allVisibleText())
         if (numeric.hasMatch(e.value)) '${e.key}: ${e.value}',

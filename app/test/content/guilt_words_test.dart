@@ -38,6 +38,7 @@ void main() {
       for (final a in library.actions) ...a.userVisibleText.map((t) => MapEntry(a.id, t)),
       for (final s in stubActions) ...[
         MapEntry('stub ${s.title}', s.title),
+        MapEntry('stub ${s.title}', s.detail),
         MapEntry('stub ${s.title}', s.reason),
       ],
     ];

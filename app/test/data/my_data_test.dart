@@ -120,11 +120,14 @@ void main() {
 
     // TC-022: with the consent screen showing, no table has a row yet.
     expect((await userRowCounts(db)).values.every((n) => n == 0), isTrue);
+    // BR-014: the library is not loaded before consent either.
+    expect(await db.select(db.actions).get(), isEmpty);
 
     await tester.tap(find.text('I agree, continue'));
     await tester.pumpAndSettle();
     expect(find.text('Here’s what fits today'), findsOneWidget);
     expect((await userRowCounts(db))['consent'], 1);
+    expect(await db.select(db.actions).get(), isNotEmpty);
 
     final container = ProviderScope.containerOf(tester.element(find.byType(LiltApp)));
     await container.read(deleteEverythingProvider)();

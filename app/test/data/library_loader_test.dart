@@ -29,7 +29,7 @@ void main() {
     final run = await (db.select(db.actions)..where((t) => t.id.equals('act_run_walk_20'))).getSingle();
     expect(run.activity, ActivityKind.running);
     expect(run.durationMin, 20);
-    expect(run.tags, 'solo,outdoors,free');
+    expect(run.tags, 'solo,outdoors,free,high_impact');
     expect(run.similarTo, 'act_run_easy_10,act_walk_brisk_30');
     expect(run.libraryVersion, library.version);
   });

@@ -1,8 +1,8 @@
 {
   "dataset": "DS-003",
-  "version": "2026-10-27.1",
+  "version": "2026-10-27.2",
   "status": "draft: team-authored (docs/methods.md DS-003); BR-001 and BR-002 say no diagnosis, treatment, medical claims, promise of results, or numeric body targets",
-  "matching": "Case-insensitive, on word boundaries (EQ-007 a, TC-009). Every user-visible string in the library, the suggestion templates, the notification copy and the observation templates is scanned.",
+  "matching": "Case-insensitive, on word boundaries (EQ-007 a, TC-009), so each inflection is listed on its own. Every user-visible string in the library, the suggestion templates, the notification copy and the observation templates is scanned. \"treat\" also blocks \"a treat\"; reword such copy.",
   "terms": [
     "cure", "cures", "cured",
     "treat", "treats", "treated", "treatment",
@@ -10,13 +10,18 @@
     "therapy", "therapeutic",
     "heal", "heals", "healing",
     "prevent", "prevents", "prevention",
+    "relieve", "relieves", "relief",
     "medication", "medicine", "prescribe", "prescription",
     "supplement", "supplements",
     "guarantee", "guarantees", "guaranteed",
     "proven", "clinically proven", "doctor-approved", "miracle",
-    "detox",
-    "lose weight", "weight loss", "burn fat", "fat burning", "burn calories", "calories",
-    "slim down", "get ripped", "six-pack",
+    "detox", "detoxing",
+    "get results", "see results",
+    "lose weight", "losing weight", "lost weight", "weight loss", "fat loss", "lose fat",
+    "burn fat", "fat burning", "burn calories", "burns calories", "burning calories", "calorie", "calories",
+    "boost metabolism", "slim down", "slim", "toned", "shred", "beach body",
+    "get ripped", "six-pack",
+    "reduces stress", "improves your health", "lower your risk",
     "lower blood pressure", "lower cholesterol", "reduce your risk", "boost immunity", "anti-aging"
   ]
 }

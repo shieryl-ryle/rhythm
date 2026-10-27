@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lilt/app/app.dart';
 import 'package:lilt/data/consent_repository.dart';
+import 'package:lilt/data/library/library_loader.dart';
 import 'package:lilt/data/providers.dart';
 import 'package:lilt/features/today/stub_actions.dart';
 
@@ -102,4 +103,28 @@ void main() {
     expect(find.text('Here’s what fits today'), findsOneWidget);
     expect(find.byType(Scaffold), findsWidgets);
   });
+
+  testWidgets('a library that fails to load does not undo consent', (tester) async {
+    final repo = FakeConsentRepository()..agreed = true;
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          consentRepositoryProvider.overrideWithValue(repo),
+          libraryLoaderProvider.overrideWithValue(_FailingLibraryLoader()),
+        ],
+        child: const LiltApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Here’s what fits today'), findsOneWidget);
+    expect(find.text('Welcome to Lilt'), findsNothing);
+    final container = ProviderScope.containerOf(tester.element(find.byType(LiltApp)));
+    expect(container.read(libraryReadyProvider).hasError, isTrue);
+  });
+}
+
+class _FailingLibraryLoader implements LibraryLoader {
+  @override
+  Future<int> load() async => throw const FormatException('broken library');
 }
