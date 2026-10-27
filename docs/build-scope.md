@@ -82,7 +82,7 @@
 |---|---|---|---|
 | 7.1 Settings | S-008 | `/settings` | A |
 | 7.2 My activities | S-016 | `/settings/activities` | A |
-| 7.3 Gentle reminders | S-106 | `/settings/reminders` | A (after the core loop) |
+| 7.3 Gentle reminders | S-106 sheet | sheet | A (after the core loop) |
 | 7.4 Exporting; 7.5 Export done | S-008 states | `/settings` | A |
 | 7.6 Delete everything?; 7.7 Deleting | S-104 dialog | dialog | A |
 | 7.8 When I'm free | S-017 | `/settings/free-times` | A |
@@ -115,7 +115,8 @@
 |---|---|---|---|
 | 11.4, 11.4s Together · events (signed in, signed out) | S-010 | `/together` | B |
 | 11.8 Together · clubs; 11.9 Together · mine | S-010 segments | `/together` | B |
-| 11.5, 11.5s, 11.6 Event detail, signed out, you're going; 10.5 Event cancelled → alternative | S-021 | `/together/event/:id` | B |
+| 11.5, 11.5s, 11.6 Event detail, signed out, you're going | S-021 | `/together/event/:id` | B |
+| 10.5 Event cancelled → alternative | S-021 state | `/together/event/:id` | B (needs host cancel, so it goes with hosting if hosting is cut) |
 | 11.7 Club page | S-022 | `/together/club/:id` | B |
 | 11.1 Together · sign in | S-024 | `/together/sign-in` | B |
 | 11.2 Your profile | S-019 | `/together/profile` | B |

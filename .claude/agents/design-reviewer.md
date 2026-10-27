@@ -47,7 +47,7 @@ Report issues with the frame they appear on; do not fix them.
   - BR-013: paused days and paused state are neutral.
   - BR-014: nothing is asked or stored before consent.
   - BR-016: the AI choice explains what is sent.
-  - BR-019: AI-worded text is labelled.
+  - BR-019: AI-worded text is labelled (dormant in P0, ADR-006: skip unless AI code exists).
 - **Owner decisions (2026-10-23, Sitemap §1).**
   - Exactly 3 tabs: Today · Discover · My rhythm. Settings sits behind the header profile icon.
   - Today shows one hero suggestion, with "Something else" and "Not today".
