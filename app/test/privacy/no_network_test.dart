@@ -52,6 +52,7 @@ void main() {
         overrides: [
           databaseProvider.overrideWithValue(db),
           libraryLoaderProvider.overrideWithValue(DriftLibraryLoader(db, readAssetFile)),
+          ...setupTestOverrides(),
         ],
         child: const LiltApp(),
       ),
@@ -60,6 +61,7 @@ void main() {
 
     await tester.tap(find.text('I agree, continue'));
     await tester.pumpAndSettle();
+    await completeSetup(tester);
     expect(find.text('Here’s what fits today'), findsOneWidget);
 
     final container = ProviderScope.containerOf(tester.element(find.byType(LiltApp)));

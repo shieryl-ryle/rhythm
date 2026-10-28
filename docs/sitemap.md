@@ -46,7 +46,7 @@ IDs: `S-001…` main screens · `S-09x` error/blocked states · `S-1xx` dialogs/
 | S-023 | Host an event | Create an event and confirm it was posted (11.10, 11.11) | F-018, BR-027 | S-010 "+ Host an event" | Signed in, 18+ | idle / posted |
 | S-024 | Sign-in step | Google or email sign-in, shown on RSVP, join or host (11.1); email entry and link-sent states are not drawn | F-018 | S-021 "I'm going", S-022 Join, S-010 "+ Host an event", the signed-out "Mine" segment | Public | idle / email sent / error |
 | S-025 | Together account | Edit profile, sign out, delete the account (no frame; BR-017) | F-018, BR-017 | Settings | Signed in | idle |
-| S-090 | Support message | Fixed, non-AI message pointing to professional or emergency help | BR-003 | Red-flag text anywhere | Any | static |
+| S-090 | Support message | Fixed, non-AI message pointing to professional or emergency help. Three rows (emergency services, a crisis line, your doctor) open the numbers for the person's region **as text**; the app never dials (owner decision 2026-10-28). The numbers are data in `app/assets/support/helplines.json`, which the owner fills and verifies per region (South Africa, MENA and APAC first); until a region is listed the screen says "call your local emergency number" | BR-003 | Red-flag text anywhere | Any | static |
 | S-091 | Something went wrong | Recoverable error with retry; no data loss | — | Unhandled error | Any | static |
 | S-101 | Reflection sheet | Completed / partly / skipped + optional enjoyment, effort, barrier | F-003 | Today (after accept); notification | Consented | idle / saved |
 | S-102 | Edit option sheet | Adjust duration and time of an option | F-002 | Today → Edit | Consented | idle |
