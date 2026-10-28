@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lilt/data/library/library_models.dart';
+import 'package:lilt/features/support/helplines.dart';
+import 'package:lilt/features/support/support_providers.dart';
 
 import '../support/test_support.dart';
 
@@ -16,6 +18,14 @@ void main() {
   test('the library has been reviewed for safety and culture', () async {
     final library = parseActionLibrary(await readAssetFile(LibraryAssets.actions));
     expect(library.isReviewed, isTrue, reason: 'status: "${library.status}", reviewed_by: ${library.reviewedBy}');
+  }, skip: _enforce ? false : 'Enforced only for release and study builds (REQUIRE_REVIEWED_CONTENT=true)');
+
+  test('the support message has numbers for at least one region (BR-003)', () async {
+    final helplines = Helplines.parse(await readAssetFile(helplinesAsset));
+    expect(helplines.regions, isNotEmpty, reason: 'assets/support/helplines.json is empty: S-090 has no numbers');
+    for (final r in helplines.regions) {
+      expect(r.emergency, isNotEmpty, reason: '${r.name} needs emergency numbers');
+    }
   }, skip: _enforce ? false : 'Enforced only for release and study builds (REQUIRE_REVIEWED_CONTENT=true)');
 
   test('a draft library is never counted as reviewed', () {

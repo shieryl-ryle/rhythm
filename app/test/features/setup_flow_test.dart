@@ -22,6 +22,14 @@ class _AgreedConsent implements ConsentRepository {
   Future<void> agree() async {}
 }
 
+class _NotAgreedConsent implements ConsentRepository {
+  @override
+  Future<bool> hasAgreed() async => false;
+
+  @override
+  Future<void> agree() async {}
+}
+
 class _ThrowingSetupRepository implements SetupRepository {
   int attempts = 0;
   bool failOnce = true;
@@ -96,7 +104,7 @@ void main() {
       await _tap(tester, 'Pick up something I stopped');
       await _tap(tester, 'Start being active for the first time');
       await _tap(tester, 'Next');
-      expect(find.text('What sounds good to try?'), findsOneWidget);
+      expect(find.text('What sounds fun to you?'), findsOneWidget);
     });
   });
 
@@ -197,6 +205,125 @@ void main() {
     });
   });
 
+  group('Skip', () {
+    testWidgets('leaves the question unanswered: what was ticked is cleared (BR-008)', (tester) async {
+      final repo = await _open(tester);
+      await _tap(tester, 'Pick up something I stopped');
+      await _tap(tester, 'Next');
+      await _tap(tester, 'Gym');
+      await _tap(tester, 'Next');
+      await _tap(tester, 'A year or more');
+      await _tap(tester, 'Next');
+      await _tap(tester, 'Moved');
+      await _tap(tester, 'Skip');
+      await _tap(tester, 'Shorter sessions');
+      await _tap(tester, 'Skip');
+      await _tap(tester, 'Lunch');
+      await _tap(tester, 'Next');
+      await _tap(tester, 'Next');
+      await _tap(tester, 'Show me today');
+      expect(repo.saved!.gotInTheWay, isEmpty);
+      expect(repo.saved!.wouldHelp, isEmpty);
+    });
+  });
+
+  group('add something new with keep going', () {
+    testWidgets('does not ask what they do now twice', (tester) async {
+      await _open(tester);
+      await _tap(tester, 'Keep going with something I do now');
+      await _tap(tester, 'Add something new to what I do');
+      await _tap(tester, 'Next');
+      await _tap(tester, 'Walking');
+      await _tap(tester, 'Next');
+      await _tap(tester, 'Going well');
+      await _tap(tester, 'Next');
+      expect(find.text('When could you fit it in?'), findsOneWidget);
+    });
+  });
+
+  group('a leave-out that covers something they follow', () {
+    testWidgets('says so, and the leave-out stays', (tester) async {
+      final repo = await _open(tester);
+      await _tap(tester, 'Keep going with something I do now');
+      await _tap(tester, 'Next');
+      await _tap(tester, 'Swimming');
+      await _tap(tester, 'Next');
+      await _tap(tester, 'Going well');
+      await _tap(tester, 'Next');
+      await _tap(tester, 'Lunch');
+      await _tap(tester, 'Next');
+      await _tap(tester, 'Next');
+      expect(find.textContaining('You also picked'), findsNothing);
+      await _tap(tester, 'Swimming');
+      expect(find.text('You also picked swimming. We won’t suggest it while it is left out.'), findsOneWidget);
+      await _tap(tester, 'Show me today');
+      expect(repo.saved!.excluded, {'swimming'});
+    });
+  });
+
+  group('frames 9.12 and 9.13, and the folded row on 1.8', () {
+    testWidgets('add something new alone asks "What do you already do?"', (tester) async {
+      await _open(tester);
+      await _tap(tester, 'Add something new to what I do');
+      await _tap(tester, 'Next');
+      expect(find.text('Add something new'), findsOneWidget);
+      expect(find.text('What do you already do?'), findsOneWidget);
+    });
+
+    testWidgets('start fresh offers the eight chips of frame 9.13, tickless', (tester) async {
+      final repo = await _open(tester);
+      await _tap(tester, 'Start being active for the first time');
+      await _tap(tester, 'Next');
+      expect(find.text('What sounds fun to you?'), findsOneWidget);
+      for (final label in ['Walking', 'Dancing', 'Cycling', 'Swimming', 'Team sports', 'Racket sports', 'Yoga', 'Not sure yet']) {
+        expect(find.text(label), findsOneWidget, reason: label);
+      }
+      await _tap(tester, 'Walking');
+      expect(find.byIcon(Icons.check), findsNothing, reason: 'single choice has no tick');
+      await _tap(tester, 'Next');
+      await _tap(tester, 'Lunch');
+      await _tap(tester, 'Next');
+      await _tap(tester, 'Next');
+      await _tap(tester, 'Show me today');
+      expect(repo.saved!.freshChoice, ActivityKind.walking);
+    });
+
+    testWidgets('keep going and pick up again: the 1.8 question folds the first section into a row, and Edit goes back',
+        (tester) async {
+      await _open(tester);
+      await _tap(tester, 'Keep going with something I do now');
+      await _tap(tester, 'Pick up something I stopped');
+      await _tap(tester, 'Next');
+      await _tap(tester, 'Gym');
+      await _tap(tester, 'Next');
+      await _tap(tester, 'Up and down');
+      await _tap(tester, 'Next');
+      expect(find.text('What would you like to pick up again?'), findsOneWidget);
+      expect(find.text('Gym · up and down'), findsOneWidget);
+      expect(find.text('Step 4 of 10'), findsNothing); // the progress is named, not shown as text
+      await _tap(tester, 'Edit');
+      expect(find.text('What do you do now?'), findsOneWidget);
+    });
+  });
+
+  group('Skip is at the top right, so Next never moves', () {
+    testWidgets('Next is in the same place on a question with Skip and one without', (tester) async {
+      await _open(tester);
+      await _tap(tester, 'Pick up something I stopped');
+      await _tap(tester, 'Next');
+      await _tap(tester, 'Running');
+      final withoutSkip = tester.getRect(find.widgetWithText(FilledButton, 'Next'));
+      await _tap(tester, 'Next');
+      await _tap(tester, 'A few months ago');
+      await _tap(tester, 'Next');
+      expect(find.text('What got in the way?'), findsOneWidget);
+      final withSkip = tester.getRect(find.widgetWithText(FilledButton, 'Next'));
+      expect(withSkip, withoutSkip);
+      // Skip is in the header, above the content, not touching Next.
+      expect(tester.getRect(find.widgetWithText(TextButton, 'Skip')).bottom, lessThan(withSkip.top));
+    });
+  });
+
   group('back', () {
     testWidgets('the back arrow goes to the previous question and keeps the answers', (tester) async {
       await _open(tester);
@@ -283,7 +410,7 @@ void main() {
       await toKeepActivity(tester);
       await tester.enterText(find.byType(TextField), 'Padel');
       await tester.pumpAndSettle();
-      expect(find.text('Not listed?'), findsOneWidget);
+      expect(find.text('No activities match “Padel”'), findsOneWidget);
       await tester.tap(find.text('Add “Padel” yourself'));
       await tester.pumpAndSettle();
 
@@ -305,7 +432,9 @@ void main() {
       await toKeepActivity(tester);
       await tester.enterText(find.byType(TextField), 'zzz');
       await tester.pumpAndSettle();
-      expect(find.text('No matches'), findsOneWidget);
+      // Frame 9.14: what happened, then the way forward.
+      expect(find.text('No activities match “zzz”'), findsOneWidget);
+      expect(find.text('Check the spelling, or add it yourself.'), findsOneWidget);
       expect(find.text('Add “zzz” yourself'), findsOneWidget);
     });
 
@@ -329,6 +458,32 @@ void main() {
       expect(tester.widget<FilledButton>(_next).onPressed, isNull, reason: 'no activity was picked');
       expect(repo.saved, isNull);
       expect(find.textContaining('want to die'), findsNothing);
+    });
+
+    testWidgets('if the red-flag list cannot be read, the text is not used and the person is told', (tester) async {
+      final repo = await _open(tester, more: [
+        assetReaderProvider.overrideWithValue((path) async {
+          if (path.contains('red_flags')) throw StateError('missing');
+          return readAssetFile(path);
+        }),
+      ]);
+      await toKeepActivity(tester);
+      await tester.enterText(find.byType(TextField), 'Padel');
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Add “Padel” yourself'));
+      await tester.pumpAndSettle();
+      expect(find.text('That did not work. Please try again.'), findsOneWidget);
+      expect(find.text('Padel'), findsOneWidget, reason: 'still in the field, not chosen');
+      expect(repo.saved, isNull);
+    });
+
+    testWidgets('the field does not learn or suggest what is typed', (tester) async {
+      await _open(tester);
+      await toKeepActivity(tester);
+      final field = tester.widget<TextField>(find.byType(TextField));
+      expect(field.autocorrect, isFalse);
+      expect(field.enableSuggestions, isFalse);
+      expect(field.enableIMEPersonalizedLearning, isFalse);
     });
 
     testWidgets('everyday words are not flagged', (tester) async {
@@ -408,7 +563,114 @@ void main() {
     });
   });
 
+  group('TC-044 and TC-045 on the rest of setup, the search and the support message', () {
+    for (final scale in [1.0, 2.0]) {
+      for (final size in [const Size(360, 800), const Size(320, 568)]) {
+        testWidgets('${(scale * 100).round()}% text on ${size.width.toInt()}x${size.height.toInt()}', (tester) async {
+          final handle = tester.ensureSemantics();
+          await _open(tester, size: size, textScale: scale);
+          Future<void> check(String where) async {
+            expect(tester.takeException(), isNull, reason: where);
+            await expectLater(tester, meetsGuideline(androidTapTargetGuideline), reason: where);
+            await expectLater(tester, meetsGuideline(labeledTapTargetGuideline), reason: where);
+          }
+
+          await _tap(tester, 'Pick up something I stopped');
+          await _tap(tester, 'Next');
+          await _tap(tester, 'Running');
+          await _tap(tester, 'Next');
+          await check('when did you stop');
+          await _tap(tester, 'A few months ago');
+          await _tap(tester, 'Next');
+          await check('what got in the way, with Skip and the summary');
+          await _tap(tester, 'Skip');
+          await check('what would help');
+          await _tap(tester, 'Skip');
+          await check('week');
+          await _tap(tester, 'Lunch');
+          await _tap(tester, 'Next');
+          await check('why it matters');
+          await _tap(tester, 'Next');
+          await check('leave out');
+          await _tap(tester, 'Swimming');
+          await check('leave out with a ticked chip');
+          handle.dispose();
+        });
+      }
+    }
+
+    testWidgets('the activity search, with matches and with none, at 200% on a small phone', (tester) async {
+      final handle = tester.ensureSemantics();
+      await _open(tester, size: const Size(320, 568), textScale: 2);
+      await _tap(tester, 'Keep going with something I do now');
+      await _tap(tester, 'Next');
+      await _tap(tester, 'Other');
+      await tester.enterText(find.byType(TextField), 'pil');
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+      await tester.enterText(find.byType(TextField), 'zzz');
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+      await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
+      handle.dispose();
+    });
+  });
+
   group('S-090 support message', () {
+    testWidgets('at 200% the emergency row is pinned and reachable without scrolling', (tester) async {
+      await _open(tester, size: const Size(320, 568), textScale: 2);
+      GoRouterHelper.go(tester.element(find.byType(Scaffold).first), '/support');
+      await tester.pumpAndSettle();
+      final row = tester.getRect(find.text('Call emergency services'));
+      expect(row.bottom, lessThanOrEqualTo(568));
+      expect(row.top, greaterThanOrEqualTo(0));
+      // Pinned: it is outside the scrolling body, so it does not move when the body scrolls.
+      await tester.drag(find.byType(SingleChildScrollView).first, const Offset(0, -300));
+      await tester.pumpAndSettle();
+      expect(tester.getRect(find.text('Call emergency services')), row);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('a listed region is named above its numbers', (tester) async {
+      const json = '''
+{"version":"test","regions":[{"name":"Testland","countries":["ZZ"],
+ "emergency":[{"label":"Emergency services","number":"000","note":"Free from any phone"}]}]}''';
+      await _open(tester, more: [
+        deviceCountryProvider.overrideWithValue('ZZ'),
+        assetReaderProvider.overrideWithValue((path) async => path == helplinesAsset ? json : readAssetFile(path)),
+      ]);
+      GoRouterHelper.go(tester.element(find.byType(Scaffold).first), '/support');
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Call emergency services'));
+      await tester.pumpAndSettle();
+      expect(find.text('Numbers for Testland'), findsOneWidget);
+      expect(find.text('Free from any phone'), findsOneWidget);
+    });
+
+    testWidgets('it can be opened before consent, with nothing stored (BR-003, BR-014)', (tester) async {
+      tester.view.physicalSize = const Size(360, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            consentRepositoryProvider.overrideWithValue(_NotAgreedConsent()),
+            setupRepositoryProvider.overrideWithValue(FakeSetupRepository()),
+            libraryLoaderProvider.overrideWithValue(NoopLibraryLoader()),
+            ...setupTestOverrides(),
+          ],
+          child: const LiltApp(),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Welcome to Lilt'), findsOneWidget);
+      GoRouterHelper.go(tester.element(find.byType(Scaffold).first), '/support');
+      await tester.pumpAndSettle();
+      expect(find.text('You don’t have to handle this alone'), findsOneWidget);
+    });
+
     testWidgets('with no numbers listed it says to call the local emergency number, and shows no number',
         (tester) async {
       await _open(tester, more: [deviceCountryProvider.overrideWithValue('ZA')]);

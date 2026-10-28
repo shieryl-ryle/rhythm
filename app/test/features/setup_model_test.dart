@@ -33,12 +33,11 @@ void main() {
       expect(steps.indexOf(SetupStep.why) + 1, 9);
     });
 
-    test('all three ticked paths', () {
+    test('all three ticked paths: "What do you do now?" is asked once', () {
       expect(stepsFor({SetupPath.keepGoing, SetupPath.addNew, SetupPath.pickUpAgain}), [
         SetupStep.brings,
         SetupStep.keepActivity,
         SetupStep.keepProgress,
-        SetupStep.addNew,
         SetupStep.pickUpWhich,
         SetupStep.pickUpStopped,
         SetupStep.pickUpGotInWay,
@@ -47,6 +46,11 @@ void main() {
         SetupStep.why,
         SetupStep.leaveOut,
       ]);
+    });
+
+    test('add something new alone asks what they do now; with keep going it does not ask again', () {
+      expect(stepsFor({SetupPath.addNew}), contains(SetupStep.addNew));
+      expect(stepsFor({SetupPath.addNew, SetupPath.keepGoing}), isNot(contains(SetupStep.addNew)));
     });
 
     test('start fresh has one question of its own', () {
@@ -162,6 +166,28 @@ void main() {
     });
   });
 
+  group('leave-outs that cover something they follow (BR-011)', () {
+    test('swimming', () {
+      const a = SetupAnswers(keepActivity: ActivityKind.swimming, excluded: {'swimming'});
+      expect(leaveOutConflicts(a), [ActivityKind.swimming]);
+    });
+
+    test('team sports covers team sports and basketball', () {
+      const a = SetupAnswers(
+        keepActivity: ActivityKind.basketball,
+        freshChoice: ActivityKind.teamSports,
+        excluded: {'team_sport'},
+      );
+      expect(leaveOutConflicts(a), unorderedEquals([ActivityKind.teamSports, ActivityKind.basketball]));
+    });
+
+    test('no overlap, no conflict', () {
+      const a = SetupAnswers(keepActivity: ActivityKind.walking, excluded: {'swimming', 'after_dark'});
+      expect(leaveOutConflicts(a), isEmpty);
+      expect(leaveOutConflicts(const SetupAnswers(keepActivity: ActivityKind.swimming)), isEmpty);
+    });
+  });
+
   group('words', () {
     test('titles use the person\'s own activity, as frame 1.7 does', () {
       const a = SetupAnswers(keepActivity: ActivityKind.gym);
@@ -178,9 +204,27 @@ void main() {
       );
       expect(summaryFor(SetupStep.pickUpStopped, a), 'Running');
       expect(summaryFor(SetupStep.pickUpGotInWay, a), 'Running · a few months ago');
-      expect(summaryFor(SetupStep.pickUpHelp, a), 'Running · a few months ago · busier at work or study');
+      // The summary shows what is certain, not one of several ticked answers.
+      expect(summaryFor(SetupStep.pickUpHelp, a), 'Running · a few months ago');
       expect(summaryFor(SetupStep.keepProgress, const SetupAnswers(keepActivity: ActivityKind.gym)), 'Gym');
       expect(summaryFor(SetupStep.week, a), isNull);
+    });
+
+    test('with keep going ticked, "What would you like to pick up again?" folds it into a row (frame 1.8)', () {
+      const a = SetupAnswers(
+        paths: {SetupPath.keepGoing, SetupPath.pickUpAgain},
+        keepActivity: ActivityKind.gym,
+        progress: Progress.upAndDown,
+      );
+      expect(summaryFor(SetupStep.pickUpWhich, a), 'Gym · up and down');
+      expect(summaryFor(SetupStep.pickUpWhich, const SetupAnswers(paths: {SetupPath.pickUpAgain})), isNull);
+      expect(sectionStart(SetupStep.pickUpWhich, keepGoingTicked: true), SetupStep.keepActivity);
+      expect(sectionStart(SetupStep.pickUpWhich), SetupStep.pickUpWhich);
+    });
+
+    test('the add-something-new and start-fresh titles are the ones on frames 9.12 and 9.13', () {
+      expect(titleFor(SetupStep.addNew, const SetupAnswers()), 'What do you already do?');
+      expect(titleFor(SetupStep.startFresh, const SetupAnswers()), 'What sounds fun to you?');
     });
 
     test('"Edit" goes back to the start of the section', () {

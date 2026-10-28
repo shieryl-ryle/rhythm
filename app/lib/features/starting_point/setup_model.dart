@@ -180,7 +180,8 @@ class SetupAnswers {
 List<SetupStep> stepsFor(Set<SetupPath> paths) => [
       SetupStep.brings,
       if (paths.contains(SetupPath.keepGoing)) ...[SetupStep.keepActivity, SetupStep.keepProgress],
-      if (paths.contains(SetupPath.addNew)) SetupStep.addNew,
+      // "What do you do now?" is asked once: Keep going already holds the activity they do today.
+      if (paths.contains(SetupPath.addNew) && !paths.contains(SetupPath.keepGoing)) SetupStep.addNew,
       if (paths.contains(SetupPath.pickUpAgain)) ...[
         SetupStep.pickUpWhich,
         SetupStep.pickUpStopped,
@@ -244,9 +245,31 @@ String? eyebrowFor(SetupStep step) => switch (step) {
       SetupStep.brings => null,
     };
 
-/// The first step of the section [step] belongs to, which "Edit" on the summary row goes back to.
-SetupStep sectionStart(SetupStep step) => switch (step) {
+/// The first step of the section [step] belongs to, which "Edit" on the summary row goes back to. With Keep
+/// going ticked, the row on "What would you like to pick up again?" summarises that section, so Edit goes there.
+SetupStep sectionStart(SetupStep step, {bool keepGoingTicked = false}) => switch (step) {
       SetupStep.keepProgress => SetupStep.keepActivity,
+      SetupStep.pickUpWhich when keepGoingTicked => SetupStep.keepActivity,
       SetupStep.pickUpStopped || SetupStep.pickUpGotInWay || SetupStep.pickUpHelp => SetupStep.pickUpWhich,
       _ => step,
     };
+
+/// Leave-outs that cover something the person said they follow (BR-011: the leave-out wins). "Swimming" covers
+/// swimming; "Team sports" (the tag `team_sport`) covers team sports and basketball, the same way the ranker
+/// filters (docs/methods.md EQ-003).
+List<ActivityKind> leaveOutConflicts(SetupAnswers a) {
+  final followed = <ActivityKind>{
+    ?a.keepActivity,
+    ?a.addNewActivity,
+    ?a.pickUpActivity,
+    ?a.freshChoice,
+  };
+  final covered = <ActivityKind>{
+    if (a.excluded.contains('swimming')) ActivityKind.swimming,
+    if (a.excluded.contains('team_sport')) ...[ActivityKind.teamSports, ActivityKind.basketball],
+  };
+  return [
+    for (final k in ActivityKind.values)
+      if (followed.contains(k) && covered.contains(k)) k,
+  ];
+}

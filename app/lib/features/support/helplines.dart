@@ -2,10 +2,14 @@ import 'dart:convert';
 
 /// One phone number the support message can show: a label such as "Emergency services" and the number.
 class HelplineNumber {
-  const HelplineNumber({required this.label, required this.number});
+  const HelplineNumber({required this.label, required this.number, this.note});
 
   final String label;
   final String number;
+
+  /// What the owner has verified about this number, such as its hours. Shown under it, and only when present,
+  /// so the app never claims more than the data does.
+  final String? note;
 }
 
 /// The numbers for one region (a country or a group of countries). Each list may be empty.
@@ -52,7 +56,7 @@ class Helplines {
     final json = jsonDecode(source) as Map<String, Object?>;
     List<HelplineNumber> numbers(Object? list) => [
           for (final e in (list as List? ?? const []).cast<Map<String, Object?>>())
-            HelplineNumber(label: e['label']! as String, number: e['number']! as String),
+            HelplineNumber(label: e['label']! as String, number: e['number']! as String, note: e['note'] as String?),
         ];
     return Helplines(
       version: json['version']! as String,

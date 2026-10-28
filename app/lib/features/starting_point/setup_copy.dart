@@ -89,10 +89,16 @@ const pickUpKinds = [
   ActivityKind.dance,
 ];
 
+/// Frame 9.13: eight tickless chips. Walking, cycling, swimming and yoga are stored as the activity with the
+/// path `start_fresh`; "Not sure yet" has no activity and starters are offered (EV-005).
 const freshOptions = [
+  Option(ActivityKind.walking, 'Walking'),
   Option(ActivityKind.dance, 'Dancing'),
+  Option(ActivityKind.cycling, 'Cycling'),
+  Option(ActivityKind.swimming, 'Swimming'),
   Option(ActivityKind.teamSports, 'Team sports'),
   Option(ActivityKind.racketSports, 'Racket sports'),
+  Option(ActivityKind.yoga, 'Yoga'),
   Option(ActivityKind.notSure, 'Not sure yet'),
 ];
 
@@ -194,6 +200,13 @@ String activityLabel(ActivityKind? kind, String? customName) {
 /// "Gym · up and down" (frames 1.8 to 1.11). Null when the step has nothing earlier to summarise.
 String? summaryFor(SetupStep step, SetupAnswers a) {
   switch (step) {
+    case SetupStep.pickUpWhich:
+      // With Keep going ticked, the earlier answers fold into a row here (frame 1.8: "Gym · up and down").
+      if (!a.paths.contains(SetupPath.keepGoing) || a.keepActivity == null) return null;
+      return _join([
+        activityLabel(a.keepActivity, a.keepCustomName),
+        if (a.progress != null) labelOf(progressOptions, a.progress!).toLowerCase(),
+      ]);
     case SetupStep.keepProgress:
       final name = activityLabel(a.keepActivity, a.keepCustomName);
       return name.isEmpty ? null : name;
@@ -204,8 +217,6 @@ String? summaryFor(SetupStep step, SetupAnswers a) {
       final parts = [
         activityLabel(a.pickUpActivity, a.pickUpCustomName),
         if (a.stoppedAgo != null) labelOf(stoppedOptions, a.stoppedAgo!).toLowerCase(),
-        if (step == SetupStep.pickUpHelp && a.gotInTheWay.isNotEmpty)
-          labelOf(gotInTheWayOptions, a.gotInTheWay.first).toLowerCase(),
       ];
       return _join(parts);
     default:
@@ -223,12 +234,12 @@ String titleFor(SetupStep step, SetupAnswers a) => switch (step) {
       SetupStep.brings => 'What brings you here?',
       SetupStep.keepActivity => 'What do you do now?',
       SetupStep.keepProgress => 'How’s the ${activityLabel(a.keepActivity, a.keepCustomName).toLowerCase()} going?',
-      SetupStep.addNew => 'What do you do now?',
+      SetupStep.addNew => 'What do you already do?',
       SetupStep.pickUpWhich => 'What would you like to pick up again?',
       SetupStep.pickUpStopped => 'When did you stop, roughly?',
       SetupStep.pickUpGotInWay => 'What got in the way?',
       SetupStep.pickUpHelp => 'What would make it easier now?',
-      SetupStep.startFresh => 'What sounds good to try?',
+      SetupStep.startFresh => 'What sounds fun to you?',
       SetupStep.week => 'When could you fit it in?',
       SetupStep.why => 'Why does being active matter to you?',
       SetupStep.leaveOut => 'Anything to leave out?',

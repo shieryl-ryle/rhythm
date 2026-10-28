@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../app/theme.dart';
 import '../../data/enums.dart';
 import '../../ui/ui.dart';
+import '../../domain/red_flags.dart';
 import '../support/support_providers.dart';
 import 'setup_copy.dart';
 
@@ -59,7 +60,18 @@ class _ActivitySearchScreenState extends ConsumerState<ActivitySearchScreen> {
   Future<void> _addYourself() async {
     final typed = _controller.text.trim();
     if (typed.isEmpty) return;
-    final detector = await ref.read(redFlagDetectorProvider.future);
+    final RedFlagDetector detector;
+    try {
+      detector = await ref.read(redFlagDetectorProvider.future);
+    } on Object {
+      // The check could not run, so the text is not used (BR-003 fails closed). Say so instead of doing nothing.
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('That did not work. Please try again.')),
+        );
+      }
+      return;
+    }
     if (!mounted) return;
     if (detector.check(typed) != null) {
       // BR-003: no suggestion, nothing stored. Clear the field and show the support message.
@@ -109,6 +121,10 @@ class _ActivitySearchScreenState extends ConsumerState<ActivitySearchScreen> {
                         focusNode: _focus,
                         autofocus: true,
                         maxLength: maxCustomNameLength,
+                        // This field can hold sensitive words: no suggestions and no keyboard learning (BR-015).
+                        autocorrect: false,
+                        enableSuggestions: false,
+                        enableIMEPersonalizedLearning: false,
                         textInputAction: TextInputAction.search,
                         style: LiltText.body,
                         decoration: const InputDecoration(
@@ -132,10 +148,31 @@ class _ActivitySearchScreenState extends ConsumerState<ActivitySearchScreen> {
                 ),
               ),
               const SizedBox(height: LiltSpacing.lg),
-              Text(
-                matches.isEmpty ? 'No matches' : (query.isEmpty ? 'Activities' : 'Matches'),
-                style: LiltText.label.copyWith(color: LiltColors.inkMuted),
-              ),
+              if (matches.isEmpty && typed.isNotEmpty) ...[
+                // Frame 9.14: say what happened, then the way forward.
+                Semantics(
+                  liveRegion: true,
+                  child: Text(
+                    'No activities match “${_shortened(typed)}”',
+                    style: LiltText.body.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                ),
+                const SizedBox(height: LiltSpacing.xs),
+                Text(
+                  'Check the spelling, or add it yourself.',
+                  style: LiltText.body.copyWith(color: LiltColors.inkMuted),
+                ),
+                LiltButton(
+                  label: 'Add “${_shortened(typed)}” yourself',
+                  kind: LiltButtonKind.text,
+                  flush: true,
+                  onPressed: _addYourself,
+                ),
+              ] else
+                Text(
+                  query.isEmpty ? 'Activities' : 'Matches',
+                  style: LiltText.label.copyWith(color: LiltColors.inkMuted),
+                ),
               const SizedBox(height: LiltSpacing.sm),
               for (final e in matches)
                 LiltListRow(
@@ -143,15 +180,16 @@ class _ActivitySearchScreenState extends ConsumerState<ActivitySearchScreen> {
                   subtitle: e.blurb,
                   onTap: () => Navigator.of(context).pop(ActivityPick(e.kind)),
                 ),
-              if (typed.isNotEmpty && !exact) ...[
+              if (typed.isNotEmpty && !exact && matches.isNotEmpty) ...[
                 const SizedBox(height: LiltSpacing.sm),
                 Wrap(
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     Text('Not listed?', style: LiltText.body.copyWith(color: LiltColors.inkMuted)),
                     LiltButton(
-                      label: 'Add “$typed” yourself',
+                      label: 'Add “${_shortened(typed)}” yourself',
                       kind: LiltButtonKind.text,
+                      flush: true,
                       onPressed: _addYourself,
                     ),
                   ],
@@ -164,3 +202,6 @@ class _ActivitySearchScreenState extends ConsumerState<ActivitySearchScreen> {
     );
   }
 }
+
+/// A long typed name is cut for the heading and the button, so they stay on a couple of lines.
+String _shortened(String text) => text.length <= 24 ? text : '${text.substring(0, 23).trimRight()}…';

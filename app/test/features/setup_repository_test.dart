@@ -105,7 +105,9 @@ void main() {
       freeTimes: {'lunch'},
     ));
     expect(await followed(), hasLength(1));
+  });
 
+  test('add something new with a different activity keeps both', () async {
     await repo.save(const SetupAnswers(
       paths: {SetupPath.keepGoing, SetupPath.addNew},
       keepActivity: ActivityKind.running,
@@ -114,6 +116,17 @@ void main() {
       freeTimes: {'lunch'},
     ));
     expect((await followed()).map((r) => r.activity).toSet(), {ActivityKind.running, ActivityKind.walking});
+  });
+
+  test('start fresh with a real activity stores it with the start_fresh path (frame 9.13)', () async {
+    await repo.save(const SetupAnswers(
+      paths: {SetupPath.startFresh},
+      freshChoice: ActivityKind.swimming,
+      freeTimes: {'lunch'},
+    ));
+    final row = (await followed()).single;
+    expect(row.activity, ActivityKind.swimming);
+    expect(row.path, SetupPath.startFresh);
   });
 
   test('start fresh stores the one choice, including "not sure yet"', () async {
@@ -165,17 +178,33 @@ void main() {
     expect(await prefs(PrefKind.motivation), hasLength(3));
   });
 
-  test('saving twice replaces the first answers instead of doubling them', () async {
+  test('setup can only be saved once: a later save cannot wipe followed activities and preferences', () async {
     const first = SetupAnswers(
       paths: {SetupPath.startFresh},
       freshChoice: ActivityKind.dance,
       freeTimes: {'lunch'},
     );
     await repo.save(first);
-    await repo.save(first.copyWith(freshChoice: ActivityKind.teamSports, freeTimes: {'weekends'}));
-    expect((await followed()).single.activity, ActivityKind.teamSports);
-    expect(await prefs(PrefKind.freeTime), {'weekends'});
+    await expectLater(
+      repo.save(first.copyWith(freshChoice: ActivityKind.teamSports, freeTimes: {'weekends'})),
+      throwsStateError,
+    );
+    expect((await followed()).single.activity, ActivityKind.dance);
+    expect(await prefs(PrefKind.freeTime), {'lunch'});
     expect(await db.select(db.profiles).get(), hasLength(1));
+  });
+
+  test('a typed name is compared without regard to case when removing a duplicate', () async {
+    await repo.save(const SetupAnswers(
+      paths: {SetupPath.keepGoing, SetupPath.addNew},
+      keepActivity: ActivityKind.other,
+      keepCustomName: 'Padel',
+      progress: Progress.goingWell,
+      addNewActivity: ActivityKind.other,
+      addNewCustomName: 'padel',
+      freeTimes: {'lunch'},
+    ));
+    expect(await followed(), hasLength(1));
   });
 
   test('a failure part way through stores nothing', () async {

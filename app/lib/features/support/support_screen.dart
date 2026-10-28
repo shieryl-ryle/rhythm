@@ -18,6 +18,23 @@ class SupportScreen extends ConsumerWidget {
     final helplines = ref.watch(helplinesProvider).valueOrNull;
     final region = helplines?.regionFor(ref.watch(deviceCountryProvider));
 
+    // At large text the one primary, the emergency row, is pinned under the text so it can always be reached
+    // (docs/DESIGN.md: only the screen's one primary is sticky); the other rows and Back scroll.
+    final pinned = MediaQuery.textScalerOf(context).scale(1) >= 1.5;
+
+    final emergency = _ActionRow(
+      title: 'Call emergency services',
+      subtitle: 'If you’re in danger now',
+      filled: true,
+      onTap: () => _open(
+        context,
+        title: 'Call emergency services',
+        region: region,
+        numbers: region?.emergency ?? const [],
+        fallback: 'Call your local emergency number.',
+      ),
+    );
+
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -35,52 +52,56 @@ class SupportScreen extends ConsumerWidget {
                       style: LiltText.body.copyWith(color: LiltColors.inkMuted),
                     ),
                     const SizedBox(height: LiltSpacing.lg),
-                    _ActionRow(
-                      title: 'Call emergency services',
-                      subtitle: 'If you’re in danger now',
-                      filled: true,
-                      onTap: () => _open(
-                        context,
-                        title: 'Call emergency services',
-                        numbers: region?.emergency ?? const [],
-                        fallback: 'Call your local emergency number.',
-                      ),
-                    ),
-                    const SizedBox(height: LiltSpacing.sm),
+                    if (!pinned) ...[emergency, const SizedBox(height: LiltSpacing.md)],
                     _ActionRow(
                       title: 'Call a crisis line',
-                      subtitle: (region?.crisis.isNotEmpty ?? false) ? '24/7, free and confidential' : 'Ask for one in your country',
+                      subtitle: (region?.crisis.isNotEmpty ?? false) ? 'Talk to someone now' : 'Ask for one in your country',
                       onTap: () => _open(
                         context,
                         title: 'Call a crisis line',
+                        region: region,
                         numbers: region?.crisis ?? const [],
                         fallback: 'Look for a crisis line in your country, or ask your doctor or someone you trust to help you find one.',
                       ),
                     ),
-                    const SizedBox(height: LiltSpacing.sm),
+                    const SizedBox(height: LiltSpacing.md),
                     _ActionRow(
                       title: 'Talk to your doctor',
                       subtitle: 'Someone you trust',
                       onTap: () => _open(
                         context,
                         title: 'Talk to your doctor',
+                        region: region,
                         numbers: const [],
                         fallback: region?.doctorNote ??
                             'Contact your doctor, a clinic or a health professional you trust. If you can, tell someone close to you how you feel.',
                       ),
                     ),
+                    if (pinned)
+                      LiltButton(
+                        label: 'Back',
+                        kind: LiltButtonKind.text,
+                        onPressed: () => context.canPop() ? context.pop() : context.go('/'),
+                      ),
                   ],
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(LiltSpacing.lg, 0, LiltSpacing.lg, LiltSpacing.lg),
-              child: LiltButton(
-                label: 'Back',
-                kind: LiltButtonKind.text,
-                onPressed: () => context.canPop() ? context.pop() : context.go('/'),
+            if (pinned) ...[
+              const Divider(height: 1, thickness: 1, color: LiltColors.line),
+              Padding(
+                padding: const EdgeInsets.all(LiltSpacing.lg),
+                child: emergency,
               ),
-            ),
+            ] else
+              Padding(
+                padding: const EdgeInsets.fromLTRB(LiltSpacing.lg, 0, LiltSpacing.lg, LiltSpacing.lg),
+                child: LiltButton(
+                  label: 'Back',
+                  kind: LiltButtonKind.text,
+                  onPressed: () => context.canPop() ? context.pop() : context.go('/'),
+                ),
+              ),
           ],
         ),
       ),
@@ -90,18 +111,22 @@ class SupportScreen extends ConsumerWidget {
   void _open(
     BuildContext context, {
     required String title,
+    required HelplineRegion? region,
     required List<HelplineNumber> numbers,
     required String fallback,
   }) {
     showLiltSheet<void>(
       context,
       title: title,
+      // Numbers come from the phone's region setting, so say which region they are for.
+      subtitle: numbers.isNotEmpty && region != null ? 'Numbers for ${region.name}' : null,
       bodyBuilder: (_) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           for (final n in numbers) ...[
             Text(n.label, style: LiltText.label.copyWith(color: LiltColors.inkMuted)),
             SelectableText(n.number, style: LiltText.celebration),
+            if (n.note != null) Text(n.note!, style: LiltText.label.copyWith(color: LiltColors.inkMuted)),
             const SizedBox(height: LiltSpacing.lg),
           ],
           if (numbers.isEmpty) Text(fallback, style: LiltText.body),

@@ -98,9 +98,15 @@ class SetupController extends AutoDisposeNotifier<SetupState> {
     state = state.copyWith(index: state.index + 1);
   }
 
+  /// Skip leaves the question unanswered: anything ticked on it is cleared, so Skip and Next are not the same.
   void skip() {
     if (state.isLast || !canSkip(state.step)) return;
-    state = state.copyWith(index: state.index + 1);
+    final cleared = switch (state.step) {
+      SetupStep.pickUpGotInWay => _a.copyWith(gotInTheWay: <String>{}),
+      SetupStep.pickUpHelp => _a.copyWith(wouldHelp: <String>{}),
+      _ => _a,
+    };
+    state = state.copyWith(answers: cleared, index: state.index + 1);
   }
 
   /// Back one question. Returns false at the first one.
@@ -112,7 +118,7 @@ class SetupController extends AutoDisposeNotifier<SetupState> {
 
   /// "Edit" on the summary row: back to the start of the section (answers are kept).
   void editSection() {
-    final target = sectionStart(state.step);
+    final target = sectionStart(state.step, keepGoingTicked: _a.paths.contains(SetupPath.keepGoing));
     final at = state.steps.indexOf(target);
     if (at >= 0) state = state.copyWith(index: at);
   }

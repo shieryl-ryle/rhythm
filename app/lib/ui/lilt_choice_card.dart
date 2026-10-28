@@ -49,7 +49,7 @@ class LiltChoiceCard extends StatelessWidget {
         child: Container(
           constraints: const BoxConstraints(minHeight: 56),
           padding: const EdgeInsets.symmetric(horizontal: LiltSpacing.lg, vertical: LiltSpacing.md),
-          decoration: ShapeDecoration(color: dimmed ? Colors.transparent : LiltColors.surface, shape: shape),
+          decoration: ShapeDecoration(color: (dimmed || !selected) ? Colors.transparent : LiltColors.surface, shape: shape),
           child: Row(
             children: [
               _Mark(kind: kind, selected: selected),

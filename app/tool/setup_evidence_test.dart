@@ -107,6 +107,7 @@ void main() {
       await tap('Finding time');
       await _save(tester, key, 's04_keep_progress_$tag');
       await tap('Next');
+      await _save(tester, key, 's04b_pickup_which_$tag');
       await tap('Running');
       await tap('Next');
       await tap('A few months ago');

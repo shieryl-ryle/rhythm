@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lilt/data/enums.dart';
 import 'package:lilt/data/library/library_models.dart';
@@ -45,6 +47,38 @@ void main() {
     expect(hits, isEmpty, reason: hits.join('\n'));
   });
 
+  test('the words written in the screens are held to the same lists (setup, search and S-090)', () {
+    final literal = RegExp(r"'((?:[^'\\\n]|\\.)+)'");
+    final hits = <String>[];
+    for (final file in [
+      'lib/features/starting_point/setup_screen.dart',
+      'lib/features/starting_point/activity_search_screen.dart',
+      'lib/features/support/support_screen.dart',
+      'lib/features/starting_point/setup_model.dart',
+    ]) {
+      for (final m in literal.allMatches(File(file).readAsStringSync())) {
+        final text = m.group(1)!;
+        if (!text.contains(' ')) continue; // codes and identifiers, not sentences
+        for (final term in [...claims.terms, ...neverUse]) {
+          if (RegExp('\\b${RegExp.escape(term)}\\b', caseSensitive: false).hasMatch(text)) {
+            hits.add('$file: "$text" has "$term"');
+          }
+        }
+      }
+    }
+    expect(hits, isEmpty, reason: hits.join('\n'));
+  });
+
+  test('the hints above a grey Next are held to the same lists too', () {
+    for (final s in SetupStep.values) {
+      final hint = requiredHint(s);
+      if (hint == null) continue;
+      for (final term in [...claims.terms, ...neverUse]) {
+        expect(RegExp('\\b${RegExp.escape(term)}\\b', caseSensitive: false).hasMatch(hint), isFalse, reason: hint);
+      }
+    }
+  });
+
   test('codes match docs/data-model.md §7', () {
     expect(hardBecauseOptions.map((o) => o.value), ['finding_time', 'energy', 'getting_bored', 'cost', 'motivation']);
     expect(gotInTheWayOptions.map((o) => o.value),
@@ -59,8 +93,17 @@ void main() {
       'just_for_fun', 'prefer_not_to_say',
     ]);
     expect(leaveOutOptions.map((o) => o.value), ['after_dark', 'team_sport', 'high_impact', 'swimming']);
-    expect(freshOptions.map((o) => o.value),
-        [ActivityKind.dance, ActivityKind.teamSports, ActivityKind.racketSports, ActivityKind.notSure]);
+    // Frame 9.13: eight chips.
+    expect(freshOptions.map((o) => o.value), [
+      ActivityKind.walking,
+      ActivityKind.dance,
+      ActivityKind.cycling,
+      ActivityKind.swimming,
+      ActivityKind.teamSports,
+      ActivityKind.racketSports,
+      ActivityKind.yoga,
+      ActivityKind.notSure,
+    ]);
   });
 
   test('the activity chips are the ones on the frames', () {

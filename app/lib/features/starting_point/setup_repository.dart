@@ -11,7 +11,8 @@ abstract interface class SetupRepository {
   Future<bool> isDone();
 
   /// Saves every answer in one transaction and marks setup done. Nothing is written before this: the wizard
-  /// keeps its answers in memory, so leaving halfway stores nothing (BR-014).
+  /// keeps its answers in memory, so leaving halfway stores nothing (BR-014). First run only: once setup is done
+  /// this throws, so a later "edit my starting point" cannot wipe followed activities and preferences.
   Future<void> save(SetupAnswers answers);
 }
 
@@ -28,7 +29,8 @@ class DriftSetupRepository implements SetupRepository {
 
   @override
   Future<void> save(SetupAnswers a) => _db.transaction(() async {
-        // First-run setup: the tables are empty, and a second save replaces the first rather than doubling it.
+        if (await isDone()) throw StateError('Setup is already done; editing uses its own methods.');
+        // A failed first attempt leaves nothing behind, so these are empty; clear them anyway to be safe.
         await _db.delete(_db.followedActivities).go();
         await _db.delete(_db.preferences).go();
 
@@ -69,7 +71,9 @@ List<FollowedActivitiesCompanion> followedRows(SetupAnswers a) {
   if (a.paths.contains(SetupPath.addNew) && a.addNewActivity != null) {
     final name = custom(a.addNewActivity, a.addNewCustomName);
     final duplicate = rows.any(
-      (r) => r.activity.value == a.addNewActivity && r.customName.value == name,
+      (r) =>
+          r.activity.value == a.addNewActivity &&
+          (r.customName.value ?? '').toLowerCase() == (name ?? '').toLowerCase(),
     );
     if (!duplicate) {
       rows.add(
