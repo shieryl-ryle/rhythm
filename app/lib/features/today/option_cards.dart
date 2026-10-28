@@ -18,16 +18,29 @@ class ActivityTag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pill = Container(
+      padding: const EdgeInsets.symmetric(horizontal: LiltSpacing.sm, vertical: LiltSpacing.xs),
+      decoration: ShapeDecoration(color: LiltColors.selected, shape: const StadiumBorder()),
+      child: Text(
+        activityLabel(activity, null),
+        style: LiltText.label.copyWith(fontSize: 12, color: LiltColors.primary),
+      ),
+    );
+    final muted = LiltText.label.copyWith(color: LiltColors.inkMuted, fontWeight: FontWeight.w400);
+    if (MediaQuery.textScalerOf(context).scale(1) >= 1.5) {
+      // Large text: the pill, then what it says about the person, then the status, one under the other.
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Align(alignment: Alignment.centerLeft, child: pill),
+          if (relation != null) ...[const SizedBox(height: LiltSpacing.xs), Text(relation!, style: muted)],
+          if (trailing != null) ...[const SizedBox(height: LiltSpacing.xs), Text(trailing!, style: muted)],
+        ],
+      );
+    }
     return Row(
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: LiltSpacing.sm, vertical: LiltSpacing.xs),
-          decoration: ShapeDecoration(color: LiltColors.selected, shape: const StadiumBorder()),
-          child: Text(
-            activityLabel(activity, null),
-            style: LiltText.label.copyWith(fontSize: 12, color: LiltColors.primary),
-          ),
-        ),
+        pill,
         if (relation != null) ...[
           const SizedBox(width: LiltSpacing.sm),
           Flexible(
@@ -141,7 +154,7 @@ class HeroCard extends StatelessWidget {
           _OptionText(title: offer.action.title, suggested: slot, reason: offer.reason, big: true),
           const SizedBox(height: LiltSpacing.lg),
           LiltButton(label: 'I’ll try this', onPressed: onAccept),
-          const SizedBox(height: LiltSpacing.xs),
+          const SizedBox(height: LiltSpacing.sm),
           LiltButtonRow(
             children: [
               if (canSwap) LiltButton(label: 'Something else', kind: LiltButtonKind.text, onPressed: onSwap),
@@ -212,16 +225,19 @@ class CompactCard extends StatelessWidget {
 /// An option the person accepted: it is in today's plan (frame 2.5). The planned card has no button yet; telling
 /// Lilt how it went comes with the Reflection sheet.
 class PlannedCard extends StatelessWidget {
-  const PlannedCard({super.key, required this.offer, required this.today});
+  const PlannedCard({super.key, required this.offer, required this.today, this.onNotToday});
 
   final StoredOffer offer;
   final String today;
+
+  /// Opens the Not today sheet, so the pause is reachable from the planned state (BR-006). Null while paused.
+  final VoidCallback? onNotToday;
 
   @override
   Widget build(BuildContext context) {
     final o = offer.offer;
     final when = [
-      o.suggestedDay == today ? 'Today' : shortDate(o.suggestedDay),
+      o.suggestedDay == today ? 'Today' : weekdayDate(o.suggestedDay),
       if (o.suggestedTime != null) o.suggestedTime!,
     ].join(' ');
     return _CardShell(
@@ -236,6 +252,8 @@ class PlannedCard extends StatelessWidget {
           ),
           const SizedBox(height: LiltSpacing.xs),
           Text('$when · ${offer.action.durationMin} min', style: LiltText.label.copyWith(fontWeight: FontWeight.w400)),
+          if (onNotToday != null)
+            LiltButton(label: 'Not today', kind: LiltButtonKind.text, flush: true, onPressed: onNotToday),
         ],
       ),
     );

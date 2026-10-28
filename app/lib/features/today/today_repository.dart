@@ -64,10 +64,33 @@ class TodayRepository {
   Future<void> createHeroChain(String day, TodayPlan plan, TodayChips chips) => _db.transaction(() async {
         await _deleteWaiting(day);
         final followed = await _followedIds();
+        final acted = await _actedActionIds(day);
         for (final option in plan.hero) {
+          // An option already stepped past, declined or accepted today is not offered again.
+          if (acted.contains(option.ranked.action.id)) continue;
           await _insertOffer(day, option, chips, followed);
         }
       });
+
+  Future<Set<String>> _actedActionIds(String day) async {
+    final rows = await (_db.select(_db.optionOffers)
+          ..where((t) => t.day.equals(day) & t.status.equals(OfferStatus.offered.code).not()))
+        .get();
+    return {for (final o in rows) o.actionId};
+  }
+
+  /// A waiting option whose suggested time has passed is moved to the next free slot, so Today never shows or
+  /// plans a time in the past. Only the time changes: the options and their order stay (no reshuffle).
+  Future<void> reslotWaiting(String day, SuggestedSlot? slot) async {
+    final waiting = await (_db.select(_db.optionOffers)
+          ..where((t) => t.day.equals(day) & t.status.equals(OfferStatus.offered.code)))
+        .get();
+    for (final o in waiting) {
+      await (_db.update(_db.optionOffers)..where((t) => t.id.equals(o.id))).write(
+        OptionOffersCompanion(suggestedDay: Value(slot?.day ?? day), suggestedTime: Value(slot?.clock)),
+      );
+    }
+  }
 
   Future<void> _deleteWaiting(String day) async {
     final waiting = await (_db.select(_db.optionOffers)
@@ -124,17 +147,35 @@ class TodayRepository {
 
   /// "I'll try this" on an offer that is already stored (the hero card): it becomes `accepted`, and a plan item
   /// with an `unknown` reflection is created with it (docs/data-model.md rules for the code that uses the schema).
-  Future<void> accept(StoredOffer stored) => _db.transaction(() async {
+  Future<bool> accept(StoredOffer stored) => _db.transaction(() async {
+        // Still waiting? A second tap on the same button, or a stale screen, must not plan it twice.
+        final current = await (_db.select(_db.optionOffers)..where((t) => t.id.equals(stored.offer.id))).getSingleOrNull();
+        if (current == null || current.status != OfferStatus.offered) return false;
         await (_db.update(_db.optionOffers)..where((t) => t.id.equals(stored.offer.id)))
             .write(OptionOffersCompanion(status: Value(OfferStatus.accepted)));
         await _createPlanItem(stored.offer, stored.action);
+        return true;
       });
 
   /// "I'll try this" on a compact card, which is not stored until now.
-  Future<void> acceptNew(String day, TodayOption option, TodayChips chips) => _db.transaction(() async {
+  Future<String?> acceptNew(String day, TodayOption option, TodayChips chips) => _db.transaction(() async {
+        // The same action is not planned twice in a day (a double tap).
+        if ((await _actedActionIds(day)).contains(option.ranked.action.id)) return null;
         final followed = await _followedIds();
         final offer = await _insertOffer(day, option, chips, followed, status: OfferStatus.accepted);
         await _createPlanItem(offer, option.ranked.action);
+        return offer.id;
+      });
+
+  /// Undo for "I'll try this": the plan item goes (its unknown reflection with it). An offer from the hero chain
+  /// goes back to waiting; one that was created by accepting a compact card is removed.
+  Future<void> undoAccept(String offerId, {required bool wasNew}) => _db.transaction(() async {
+        await (_db.delete(_db.planItems)..where((t) => t.offerId.equals(offerId))).go();
+        if (wasNew) {
+          await (_db.delete(_db.optionOffers)..where((t) => t.id.equals(offerId))).go();
+        } else {
+          await _setStatus(offerId, OfferStatus.offered);
+        }
       });
 
   Future<void> _createPlanItem(OptionOffer offer, ActionInfo action) async {
@@ -212,9 +253,13 @@ class TodayRepository {
   /// "Resume now": the pause ends today, so Today shows options again right away. The repository sets
   /// `end_day` to the resume day (docs/data-model.md).
   Future<void> resume(String today) async {
-    final active = await activePause(today);
-    if (active == null) return;
-    await (_db.update(_db.pauses)..where((t) => t.id.equals(active.id))).write(PausesCompanion(endDay: Value(today)));
+    final rows = await (_db.select(_db.pauses)..where((t) => t.kind.equals(PauseKind.pause.code))).get();
+    for (final p in rows) {
+      final covers = p.startDay.compareTo(today) <= 0 && (p.endDay == null || p.endDay!.compareTo(today) > 0);
+      if (covers) {
+        await (_db.update(_db.pauses)..where((t) => t.id.equals(p.id))).write(PausesCompanion(endDay: Value(today)));
+      }
+    }
   }
 }
 

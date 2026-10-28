@@ -62,7 +62,7 @@ List<SuggestedSlot> upcomingSlots(Set<String> freeTimes, DateTime now) {
   final today = formatDay(DateTime.utc(now.year, now.month, now.day));
   final nowMinute = now.hour * 60 + now.minute;
   final slots = <SuggestedSlot>[];
-  for (var offset = 0; offset < 8; offset++) {
+  for (var offset = 0; offset < 15; offset++) {
     final day = addDays(today, offset);
     final weekday = parseDay(day).weekday;
     for (final code in ['early_morning', 'lunch', 'after_work', 'weekends']) {
@@ -83,7 +83,8 @@ List<SuggestedSlot> upcomingSlots(Set<String> freeTimes, DateTime now) {
 /// "Suggested 12:30 · lunch" for today, "Suggested Sat 10:00 · weekends" for another day.
 String suggestedLabel(SuggestedSlot slot, String today) {
   final dayPart = slot.day == today ? '' : '${_weekdayName(slot.day)} ';
-  return 'Suggested $dayPart${slot.clock} · ${slotLabels[slot.code]}';
+  // Non-breaking spaces keep "12:30 · lunch" together when the text wraps at large sizes.
+  return 'Suggested $dayPart${slot.clock}\u00A0·\u00A0${slotLabels[slot.code]!.replaceAll(' ', '\u00A0')}';
 }
 
 String _weekdayName(String day) => const ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][parseDay(day).weekday - 1];
@@ -176,6 +177,7 @@ TodayPlan buildTodayPlan({
         person: person,
         libraryVersion: libraryVersion,
         limit: limit,
+        reasonContext: actions,
         request: RankingRequest(
           // Today's chips filter only what is suggested for today (EQ-003).
           forToday: slot == null || slot.day == today,
@@ -191,13 +193,14 @@ TodayPlan buildTodayPlan({
   if (hero.isEmpty) {
     final relaxed = rank(timeMin: null, energy: null, lighterMode: lighter, slot: heroSlot);
     if (relaxed.isEmpty) return const TodayPlan(kind: TodayKind.nothingFitsChoices);
-    return TodayPlan(
-      kind: TodayKind.nothingFitsChips,
-      relaxation: _relaxation(
-        chips,
-        (c) => rank(timeMin: c.timeMin, energy: c.energy, lighterMode: lighter, slot: heroSlot).isNotEmpty,
-      ),
-    );
+    bool hasOptions(TodayChips c) =>
+        rank(timeMin: c.timeMin, energy: c.energy, lighterMode: lighter, slot: heroSlot).isNotEmpty;
+    // The chips top out at 45 minutes and high energy. If even that brings nothing back (only a longer action
+    // is left), no chip can fix it, so it is the other case: a button that changes nothing would be a trap.
+    if (!hasOptions(TodayChips(timeMin: TodayChips.timeChoices.last, energy: Energy.high))) {
+      return const TodayPlan(kind: TodayKind.nothingFitsChoices);
+    }
+    return TodayPlan(kind: TodayKind.nothingFitsChips, relaxation: _relaxation(chips, hasOptions));
   }
 
   // One candidate per followed activity: its best option, with the next free slot after the hero's.
@@ -206,6 +209,7 @@ TodayPlan buildTodayPlan({
   for (final kind in followedOrder) {
     if (others.any((o) => o.ranked.action.activity == kind)) continue;
     final slot = slotIndex < slots.length ? slots[slotIndex] : null;
+    final isHeroActivity = kind == hero.first.action.activity;
     final best = rank(
       timeMin: chips.timeMin,
       energy: chips.energy,
@@ -216,7 +220,8 @@ TodayPlan buildTodayPlan({
     );
     if (best.isEmpty) continue;
     others.add(TodayOption(ranked: best.first, slot: slot));
-    slotIndex++;
+    // The hero's activity shows no compact card at first, so it does not use up a later slot.
+    if (!isHeroActivity) slotIndex++;
   }
 
   return TodayPlan(

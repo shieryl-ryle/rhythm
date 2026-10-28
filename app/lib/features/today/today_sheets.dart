@@ -67,7 +67,8 @@ Future<void> showNotTodaySheet(
   return showLiltSheet<void>(
     context,
     title: 'Not today?',
-    subtitle: 'That’s okay. What would help?',
+    // With no path above the pause, "What would help?" would point at a single choice, so it is left out.
+    subtitle: lighterAvailable ? 'That’s okay. What would help?' : 'That’s okay.',
     bodyBuilder: (sheet) => _NotTodayBody(
       lighterAvailable: lighterAvailable,
       onLighter: () {
@@ -113,10 +114,13 @@ class _NotTodayBodyState extends State<_NotTodayBody> {
             subtitle: 'A shorter, easier option',
             onTap: widget.onLighter,
           ),
-        const SizedBox(height: LiltSpacing.xl),
+        if (widget.lighterAvailable) const SizedBox(height: LiltSpacing.xl),
         Semantics(
           header: true,
-          child: Text('Or pause for a while', style: LiltText.body.copyWith(fontWeight: FontWeight.w600)),
+          child: Text(
+            widget.lighterAvailable ? 'Or pause for a while' : 'Pause for a while',
+            style: LiltText.body.copyWith(fontWeight: FontWeight.w600),
+          ),
         ),
         const SizedBox(height: LiltSpacing.xs),
         Text('Reminders stop. Your progress stays.', style: LiltText.body.copyWith(color: LiltColors.inkMuted)),

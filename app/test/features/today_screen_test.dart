@@ -10,6 +10,7 @@ import 'package:lilt/data/providers.dart';
 import 'package:lilt/features/starting_point/setup_model.dart';
 import 'package:lilt/features/starting_point/setup_repository.dart';
 import 'package:lilt/features/support/support_providers.dart';
+import 'package:lilt/features/today/today_controller.dart';
 
 import '../support/test_support.dart';
 
@@ -22,6 +23,10 @@ class _Agreed implements ConsentRepository {
   @override
   Future<void> agree() async {}
 }
+
+/// A text widget whose words match, ignoring the non-breaking spaces that keep a label together.
+Finder _text(String words) =>
+    find.byWidgetPredicate((w) => w is Text && (w.data ?? '').replaceAll('\u00A0', ' ') == words);
 
 const _runner = SetupAnswers(
   paths: {SetupPath.keepGoing, SetupPath.pickUpAgain},
@@ -40,6 +45,7 @@ Future<LiltDatabase> _open(
   double textScale = 1,
   Future<void> Function(LiltDatabase db)? seed,
   bool emptyLibrary = false,
+  bool realConsent = false,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -47,11 +53,13 @@ Future<LiltDatabase> _open(
   final db = inMemoryDatabase();
   addTearDown(db.close);
   await DriftSetupRepository(db).save(answers);
+  if (realConsent) await DriftConsentRepository(db).agree();
   await seed?.call(db);
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
-        consentRepositoryProvider.overrideWithValue(_Agreed()),
+        // The real consent store when asked, so delete-all really takes consent away.
+        if (!realConsent) consentRepositoryProvider.overrideWithValue(_Agreed()),
         ...todayTestOverrides(db),
         if (emptyLibrary) libraryLoaderProvider.overrideWithValue(_NoLibrary()),
         assetReaderProvider.overrideWithValue(readAssetFile),
@@ -88,7 +96,7 @@ void main() {
       expect(find.text('Your first ideas'), findsOneWidget);
       expect(find.text('20 min'), findsOneWidget);
       expect(find.text('Medium energy'), findsOneWidget);
-      expect(find.text('Suggested 12:30 · lunch'), findsWidgets);
+      expect(_text('Suggested 12:30 · lunch'), findsWidgets);
       expect(find.widgetWithText(FilledButton, 'I’ll try this'), findsOneWidget, reason: 'one primary on the screen (DESIGN.md)');
       expect(find.byType(FilledButton), findsOneWidget);
     });
@@ -105,8 +113,8 @@ void main() {
     testWidgets('the week strip has seven tiles and a name for each day', (tester) async {
       final handle = tester.ensureSemantics();
       await _open(tester);
-      expect(find.bySemanticsLabel(RegExp(r'^Oct (19|20|21|22|23|24|25): ')), findsNWidgets(7));
-      expect(find.bySemanticsLabel('Oct 23: rest or not recorded'), findsOneWidget);
+      expect(find.bySemanticsLabel(RegExp(r'^Oct (19|20|21|22|23|24|25)( \(today\))?: ')), findsNWidgets(7));
+      expect(find.bySemanticsLabel('Oct 23 (today): rest or not recorded'), findsOneWidget, reason: 'today is named, not only ringed');
       handle.dispose();
     });
   });
@@ -264,7 +272,10 @@ void main() {
       await _tap(tester, 'Not today', index: 1);
       expect(find.text('Not today?'), findsOneWidget);
       expect(find.text('Something lighter'), findsNothing);
-      expect(find.text('Or pause for a while'), findsOneWidget);
+      // Nothing sits above the pause, so there is no "What would help?" and no "Or".
+      expect(find.text('Pause for a while'), findsOneWidget);
+      expect(find.text('Or pause for a while'), findsNothing);
+      expect(find.text('That’s okay. What would help?'), findsNothing);
     });
 
     testWidgets('the sheet has no rows for screens that are not built yet', (tester) async {
@@ -297,7 +308,7 @@ void main() {
     testWidgets('N2: the chips are the cause. The button relaxes them for today, and plans nothing', (tester) async {
       final db = await _open(tester, emptyLibrary: true, seed: oneAction);
       expect(find.text('Nothing fits those choices'), findsOneWidget);
-      expect(find.text('Change the time or energy, or add something of your own.'), findsOneWidget);
+      expect(find.text('Change the time or energy.'), findsOneWidget);
       expect(find.text('20 min'), findsOneWidget, reason: 'the chips stay so they can be changed');
       expect(find.text('Show options up to 45 min'), findsOneWidget);
       expect(find.text('Show a lighter option'), findsNothing, reason: 'it cannot help: lighter is the same chips');
@@ -320,8 +331,7 @@ void main() {
         },
       );
       expect(find.text('Nothing to suggest right now'), findsOneWidget);
-      expect(find.text('Your leave-out and access choices cover everything we have. You can change them any time.'),
-          findsOneWidget);
+      expect(find.text('Your leave-out and access choices cover everything we have.'), findsOneWidget);
       expect(find.text('20 min'), findsNothing, reason: 'the chips cannot fix it, so they are hidden');
       expect(find.text('Medium energy'), findsNothing);
       expect(find.text('Not today'), findsOneWidget);
@@ -348,6 +358,213 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Your first ideas'), findsOneWidget);
     });
+  });
+
+  group('8 dp between targets (DESIGN.md)', () {
+    testWidgets('the hero\'s primary and its text buttons do not touch', (tester) async {
+      await _open(tester);
+      final primary = tester.getRect(find.widgetWithText(FilledButton, 'I’ll try this'));
+      final below = tester.getRect(find.widgetWithText(TextButton, 'Something else'));
+      expect(below.top - primary.bottom, greaterThanOrEqualTo(8));
+    });
+
+    testWidgets('the nothing-fits primary and Not today do not touch', (tester) async {
+      await _open(tester, emptyLibrary: true, seed: (db) async {
+        await db.delete(db.actions).go();
+        await db.into(db.actions).insert(
+              ActionsCompanion.insert(
+                id: 'act_only',
+                activity: ActivityKind.running,
+                title: 'A long easy run',
+                description: 'Run at an easy pace.',
+                durationMin: 45,
+                intensity: Intensity.low,
+                energyNeeded: Energy.medium,
+                tags: const Value('solo,outdoors,free'),
+                isStarter: const Value(true),
+                libraryVersion: 'test-1',
+              ),
+            );
+      });
+      final primary = tester.getRect(find.byType(FilledButton));
+      final below = tester.getRect(find.widgetWithText(TextButton, 'Not today'));
+      expect(below.top - primary.bottom, greaterThanOrEqualTo(8));
+    });
+  });
+
+  group('"I\'ll try this" can be undone, and a swapped-away activity does not come back as a card', () {
+    testWidgets('a snackbar says it was added and Undo removes the plan item', (tester) async {
+      final db = await _open(tester);
+      await _tap(tester, 'I’ll try this');
+      expect(find.text('Added to today’s plan'), findsOneWidget);
+      expect(await db.select(db.planItems).get(), hasLength(1));
+      await tester.tap(find.text('Undo'));
+      await tester.pumpAndSettle();
+      expect(await db.select(db.planItems).get(), isEmpty);
+      expect(await db.select(db.reflections).get(), isEmpty);
+      expect(find.text('Your first ideas'), findsOneWidget, reason: 'back to the options');
+    });
+
+    testWidgets('after "Something else" the activity just left is not a compact card', (tester) async {
+      final db = await _open(tester);
+      final first = (await _offers(db)).first;
+      final firstAction = await (db.select(db.actions)..where((t) => t.id.equals(first.actionId))).getSingle();
+      await _tap(tester, 'Something else');
+      // The card for the activity the hero just stepped past is gone: its title is not on screen at all.
+      expect(find.text(firstAction.title), findsNothing);
+    });
+  });
+
+  group('the planned state keeps a way out (BR-006)', () {
+    testWidgets('the planned card has a Not today that opens the pause', (tester) async {
+      final db = await _open(tester, answers: const SetupAnswers(
+        paths: {SetupPath.keepGoing},
+        keepActivity: ActivityKind.gym,
+        progress: Progress.goingWell,
+        freeTimes: {'lunch'},
+        access: {'gym_membership'},
+      ));
+      await _tap(tester, 'I’ll try this');
+      expect(find.text('Today’s plan'), findsOneWidget);
+      await _tap(tester, 'Not today');
+      expect(find.text('Pause for a while'), findsOneWidget);
+      await _tap(tester, 'Pause for 1 week');
+      expect(find.text('Paused, resume anytime'), findsOneWidget);
+      expect(find.text('Planned'), findsOneWidget, reason: 'the plan stays visible while paused');
+      expect(await db.select(db.planItems).get(), hasLength(1));
+    });
+  });
+
+  group('the day moves on', () {
+    testWidgets('a time that has passed is replaced by the next slot, and a new day starts fresh', (tester) async {
+      var clock = DateTime(2026, 10, 23, 9);
+      final db = inMemoryDatabase();
+      addTearDown(db.close);
+      tester.view.physicalSize = const Size(360, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await DriftSetupRepository(db).save(_runner);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            consentRepositoryProvider.overrideWithValue(_Agreed()),
+            ...todayTestOverrides(db, clock: () => clock),
+            assetReaderProvider.overrideWithValue(readAssetFile),
+          ],
+          child: const LiltApp(),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(_text('Suggested 12:30 · lunch'), findsWidgets);
+
+      // It is now 14:00: lunch has passed, so a chip change moves the waiting options to the next slot.
+      clock = DateTime(2026, 10, 23, 14);
+      await _tap(tester, '20 min');
+      await tester.tap(find.widgetWithText(InkWell, '30 min').last);
+      await tester.pumpAndSettle();
+      expect(_text('Suggested 12:30 · lunch'), findsNothing);
+      expect(_text('Suggested Sat 10:00 · weekends'), findsWidgets);
+
+      // The next morning, coming back to the app shows the new day with the chips reset.
+      clock = DateTime(2026, 10, 24, 9);
+      final container = ProviderScope.containerOf(tester.element(find.byType(LiltApp)));
+      await container.read(todayControllerProvider.notifier).refreshIfNewDay();
+      await tester.pumpAndSettle();
+      expect(find.text('Saturday 24 October'), findsOneWidget);
+      expect(find.text('20 min'), findsOneWidget);
+      expect((await _offers(db)).where((o) => o.day == '2026-10-24'), isNotEmpty);
+    });
+  });
+
+  group('BR-005 and BR-009: only a tap plans anything', () {
+    testWidgets('stepping, lighter, chips and looking at cards plan nothing and create no reflection', (tester) async {
+      final db = await _open(tester);
+      await _tap(tester, 'Something else');
+      await _tap(tester, '20 min');
+      await tester.tap(find.widgetWithText(InkWell, '30 min').last);
+      await tester.pumpAndSettle();
+      await _tap(tester, 'Not today');
+      await _tap(tester, 'Something lighter');
+      expect(await db.select(db.planItems).get(), isEmpty);
+      expect(await db.select(db.reflections).get(), isEmpty);
+    });
+  });
+
+  group('BR-011: a leave-out is never shown or stored as an offer', () {
+    testWidgets('running and high impact are left out, so no such action is offered anywhere', (tester) async {
+      final db = await _open(
+        tester,
+        answers: _runner.copyWith(excluded: {'running', 'high_impact'}),
+      );
+      final offered = await _offers(db);
+      expect(offered, isNotEmpty);
+      for (final o in offered) {
+        final action = await (db.select(db.actions)..where((t) => t.id.equals(o.actionId))).getSingle();
+        expect(action.activity, isNot(ActivityKind.running), reason: action.id);
+        expect(action.tags.split(','), isNot(contains('high_impact')), reason: action.id);
+      }
+      expect(find.text('Running'), findsNothing, reason: 'no card for a left-out activity');
+    });
+  });
+
+  group('a paused day on the rhythm card', () {
+    testWidgets('is drawn like an empty day and named "paused" for screen readers (ADR-012)', (tester) async {
+      final handle = tester.ensureSemantics();
+      await _open(tester);
+      await _tap(tester, 'Not today');
+      await _tap(tester, 'Pause for 1 week');
+      expect(find.bySemanticsLabel('Oct 23 (today): paused'), findsOneWidget);
+      handle.dispose();
+    });
+  });
+
+  group('TC-025 through Today: delete everything leaves nothing, and Today does not write it back', () {
+    testWidgets('offers and plan items are gone, the library stays, and the consent screen shows', (tester) async {
+      final db = await _open(tester, realConsent: true);
+      await _tap(tester, 'I’ll try this');
+      expect(await db.select(db.optionOffers).get(), isNotEmpty);
+      expect(await db.select(db.offerReasons).get(), isNotEmpty);
+      expect(await db.select(db.planItems).get(), isNotEmpty);
+
+      final container = ProviderScope.containerOf(tester.element(find.byType(LiltApp)));
+      await container.read(deleteEverythingProvider)();
+      await tester.pumpAndSettle();
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpAndSettle();
+
+      for (final table in db.userTables) {
+        final rows = await db.customSelect('SELECT COUNT(*) AS n FROM ${table.actualTableName}').getSingle();
+        expect(rows.read<int>('n'), 0, reason: table.actualTableName);
+      }
+      expect(await db.select(db.actions).get(), isNotEmpty);
+    });
+  });
+
+  group('TC-044 and TC-045 on the rest of Today', () {
+    for (final scale in [1.0, 2.0]) {
+      testWidgets('chip lists, today\'s plan and the nothing-fits states at ${(scale * 100).round()}% text',
+          (tester) async {
+        final handle = tester.ensureSemantics();
+        await _open(tester, size: const Size(320, 568), textScale: scale);
+        Future<void> check(String where) async {
+          expect(tester.takeException(), isNull, reason: where);
+          await expectLater(tester, meetsGuideline(androidTapTargetGuideline), reason: where);
+          await expectLater(tester, meetsGuideline(labeledTapTargetGuideline), reason: where);
+        }
+
+        await _tap(tester, '20 min');
+        await check('time list');
+        await tester.tap(find.byTooltip('Close'));
+        await tester.pumpAndSettle();
+        await _tap(tester, 'Medium energy');
+        await check('energy list');
+        await tester.tap(find.byTooltip('Close'));
+        await tester.pumpAndSettle();
+        await _tap(tester, 'I’ll try this');
+        await check('today\'s plan with the cards still open');
+        handle.dispose();
+      });
+    }
   });
 
   group('TC-044 and TC-045 on Today', () {

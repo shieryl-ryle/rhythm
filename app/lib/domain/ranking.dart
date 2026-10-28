@@ -129,9 +129,12 @@ List<RankedAction> rankOptions({
   required RankingRequest request,
   required String libraryVersion,
   int limit = 3,
+  List<ActionInfo>? reasonContext,
 }) {
   final known = person.reflections.where((r) => r.isKnown).toList();
-  final byId = {for (final a in actions) a.id: a};
+  // A reason can name an action outside the pool that was ranked ("Similar to ..."), so it looks in the whole
+  // library when the caller passes it.
+  final byId = {for (final a in reasonContext ?? actions) a.id: a};
 
   var pool = actions.where((a) => _isOffered(a, person, request, libraryVersion)).toList();
   if (known.isEmpty) {

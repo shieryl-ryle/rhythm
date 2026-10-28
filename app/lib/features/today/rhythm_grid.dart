@@ -13,6 +13,14 @@ class RhythmGridCard extends StatelessWidget {
   /// The days to draw, oldest first, starting on a Monday.
   final List<GridDay> days;
 
+  /// What a screen reader says for the whole grid: one node instead of eighty-four tiles, with today named.
+  String get _summary {
+    final active = days.where((d) => !d.cell.isPause && d.cell.level > 0).length;
+    final today = days.where((d) => d.isToday).firstOrNull;
+    final todayWords = today == null ? '' : ' Today: ${_Tile(day: today, height: 0).label.split(': ').last}.';
+    return 'Your rhythm, last $rhythmWeeks weeks. $active days with activity.$todayWords';
+  }
+
   @override
   Widget build(BuildContext context) {
     final weeks = <List<GridDay>>[];
@@ -21,24 +29,69 @@ class RhythmGridCard extends StatelessWidget {
     }
     return _Card(
       title: 'Your rhythm · last $rhythmWeeks weeks',
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        reverse: true, // the newest week stays in view
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (var w = 0; w < weeks.length; w++) ...[
-              if (w > 0) const SizedBox(width: 4),
-              Column(
-                children: [
-                  for (var d = 0; d < weeks[w].length; d++) ...[
-                    if (d > 0) const SizedBox(height: 3),
-                    _Tile(day: weeks[w][d], width: 18, height: 8),
+      semanticsOverride: _summary,
+      child: LayoutBuilder(
+        builder: (context, box) {
+          // Tiles fill the card whatever the phone width: (width - the gaps) / the weeks.
+          const gap = 4.0;
+          final tile = ((box.maxWidth - gap * (rhythmWeeks - 1)) / rhythmWeeks).clamp(8.0, 26.0);
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (var w = 0; w < weeks.length; w++) ...[
+                if (w > 0) const SizedBox(width: gap),
+                Column(
+                  children: [
+                    for (var d = 0; d < weeks[w].length; d++) ...[
+                      if (d > 0) const SizedBox(height: 3),
+                      _Tile(day: weeks[w][d], width: tile, height: 8),
+                    ],
                   ],
-                ],
-              ),
+                ),
+              ],
             ],
-          ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// The card while Today loads: the same grid as empty tiles and nothing else (docs/sitemap.md, loading state).
+class RhythmGridSkeleton extends StatelessWidget {
+  const RhythmGridSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ExcludeSemantics(
+      child: _Card(
+        title: '',
+        showTitle: false,
+        child: LayoutBuilder(
+          builder: (context, box) {
+            const gap = 4.0;
+            final tile = ((box.maxWidth - gap * (rhythmWeeks - 1)) / rhythmWeeks).clamp(8.0, 26.0);
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (var w = 0; w < rhythmWeeks; w++) ...[
+                  if (w > 0) const SizedBox(width: gap),
+                  Column(
+                    children: [
+                      for (var d = 0; d < 7; d++) ...[
+                        if (d > 0) const SizedBox(height: 3),
+                        Container(
+                          width: tile,
+                          height: 8,
+                          decoration: BoxDecoration(color: LiltColors.grid0, borderRadius: BorderRadius.circular(1.5)),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+              ],
+            );
+          },
         ),
       ),
     );
@@ -77,14 +130,18 @@ class WeekStripCard extends StatelessWidget {
 }
 
 class _Card extends StatelessWidget {
-  const _Card({required this.title, required this.child});
+  const _Card({required this.title, required this.child, this.semanticsOverride, this.showTitle = true});
 
   final String title;
   final Widget child;
 
+  /// One spoken summary for the whole card, with the tiles left out of the reading order.
+  final String? semanticsOverride;
+  final bool showTitle;
+
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final card = Container(
       width: double.infinity,
       padding: const EdgeInsets.all(LiltSpacing.lg),
       decoration: ShapeDecoration(
@@ -97,12 +154,16 @@ class _Card extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Semantics(header: true, child: Text(title, style: LiltText.label.copyWith(fontWeight: FontWeight.w600))),
-          const SizedBox(height: LiltSpacing.lg),
+          if (showTitle) ...[
+            Semantics(header: true, child: Text(title, style: LiltText.label.copyWith(fontWeight: FontWeight.w600))),
+            const SizedBox(height: LiltSpacing.lg),
+          ],
           child,
         ],
       ),
     );
+    if (semanticsOverride == null) return card;
+    return Semantics(label: semanticsOverride, container: true, child: ExcludeSemantics(child: card));
   }
 }
 
@@ -116,13 +177,16 @@ class _Tile extends StatelessWidget {
   static const _levels = [LiltColors.grid0, LiltColors.grid1, LiltColors.grid2, LiltColors.grid3];
 
   /// Words for screen readers, so the level is never carried by colour alone (DESIGN.md).
+  String get label => _label;
+
   String get _label {
     final date = shortDate(day.day);
-    if (day.cell.isPause) return '$date: paused';
+    final label = '$date${day.isToday ? ' (today)' : ''}';
+    if (day.cell.isPause) return '$label: paused';
     return switch (day.cell.level) {
-      3 => '$date: goal met',
-      2 || 1 => '$date: some activity',
-      _ => '$date: rest or not recorded',
+      3 => '$label: goal met',
+      2 || 1 => '$label: some activity',
+      _ => '$label: rest or not recorded',
     };
   }
 
@@ -163,4 +227,10 @@ String longDate(String day) {
 String shortDate(String day) {
   final d = parseDay(day);
   return '${_months[d.month - 1].substring(0, 3)} ${d.day}';
+}
+
+/// "Sat 24 Oct", for a card that is planned for another day.
+String weekdayDate(String day) {
+  final d = parseDay(day);
+  return '${_weekdays[d.weekday - 1].substring(0, 3)} ${d.day} ${_months[d.month - 1].substring(0, 3)}';
 }

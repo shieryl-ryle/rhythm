@@ -266,8 +266,10 @@ entry point.
 - [ ] Today has a time chip and an energy chip (defaults "20 min" and "Medium energy"). Each opens a menu: time 10, 20, 30 or 45 min (as in the Edit sheet 3.2); energy Low, Medium or High. Choosing one re-ranks the options suggested for today (EQ-003): it drops actions longer than the time and, for Low energy, high-energy actions. A card suggested for another day is not filtered. The chips reset each day; the offer records the values used when it was made.
 - [ ] Nothing is planned without accept or edit (BR-005).
 - [ ] The user can follow more than one activity, and add or remove them from Settings or Discover.
-- [ ] Today shows one suggestion card per followed activity, each with its own reason, time,
-  swap and "Not today".
+- [ ] Today shows the best suggestion for each followed activity, each with its own reason and time. The
+  expanded (hero) card steps through the ranker's top options, one per activity, with "Something else"; up to two
+  compact cards show the other followed activities (owner decision 2026-10-27, [review](reviews/pre-task-005-build-plan-2026-10-27.md)).
+  Every card has "Not today", which opens the sheet with the pause.
 - [ ] Today has "Try something new" (activities with reasons), "+ Add an activity" and "+ Plan your
   own". A custom plan appears in Today's plan with the accepted suggestions (BR-005: the user made
   it).

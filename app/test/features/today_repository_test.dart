@@ -147,6 +147,72 @@ void main() {
         reason: 'the offer records the chip values used when it was made');
   });
 
+  test('accepting twice plans once: a second tap changes nothing', () async {
+    final p = await plan();
+    await repo.createHeroChain(today, p, const TodayChips());
+    final shown = shownOffer(await offers())!;
+    expect(await repo.accept(shown), isTrue);
+    expect(await repo.accept(shown), isFalse);
+    expect(await db.select(db.planItems).get(), hasLength(1));
+    expect(await db.select(db.reflections).get(), hasLength(1));
+  });
+
+  test('accepting the same compact option twice plans it once', () async {
+    final p = await plan();
+    final first = await repo.acceptNew(today, p.hero.first, const TodayChips());
+    final second = await repo.acceptNew(today, p.hero.first, const TodayChips());
+    expect(first, isNotNull);
+    expect(second, isNull);
+    expect(await db.select(db.planItems).get(), hasLength(1));
+  });
+
+  test('Undo removes the plan item and its unknown reflection, and the offer waits again', () async {
+    final p = await plan();
+    await repo.createHeroChain(today, p, const TodayChips());
+    final shown = shownOffer(await offers())!;
+    await repo.accept(shown);
+    await repo.undoAccept(shown.offer.id, wasNew: false);
+    expect(await db.select(db.planItems).get(), isEmpty);
+    expect(await db.select(db.reflections).get(), isEmpty);
+    expect(shownOffer(await offers())!.offer.id, shown.offer.id);
+  });
+
+  test('Undo of an accepted compact card removes the offer it created', () async {
+    final p = await plan();
+    final id = await repo.acceptNew(today, p.hero.first, const TodayChips());
+    await repo.undoAccept(id!, wasNew: true);
+    expect(await db.select(db.planItems).get(), isEmpty);
+    expect(await offers(), isEmpty);
+  });
+
+  test('a rebuilt chain does not offer an action already stepped past today', () async {
+    final p = await plan();
+    await repo.createHeroChain(today, p, const TodayChips());
+    final first = shownOffer(await offers())!;
+    await repo.replace(first);
+    await repo.createHeroChain(today, p, const TodayChips());
+    final waiting = (await offers()).where((o) => o.status == OfferStatus.offered);
+    expect(waiting.map((o) => o.action.id), isNot(contains(first.action.id)));
+  });
+
+  test('a waiting option whose time has passed moves to the next slot, in the same order', () async {
+    final p = await plan();
+    await repo.createHeroChain(today, p, const TodayChips());
+    final before = (await offers()).map((o) => o.offer.id).toList();
+    final later = upcomingSlots({'lunch', 'weekends'}, DateTime(2026, 10, 23, 14)).first;
+    await repo.reslotWaiting(today, later);
+    final after = await offers();
+    expect(after.map((o) => o.offer.id), before);
+    expect(after.every((o) => o.offer.suggestedTime == '10:00' && o.offer.suggestedDay == '2026-10-24'), isTrue);
+  });
+
+  test('"Resume now" ends every pause that covers today', () async {
+    await repo.pause(today, 7);
+    await repo.pause(today, 14); // an overlapping one, from a double tap
+    await repo.resume(today);
+    expect(await repo.activePause(today), isNull);
+  });
+
   test('"Not today" declines the shown offer', () async {
     final p = await plan();
     await repo.createHeroChain(today, p, const TodayChips());

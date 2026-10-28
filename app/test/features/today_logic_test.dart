@@ -34,7 +34,8 @@ void main() {
       final slots = upcomingSlots({'weekends'}, at(9, 0)); // a Friday
       expect(slots.first.day, '2026-10-24');
       expect(slots.first.clock, '10:00');
-      expect(slots.map((s) => s.day).toSet(), {'2026-10-24'}, reason: 'a week ahead holds one Saturday');
+      // Two weeks ahead, so a weekends-only person always has a second Saturday for the next card.
+      expect(slots.map((s) => s.day).toSet(), {'2026-10-24', '2026-10-31'});
     });
 
     test('no free time given: no slot', () {
@@ -43,8 +44,9 @@ void main() {
 
     test('labels read like the frames', () {
       final lunch = upcomingSlots({'lunch', 'weekends'}, at(9, 0));
-      expect(suggestedLabel(lunch.first, '2026-10-23'), 'Suggested 12:30 · lunch');
-      expect(suggestedLabel(lunch[1], '2026-10-23'), 'Suggested Sat 10:00 · weekends');
+      String plain(String s) => s.replaceAll('\u00A0', ' '); // non-breaking spaces keep the label together
+      expect(plain(suggestedLabel(lunch.first, '2026-10-23')), 'Suggested 12:30 · lunch');
+      expect(plain(suggestedLabel(lunch[1], '2026-10-23')), 'Suggested Sat 10:00 · weekends');
     });
 
     test('18:30 is dark and 07:00 is not, for the after-dark leave-out [assumption]', () {
@@ -160,12 +162,43 @@ void main() {
         expect(p.relaxation!.label, 'Show options for any time and energy');
       });
 
+      test('if even 45 minutes and high energy bring nothing back, it is not a chips problem (N3)', () {
+        final p = plan(
+          [only('run_walk', minutes: 60, energy: Energy.medium)],
+          chips: const TodayChips(timeMin: 10),
+        );
+        expect(p.kind, TodayKind.nothingFitsChoices, reason: 'a button that changes nothing would be a trap');
+      });
+
       test('the relaxation really brings an option back', () {
         final pool = [only('run_walk', minutes: 20, energy: Energy.medium)];
         final p = plan(pool, chips: const TodayChips(timeMin: 10));
         final again = plan(pool, chips: p.relaxation!.chips);
         expect(again.kind, TodayKind.options);
       });
+    });
+
+    test('a compact card can say "Similar to ..." about an action of another activity', () {
+      // yoga_stretch is similar to walk_10, and the person enjoyed walk_10; dance_class is similar to yoga_stretch.
+      final walk = actions.firstWhere((a) => a.id == 'walk_10');
+      final p = plan(
+        actions,
+        person: PersonContext(
+          access: const {'none'},
+          followed: const {ActivityKind.walking, ActivityKind.yoga},
+          reflections: [reflect('2026-10-01', ReflectionStatus.completed, action: walk, enjoyment: 3)],
+        ),
+        followed: [ActivityKind.walking, ActivityKind.yoga],
+      );
+      final yoga = p.others.firstWhere((o) => o.ranked.action.activity == ActivityKind.yoga);
+      expect(yoga.ranked.reason.code, 'similar');
+      expect(yoga.ranked.reason.text, 'Similar to ${walk.title}, which you enjoyed');
+    });
+
+    test('slots for the compact cards skip the hero\'s own activity, so each card has a distinct time', () {
+      final p = plan(actions, followed: [ActivityKind.walking, ActivityKind.yoga, ActivityKind.dance]);
+      final times = [for (final o in p.others) o.slot?.clock];
+      expect(times.toSet().length, greaterThanOrEqualTo(2));
     });
 
     group('state N3: nothing fits even without the chips', () {

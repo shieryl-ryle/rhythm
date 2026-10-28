@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/theme.dart';
@@ -12,11 +13,33 @@ import 'today_sheets.dart';
 /// S-004 Today (frames 1.16, 2.3, 2.5, 2.8, 9.3): this week's rhythm, the time and energy chips, one expanded
 /// option with its reason, and compact cards for the other activities followed. One filled button on the
 /// screen (DESIGN.md). Nothing is planned until the person taps "I'll try this" (BR-005).
-class TodayScreen extends ConsumerWidget {
+class TodayScreen extends ConsumerStatefulWidget {
   const TodayScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<TodayScreen> createState() => _TodayScreenState();
+}
+
+class _TodayScreenState extends ConsumerState<TodayScreen> {
+  late final AppLifecycleListener _lifecycle;
+
+  @override
+  void initState() {
+    super.initState();
+    // Back from the background on a new day: show the new day, with fresh chips and a fresh chain.
+    _lifecycle = AppLifecycleListener(
+      onResume: () => ref.read(todayControllerProvider.notifier).refreshIfNewDay(),
+    );
+  }
+
+  @override
+  void dispose() {
+    _lifecycle.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final async = ref.watch(todayControllerProvider);
     return Scaffold(
       body: SafeArea(
@@ -31,7 +54,11 @@ class TodayScreen extends ConsumerWidget {
             Expanded(
               child: async.when(
                 data: (view) => _TodayBody(view: view),
-                loading: () => const SizedBox.shrink(),
+                // Frame loading state: the rhythm card as empty tiles, nothing else.
+                loading: () => const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: LiltSpacing.lg),
+                  child: Align(alignment: Alignment.topCenter, child: RhythmGridSkeleton()),
+                ),
                 error: (_, _) => _LoadFailed(onRetry: () => ref.invalidate(todayControllerProvider)),
               ),
             ),
@@ -57,7 +84,7 @@ class _LoadFailed extends StatelessWidget {
           children: [
             Text('Today didn’t load', style: LiltText.display.copyWith(fontSize: 30), textAlign: TextAlign.center),
             const SizedBox(height: LiltSpacing.sm),
-            Text('Nothing was lost. Try again.', style: LiltText.body.copyWith(color: LiltColors.inkMuted)),
+            Text('Your answers are safe. Try again.', style: LiltText.body.copyWith(color: LiltColors.inkMuted)),
             const SizedBox(height: LiltSpacing.xl),
             LiltButton(label: 'Try again', onPressed: onRetry),
           ],
@@ -76,6 +103,7 @@ class _TodayBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final c = ref.read(todayControllerProvider.notifier);
     final mode = view.mode;
+    final large = MediaQuery.textScalerOf(context).scale(1) >= 1.5;
 
     final title = switch (mode) {
       TodayMode.paused => 'Paused, resume anytime',
@@ -87,8 +115,17 @@ class _TodayBody extends ConsumerWidget {
           : (view.hasHistory ? 'Here’s what fits today' : 'Your first ideas'),
     };
 
-    final rhythm = view.hasHistory ? RhythmGridCard(days: view.grid) : WeekStripCard(days: view.weekStrip);
+    final rhythm = Semantics(
+      sortKey: const OrdinalSortKey(1),
+      child: view.hasHistory ? RhythmGridCard(days: view.grid) : WeekStripCard(days: view.weekStrip),
+    );
     final showChips = mode == TodayMode.options && view.accepted.isEmpty || mode == TodayMode.nothingFitsChips;
+    final titleWidget = Semantics(
+      header: true,
+      liveRegion: true,
+      sortKey: const OrdinalSortKey(0),
+      child: Text(title, style: LiltText.display),
+    );
 
     void notToday({TodayOption? option, bool lighter = false}) => showNotTodaySheet(
           context,
@@ -97,25 +134,51 @@ class _TodayBody extends ConsumerWidget {
           onPause: (days) => c.pause(days, option: option),
         );
 
+    // "I'll try this" plans it and offers Undo, because a plan item is created (BR-005: only on a tap).
+    Future<void> accepted(Future<bool> Function() accept) async {
+      final messenger = ScaffoldMessenger.of(context);
+      final planned = await accept();
+      if (!planned) return;
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: const Text('Added to today’s plan'),
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.fromLTRB(LiltSpacing.lg, 0, LiltSpacing.lg, LiltSpacing.lg),
+            action: SnackBarAction(label: 'Undo', onPressed: c.undoLastAccept),
+          ),
+        );
+    }
+
     final children = <Widget>[];
 
     if (mode == TodayMode.paused) {
-      // Frame 2.8: the pause comes first, the rhythm under it.
+      // Frame 2.8: the pause comes first, the rhythm under it. A plan made before pausing stays visible.
       children
-        ..add(Semantics(header: true, liveRegion: true, child: Text(title, style: LiltText.display)))
+        ..add(titleWidget)
         ..add(const SizedBox(height: LiltSpacing.md))
         ..add(Text(_pausedBody(view), style: LiltText.body.copyWith(color: LiltColors.inkMuted)))
         ..add(const SizedBox(height: LiltSpacing.lg))
         ..add(LiltButton(label: 'Resume now', onPressed: c.resume))
-        ..add(const SizedBox(height: LiltSpacing.lg))
-        ..add(rhythm);
+        ..add(const SizedBox(height: LiltSpacing.lg));
+      for (final a in view.accepted) {
+        children
+          ..add(PlannedCard(offer: a, today: view.today))
+          ..add(const SizedBox(height: LiltSpacing.md));
+      }
+      children.add(rhythm);
     } else {
+      // At large text the rhythm card moves under the options, so the first screen has the action on it.
+      if (!large) {
+        children
+          ..add(rhythm)
+          ..add(const SizedBox(height: LiltSpacing.lg));
+      }
       children
-        ..add(rhythm)
-        ..add(const SizedBox(height: LiltSpacing.lg))
         ..add(Text(longDate(view.today), style: LiltText.label.copyWith(color: LiltColors.inkMuted, fontWeight: FontWeight.w400)))
         ..add(const SizedBox(height: LiltSpacing.xs))
-        ..add(Semantics(header: true, liveRegion: true, child: Text(title, style: LiltText.display)));
+        ..add(titleWidget);
 
       if (showChips) {
         children
@@ -152,7 +215,7 @@ class _TodayBody extends ConsumerWidget {
           if (view.accepted.isNotEmpty) {
             for (final a in view.accepted) {
               children
-                ..add(PlannedCard(offer: a, today: view.today))
+                ..add(PlannedCard(offer: a, today: view.today, onNotToday: notToday))
                 ..add(const SizedBox(height: LiltSpacing.md));
             }
             if (view.compact.isNotEmpty) {
@@ -171,7 +234,7 @@ class _TodayBody extends ConsumerWidget {
                 position: view.heroPosition,
                 total: view.heroTotal,
                 canSwap: view.canSwap,
-                onAccept: c.acceptShown,
+                onAccept: () => accepted(c.acceptShown),
                 onSwap: c.swapShown,
                 onNotToday: () => notToday(lighter: true),
               ))
@@ -183,7 +246,7 @@ class _TodayBody extends ConsumerWidget {
                 option: option,
                 relation: relationLabel(option.ranked.action.activity, view.followedPaths),
                 today: view.today,
-                onAccept: () => c.acceptCompact(option),
+                onAccept: () => accepted(() => c.acceptCompact(option)),
                 onNotToday: () => notToday(option: option),
               ))
               ..add(const SizedBox(height: LiltSpacing.md));
@@ -191,21 +254,20 @@ class _TodayBody extends ConsumerWidget {
 
         case TodayMode.nothingFitsChips:
           // State N2: the chips are the cause. The button relaxes them for today only; it plans nothing (BR-005).
+          // The body names only what can be done on this screen: "add something of your own" comes with that control.
           final relax = view.plan.relaxation!;
           children
-            ..add(Text(
-              'Change the time or energy, or add something of your own.',
-              style: LiltText.body.copyWith(color: LiltColors.inkMuted),
-            ))
+            ..add(Text('Change the time or energy.', style: LiltText.body.copyWith(color: LiltColors.inkMuted)))
             ..add(const SizedBox(height: LiltSpacing.lg))
             ..add(LiltButton(label: relax.label, onPressed: () => c.setChips(relax.chips)))
+            ..add(const SizedBox(height: LiltSpacing.sm))
             ..add(LiltButton(label: 'Not today', kind: LiltButtonKind.text, expand: true, onPressed: notToday));
 
         case TodayMode.nothingFitsChoices:
           // State N3: nothing fits even without the chips, so the chips are hidden: they cannot fix it.
           children
             ..add(Text(
-              'Your leave-out and access choices cover everything we have. You can change them any time.',
+              'Your leave-out and access choices cover everything we have.',
               style: LiltText.body.copyWith(color: LiltColors.inkMuted),
             ))
             ..add(const SizedBox(height: LiltSpacing.lg))
@@ -219,6 +281,12 @@ class _TodayBody extends ConsumerWidget {
 
         case TodayMode.paused:
           break;
+      }
+
+      if (large) {
+        children
+          ..add(const SizedBox(height: LiltSpacing.sm))
+          ..add(rhythm);
       }
     }
 
