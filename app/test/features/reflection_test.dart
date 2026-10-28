@@ -29,6 +29,16 @@ class _Agreed implements ConsentRepository {
   Future<void> agree() async {}
 }
 
+// Two followed activities, so a second option sits under the hero as a compact card ("Still open").
+const _twoActivities = SetupAnswers(
+  paths: {SetupPath.keepGoing, SetupPath.addNew},
+  keepActivity: ActivityKind.gym,
+  progress: Progress.goingWell,
+  addNewActivity: ActivityKind.walking,
+  freeTimes: {'lunch'},
+  access: {'gym_membership'},
+);
+
 const _runner = SetupAnswers(
   paths: {SetupPath.keepGoing},
   keepActivity: ActivityKind.gym,
@@ -43,13 +53,14 @@ Future<LiltDatabase> _open(
   double textScale = 1,
   DateTime Function()? clock,
   Future<void> Function(LiltDatabase db)? seed,
+  SetupAnswers answers = _runner,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   final db = inMemoryDatabase();
   addTearDown(db.close);
-  await DriftSetupRepository(db).save(_runner);
+  await DriftSetupRepository(db).save(answers);
   await seed?.call(db);
   await tester.pumpWidget(
     ProviderScope(
@@ -190,6 +201,125 @@ void main() {
     });
   });
 
+  group('an answer is never lowered (BR-007, EQ-011)', () {
+    test('which answers can follow which', () {
+      expect(allowedAnswers(ReflectionStatus.unknown), {ReflectionStatus.completed, ReflectionStatus.partly, ReflectionStatus.skipped});
+      expect(allowedAnswers(ReflectionStatus.skipped), {ReflectionStatus.completed, ReflectionStatus.partly, ReflectionStatus.skipped});
+      expect(allowedAnswers(ReflectionStatus.partly), {ReflectionStatus.completed, ReflectionStatus.partly});
+      expect(allowedAnswers(ReflectionStatus.completed), {ReflectionStatus.completed});
+    });
+
+    testWidgets('a Done answer offers only Done when changed, and its enjoyment can still be edited', (tester) async {
+      final db = await _open(tester);
+      await _planAndOpen(tester);
+      await _tap(tester, 'Done');
+      await _tap(tester, 'Save');
+
+      await _tap(tester, 'Change my answer');
+      expect(find.text('Done'), findsWidgets);
+      expect(find.text('Partly'), findsNothing);
+      expect(find.text('Didn’t get to it'), findsNothing);
+      await _tap(tester, 'Enjoyed it');
+      await _tap(tester, 'Save');
+      final r = await _only(db);
+      expect(r.status, ReflectionStatus.completed);
+      expect(r.enjoyment, 3);
+    });
+
+    testWidgets('a Partly answer can become Done but not Didn\'t get to it', (tester) async {
+      await _open(tester);
+      await _planAndOpen(tester);
+      await _tap(tester, 'Partly');
+      await _tap(tester, 'Save');
+      await _tap(tester, 'Change my answer');
+      expect(find.text('Done'), findsWidgets);
+      expect(find.text('Partly'), findsWidgets);
+      expect(find.text('Didn’t get to it'), findsNothing);
+    });
+
+    testWidgets('a Didn\'t get to it answer can be raised to anything', (tester) async {
+      final db = await _open(tester);
+      await _planAndOpen(tester);
+      await _tap(tester, 'Didn’t get to it');
+      await _tap(tester, 'Save');
+      await _tap(tester, 'Change my answer');
+      for (final label in ['Done', 'Partly', 'Didn’t get to it']) {
+        expect(find.text(label), findsWidgets, reason: label);
+      }
+      await _tap(tester, 'Done');
+      await _tap(tester, 'Save');
+      expect((await _only(db)).status, ReflectionStatus.completed);
+    });
+
+    testWidgets('totals and the grid do not fall when an answer is changed', (tester) async {
+      final db = await _open(tester);
+      await _planAndOpen(tester);
+      await _tap(tester, 'Done');
+      await _tap(tester, 'Save');
+      final before = (await TodayRepository(db).inputs()).reflectedDays;
+      expect(before, {'2026-10-23'});
+
+      await _tap(tester, 'Change my answer');
+      await _tap(tester, 'Save');
+      expect((await TodayRepository(db).inputs()).reflectedDays, before);
+    });
+  });
+
+  group('the sentence stays on the page, in the order of frame 2.5', () {
+    testWidgets('it is still there after the app is opened again (it comes from the stored answer)', (tester) async {
+      final db = await _open(tester);
+      await _planAndOpen(tester);
+      await _tap(tester, 'Didn’t get to it');
+      await _tap(tester, 'Save');
+      expect(find.text('We’ll suggest this one a little less often.'), findsOneWidget);
+
+      await tester.pumpWidget(const SizedBox());
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            consentRepositoryProvider.overrideWithValue(_Agreed()),
+            ...todayTestOverrides(db),
+            assetReaderProvider.overrideWithValue(readAssetFile),
+          ],
+          child: const LiltApp(),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('What changes next'), findsOneWidget);
+      expect(find.text('We’ll suggest this one a little less often.'), findsOneWidget);
+      expect(find.text('Rest counts too.'), findsWidgets);
+    });
+
+    testWidgets('Today, then Coming up, then From earlier, then Still open', (tester) async {
+      final db = await _open(tester, answers: _twoActivities);
+      await DriftLibraryLoader(db, readAssetFile).load();
+      final action = await (db.select(db.actions)..where((t) => t.id.equals('act_walk_10'))).getSingle();
+      Future<void> plan(String day, ReflectionStatus s) async {
+        final item = await db.into(db.planItems).insertReturning(
+              PlanItemsCompanion.insert(
+                source: PlanSource.offer,
+                activity: action.activity,
+                title: 'Walk on $day',
+                plannedDay: day,
+                actionId: Value(action.id),
+              ),
+            );
+        await db.into(db.reflections).insert(ReflectionsCompanion.insert(planItemId: item.id, status: Value(s)));
+      }
+
+      await plan('2026-10-24', ReflectionStatus.unknown);
+      await plan('2026-10-22', ReflectionStatus.unknown);
+      await _tap(tester, 'I’ll try this');
+      await tester.pump(const Duration(seconds: 5));
+      await tester.pumpAndSettle();
+      double y(String text) => tester.getTopLeft(find.text(text)).dy;
+      final todayHeading = tester.getTopLeft(find.byWidgetPredicate((w) => w is Text && w.data == 'Today' && w.style?.fontSize == 16)).dy;
+      expect(todayHeading, lessThan(y('Coming up')));
+      expect(y('Coming up'), lessThan(y('From earlier')));
+      expect(y('From earlier'), lessThan(y('Still open')));
+    });
+  });
+
   group('after saving', () {
     testWidgets('one sentence says what will change, and the rhythm card moves to the grid', (tester) async {
       await _open(tester);
@@ -198,7 +328,12 @@ void main() {
       await _tap(tester, 'Done');
       await _tap(tester, 'Enjoyed it');
       await _tap(tester, 'Save');
-      expect(find.text('Noted. We’ll suggest this one a little more often.'), findsOneWidget);
+      // The sentence stays on the card (a block with a left rule), not in a snackbar that disappears.
+      expect(find.text('What changes next'), findsOneWidget);
+      expect(find.text('We’ll suggest this one a little more often.'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 10));
+      expect(find.text('We’ll suggest this one a little more often.'), findsOneWidget);
+      expect(find.text('Any amount counts.'), findsOneWidget, reason: 'the answered card affirms');
       expect(find.text('Your rhythm · last 12 weeks'), findsOneWidget, reason: 'the first reflected day: the grid');
     });
 
@@ -208,7 +343,10 @@ void main() {
       await _tap(tester, 'Partly');
       await _tap(tester, 'Save');
       expect(find.text('Today’s plan'), findsOneWidget);
-      expect(find.text('Partly'), findsWidgets);
+      expect(find.text('Partly done'), findsOneWidget);
+      // The tab bar also says Today, at 12 sp; the heading is the 16 sp one.
+      expect(find.byWidgetPredicate((w) => w is Text && w.data == 'Today' && w.style?.fontSize == 16), findsOneWidget, reason: 'the Today heading above the card (frame 2.5)');
+      expect(find.text('Partly counts.'), findsOneWidget);
       expect(find.textContaining('missed'), findsNothing);
       expect(find.textContaining('overdue'), findsNothing);
     });
@@ -251,6 +389,27 @@ void main() {
       expect((await _only(db)).status, ReflectionStatus.completed);
     });
 
+    testWidgets('an unanswered item older than a week stops asking, and is not deleted or counted (BR-009)', (tester) async {
+      final db = await _open(tester, seed: (db) => seedPlan(db, day: '2026-10-15'));
+      expect(find.text('From earlier'), findsNothing);
+      final inputs = await TodayRepository(db).inputs();
+      expect(inputs.reflections.single.status, ReflectionStatus.unknown);
+      expect(find.textContaining('missed'), findsNothing);
+    });
+
+    testWidgets('an item from 7 days ago still asks', (tester) async {
+      await _open(tester, seed: (db) => seedPlan(db, day: '2026-10-16'));
+      expect(find.text('From earlier'), findsOneWidget);
+    });
+
+    testWidgets('earlier items are reachable while paused, so a return from a pause can answer them', (tester) async {
+      await _open(tester, seed: (db) => seedPlan(db, day: '2026-10-22'));
+      await _tap(tester, 'Not today');
+      await _tap(tester, 'Pause for 1 week');
+      expect(find.text('Paused, resume anytime'), findsOneWidget);
+      expect(find.text('From earlier'), findsOneWidget);
+    });
+
     testWidgets('an answered item from an earlier day does not come back', (tester) async {
       await _open(tester, seed: (db) => seedPlan(db, day: '2026-10-22', status: ReflectionStatus.completed));
       expect(find.text('From earlier'), findsNothing);
@@ -267,15 +426,19 @@ void main() {
 
   group('the words (BR-001, BR-007)', () {
     test('the sentence says only what the ranking does', () {
-      expect(whatChangesNext(status: ReflectionStatus.completed, enjoyment: 3),
-          'Noted. We’ll suggest this one a little more often.');
-      expect(whatChangesNext(status: ReflectionStatus.completed, enjoyment: 1), 'Noted. We’ll keep that in mind.');
-      expect(whatChangesNext(status: ReflectionStatus.partly), 'Noted. Partly counts.');
-      expect(whatChangesNext(status: ReflectionStatus.skipped),
-          'Noted. We’ll suggest this one a little less often.');
-      expect(whatChangesNext(status: ReflectionStatus.skipped, barrier: Barrier.time),
-          contains('If the same thing keeps getting in the way, we’ll point it out.'));
-      expect(whatChangesNext(status: ReflectionStatus.skipped, barrier: Barrier.preferNotToSay), isNot(contains('point it out')));
+      expect(whatChangesNext(status: ReflectionStatus.completed, enjoyment: 3), 'We’ll suggest this one a little more often.');
+      expect(whatChangesNext(status: ReflectionStatus.completed), 'We’ll suggest this one a little more often.');
+      // A rating of 1 or 2 adds nothing to the score (EQ-003), so no change is promised.
+      expect(whatChangesNext(status: ReflectionStatus.completed, enjoyment: 1), 'Thanks for telling us.');
+      expect(whatChangesNext(status: ReflectionStatus.completed, enjoyment: 2), 'Thanks for telling us.');
+      expect(whatChangesNext(status: ReflectionStatus.partly), 'Partly counts.');
+      expect(whatChangesNext(status: ReflectionStatus.partly, enjoyment: 3), 'Partly counts, and you enjoyed it.');
+      expect(whatChangesNext(status: ReflectionStatus.skipped), 'We’ll suggest this one a little less often.');
+      // A barrier promises nothing: observations are not shown yet, and EQ-009 counts barriers only on skipped.
+      for (final b in Barrier.values) {
+        expect(whatChangesNext(status: ReflectionStatus.partly, barrier: b), isNot(contains('point it out')));
+        expect(whatChangesNext(status: ReflectionStatus.skipped, barrier: b), isNot(contains('point it out')));
+      }
     });
 
     test('every sentence and label avoids the never-use list and the blocked claims', () async {
@@ -317,6 +480,7 @@ void main() {
             await expectLater(tester, meetsGuideline(labeledTapTargetGuideline), reason: where);
           }
 
+          await expectLater(tester, meetsGuideline(textContrastGuideline));
           await check('three answers');
           await _tap(tester, 'Partly');
           await check('partly: barrier and enjoyment');

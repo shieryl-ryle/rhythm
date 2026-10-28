@@ -160,6 +160,7 @@ class _TodayBody extends ConsumerWidget {
       final answer = await showReflectionSheet(
         context,
         activityTitle: p.title,
+        allowed: allowedAnswers(p.reflection.status),
         initial: p.isOpen
             ? null
             : ReflectionAnswer(
@@ -169,33 +170,41 @@ class _TodayBody extends ConsumerWidget {
               ),
       );
       if (answer == null) return;
-      final sentence = await c.saveReflection(p, answer);
-      if (sentence == null) return;
-      messenger
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          SnackBar(
-            content: Text(sentence),
-            behavior: SnackBarBehavior.floating,
-            margin: const EdgeInsets.fromLTRB(LiltSpacing.lg, 0, LiltSpacing.lg, LiltSpacing.lg),
-          ),
-        );
+      // The sentence about what will change appears on the card, not in a snackbar that disappears.
+      await c.saveReflection(p, answer);
+      messenger.hideCurrentSnackBar();
     }
 
     final children = <Widget>[];
 
-    // Plan items from later days and from earlier days still waiting for an answer (UF-003), below the options.
-    void planSections() {
-      void section(String heading, List<PlannedItem> items, {bool reflectable = false}) {
-        if (items.isEmpty) return;
+    void heading(String text) => children
+      ..add(const SizedBox(height: LiltSpacing.sm))
+      ..add(Semantics(header: true, child: Text(text, style: LiltText.body.copyWith(fontWeight: FontWeight.w600))))
+      ..add(const SizedBox(height: LiltSpacing.md));
+
+    // A planned card, and under an answered one the "What changes next" sentence (frame 2.6).
+    void planned(PlannedItem p, {bool reflectable = true, VoidCallback? notToday}) {
+      children.add(PlannedCard(
+        planned: p,
+        today: view.today,
+        onReflect: reflectable ? () => reflect(p) : null,
+        onNotToday: notToday,
+      ));
+      if (!p.isOpen) {
         children
-          ..add(const SizedBox(height: LiltSpacing.sm))
-          ..add(Semantics(header: true, child: Text(heading, style: LiltText.body.copyWith(fontWeight: FontWeight.w600))))
-          ..add(const SizedBox(height: LiltSpacing.md));
+          ..add(const SizedBox(height: LiltSpacing.md))
+          ..add(WhatChangesNext(planned: p));
+      }
+      children.add(const SizedBox(height: LiltSpacing.md));
+    }
+
+    // Plan items from later days and from earlier days still waiting for an answer (UF-003).
+    void planSections() {
+      void section(String text, List<PlannedItem> items, {bool reflectable = false}) {
+        if (items.isEmpty) return;
+        heading(text);
         for (final p in items) {
-          children
-            ..add(PlannedCard(planned: p, today: view.today, onReflect: reflectable ? () => reflect(p) : null))
-            ..add(const SizedBox(height: LiltSpacing.md));
+          planned(p, reflectable: reflectable);
         }
       }
 
@@ -213,10 +222,9 @@ class _TodayBody extends ConsumerWidget {
         ..add(LiltButton(label: 'Resume now', onPressed: c.resume))
         ..add(const SizedBox(height: LiltSpacing.lg));
       for (final p in view.todayItems) {
-        children
-          ..add(PlannedCard(planned: p, today: view.today, onReflect: () => reflect(p)))
-          ..add(const SizedBox(height: LiltSpacing.md));
+        planned(p);
       }
+      planSections();
       children.add(rhythm);
     } else {
       // At large text the rhythm card moves under the options, so the first screen has the action on it.
@@ -263,22 +271,12 @@ class _TodayBody extends ConsumerWidget {
       switch (mode) {
         case TodayMode.options:
           if (view.hasPlan) {
+            if (view.todayItems.isNotEmpty) heading('Today');
             for (final p in view.todayItems) {
-              children
-                ..add(PlannedCard(
-                  planned: p,
-                  today: view.today,
-                  onReflect: () => reflect(p),
-                  onNotToday: notToday,
-                ))
-                ..add(const SizedBox(height: LiltSpacing.md));
+              planned(p, notToday: notToday);
             }
-            if (view.compact.isNotEmpty) {
-              children
-                ..add(const SizedBox(height: LiltSpacing.sm))
-                ..add(Semantics(header: true, child: Text('Still open', style: LiltText.body.copyWith(fontWeight: FontWeight.w600))))
-                ..add(const SizedBox(height: LiltSpacing.md));
-            }
+            planSections();
+            if (view.compact.isNotEmpty) heading('Still open');
           } else if (view.shown != null) {
             final shown = view.shown!;
             children
@@ -306,7 +304,7 @@ class _TodayBody extends ConsumerWidget {
               ))
               ..add(const SizedBox(height: LiltSpacing.md));
           }
-          planSections();
+          if (!view.hasPlan) planSections();
 
         case TodayMode.nothingFitsChips:
           // State N2: the chips are the cause. The button relaxes them for today only; it plans nothing (BR-005).
@@ -318,6 +316,7 @@ class _TodayBody extends ConsumerWidget {
             ..add(LiltButton(label: relax.label, onPressed: () => c.setChips(relax.chips)))
             ..add(const SizedBox(height: LiltSpacing.sm))
             ..add(LiltButton(label: 'Not today', kind: LiltButtonKind.text, expand: true, onPressed: notToday));
+          planSections();
 
         case TodayMode.nothingFitsChoices:
           // State N3: nothing fits even without the chips, so the chips are hidden: they cannot fix it.
@@ -328,12 +327,14 @@ class _TodayBody extends ConsumerWidget {
             ))
             ..add(const SizedBox(height: LiltSpacing.lg))
             ..add(LiltButton(label: 'Not today', kind: LiltButtonKind.text, expand: true, onPressed: notToday));
+          planSections();
 
         case TodayMode.allDone:
           children
             ..add(Text('Rest counts too. Come back tomorrow for new ideas.', style: LiltText.body.copyWith(color: LiltColors.inkMuted)))
             ..add(const SizedBox(height: LiltSpacing.lg))
             ..add(LiltButton(label: 'Not today', kind: LiltButtonKind.text, expand: true, onPressed: notToday));
+          planSections();
 
         case TodayMode.paused:
           break;

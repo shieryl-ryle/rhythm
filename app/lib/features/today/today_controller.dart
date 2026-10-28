@@ -158,13 +158,13 @@ class TodayController extends AsyncNotifier<TodayView> {
 
   /// Runs one action. A second tap while one is running is ignored (a double tap must not plan twice), and an
   /// action started on a screen left over from yesterday refreshes the screen instead of writing under the old day.
-  Future<void> _act(Future<void> Function(TodayView view) body) async {
+  Future<void> _act(Future<void> Function(TodayView view) body, {bool requireSameDay = true}) async {
     final view = state.valueOrNull;
     if (view == null || _busy) return;
     _busy = true;
     try {
       _assertConsentNow();
-      if (view.today != _clockDay) {
+      if (requireSameDay && view.today != _clockDay) {
         await _reload();
         return;
       }
@@ -386,16 +386,24 @@ class TodayController extends AsyncNotifier<TodayView> {
   /// saving never reaches here, so the reflection stays unknown (BR-009).
   Future<String?> saveReflection(PlannedItem item, ReflectionAnswer answer) async {
     String? sentence;
-    await _act((_) async {
-      await _repo.saveReflection(
-        item.item.id,
-        status: answer.status,
-        enjoyment: answer.enjoyment,
-        barrier: answer.barrier,
-      );
-      sentence = whatChangesNext(status: answer.status, enjoyment: answer.enjoyment, barrier: answer.barrier);
-      await _reload();
-    });
+    // An answer belongs to its plan item, not to the day it was given, so it is saved even if midnight passed
+    // while the sheet was open; the screen then shows the new day.
+    await _act(
+      (_) async {
+        final result = await _repo.saveReflection(
+          item.item.id,
+          status: answer.status,
+          enjoyment: answer.enjoyment,
+          barrier: answer.barrier,
+        );
+        // The sentence only when something was written: never a confirmation for a save that did not happen.
+        if (result == ReflectionSave.saved) {
+          sentence = whatChangesNext(status: answer.status, enjoyment: answer.enjoyment, barrier: answer.barrier);
+        }
+        await _reload();
+      },
+      requireSameDay: false,
+    );
     return sentence;
   }
 

@@ -150,7 +150,7 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  for (final scale in [1.0, 2.0]) {
+  for (final scale in [1.0, 1.3, 2.0]) {
     final tag = '${(scale * 100).round()}';
 
     testWidgets('day one, plan and sheets at $tag%', (tester) async {
@@ -193,6 +193,32 @@ void main() {
       await _save(tester, key, 'r03_sheet_partly_$tag');
       await tap(tester, 'Save');
       await _save(tester, key, 'r04_saved_$tag');
+    });
+
+    testWidgets('reflection answers at $tag%', (tester) async {
+      if (_dir.isEmpty) return;
+      final (_, key) = await open(tester, scale: scale);
+      await tap(tester, 'I’ll try this');
+      await tester.pump(const Duration(seconds: 5));
+      await tester.pumpAndSettle();
+      await tap(tester, 'How did it go?');
+      await tap(tester, 'Done');
+      await _save(tester, key, 'r05_sheet_done_$tag');
+      await tap(tester, 'Save');
+      await _save(tester, key, 'r06_saved_done_$tag');
+    });
+
+    testWidgets('reflection skipped at $tag%', (tester) async {
+      if (_dir.isEmpty) return;
+      final (_, key) = await open(tester, scale: scale);
+      await tap(tester, 'I’ll try this');
+      await tester.pump(const Duration(seconds: 5));
+      await tester.pumpAndSettle();
+      await tap(tester, 'How did it go?');
+      await tap(tester, 'Didn’t get to it');
+      await _save(tester, key, 'r07_sheet_skipped_$tag');
+      await tap(tester, 'Save');
+      await _save(tester, key, 'r08_saved_skipped_$tag');
     });
 
     testWidgets('nothing fits at $tag%', (tester) async {

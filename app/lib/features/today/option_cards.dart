@@ -223,6 +223,44 @@ class CompactCard extends StatelessWidget {
   }
 }
 
+/// "What changes next" (frame 2.6): one sentence under an answered card, with a left rule and not a grey box
+/// (docs/DESIGN.md). It stays on the page, so it can be read slowly or read aloud, and it is worked out from the
+/// stored answer, so it is still there after a restart. A live region, so it is announced once when it appears.
+class WhatChangesNext extends StatelessWidget {
+  const WhatChangesNext({super.key, required this.planned});
+
+  final PlannedItem planned;
+
+  @override
+  Widget build(BuildContext context) {
+    final r = planned.reflection;
+    final sentence = whatChangesNext(status: r.status, enjoyment: r.enjoyment, barrier: r.barrier);
+    return Semantics(
+      liveRegion: true,
+      container: true,
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(width: 3, color: LiltColors.primary),
+            const SizedBox(width: LiltSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('What changes next', style: LiltText.label.copyWith(fontWeight: FontWeight.w600)),
+                  const SizedBox(height: LiltSpacing.xs),
+                  Text(sentence, style: LiltText.body),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 /// Something in the plan (frame 2.5, 2.6). Planned and not yet answered, today: "How did it go?" is the one
 /// primary. Answered: the answer shows, with "Change my answer". From an earlier day and still open: a quieter
 /// "How did it go?". Later: no button. Nothing here says overdue or missed (BR-007, BR-009).
@@ -267,7 +305,10 @@ class PlannedCard extends StatelessWidget {
             child: Text(item.title, style: LiltText.body.copyWith(fontWeight: FontWeight.w600, height: 1.3)),
           ),
           const SizedBox(height: LiltSpacing.xs),
-          Text('$when$minutes', style: LiltText.label.copyWith(fontWeight: FontWeight.w400)),
+          Text(
+            planned.isOpen ? '$when$minutes' : affirmation(status),
+            style: LiltText.label.copyWith(fontWeight: FontWeight.w400),
+          ),
           if (planned.isOpen && onReflect != null && (isToday || isEarlier)) ...[
             const SizedBox(height: LiltSpacing.lg),
             LiltButton(

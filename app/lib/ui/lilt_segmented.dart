@@ -23,8 +23,29 @@ class LiltSegmented<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final stacked = MediaQuery.textScalerOf(context).scale(1) >= 1.5;
+    final scaler = MediaQuery.textScalerOf(context);
+    // Large text, or any label that would not fit on one line in a third of the width (docs/DESIGN.md).
+    return LayoutBuilder(
+      builder: (context, box) => _build(context, scaler.scale(1) >= 1.5 || !_labelsFit(context, box.maxWidth, scaler)),
+    );
+  }
 
+  bool _labelsFit(BuildContext context, double width, TextScaler scaler) {
+    final inner = width - LiltSpacing.xs; // the track's padding
+    final each = inner / segments.length - 2 * LiltSpacing.md; // a segment's own padding
+    for (final s in segments) {
+      final painter = TextPainter(
+        text: TextSpan(text: s.label, style: LiltText.label.copyWith(fontWeight: FontWeight.w600)),
+        textDirection: Directionality.of(context),
+        textScaler: scaler,
+        maxLines: 1,
+      )..layout();
+      if (painter.width > each) return false;
+    }
+    return true;
+  }
+
+  Widget _build(BuildContext context, bool stacked) {
     Widget cell(LiltSegment<T> s) {
       final selected = s.value == value;
       return Semantics(

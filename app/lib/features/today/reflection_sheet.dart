@@ -22,6 +22,7 @@ Future<ReflectionAnswer?> showReflectionSheet(
   required String activityTitle,
   ReflectionAnswer? initial,
   ReflectionStatus? preselect,
+  Set<ReflectionStatus>? allowed,
 }) {
   return showModalBottomSheet<ReflectionAnswer>(
     context: context,
@@ -31,16 +32,24 @@ Future<ReflectionAnswer?> showReflectionSheet(
     barrierColor: LiltColors.scrim,
     backgroundColor: Colors.transparent,
     elevation: 0,
-    builder: (_) => _ReflectionSheet(activityTitle: activityTitle, initial: initial, preselect: preselect),
+    builder: (_) => _ReflectionSheet(
+      activityTitle: activityTitle,
+      initial: initial,
+      preselect: preselect,
+      allowed: allowed,
+    ),
   );
 }
 
 class _ReflectionSheet extends StatefulWidget {
-  const _ReflectionSheet({required this.activityTitle, this.initial, this.preselect});
+  const _ReflectionSheet({required this.activityTitle, this.initial, this.preselect, this.allowed});
 
   final String activityTitle;
   final ReflectionAnswer? initial;
   final ReflectionStatus? preselect;
+
+  /// The answers offered. A person who already answered can keep or raise it, not lower it (BR-007, EQ-011).
+  final Set<ReflectionStatus>? allowed;
 
   @override
   State<_ReflectionSheet> createState() => _ReflectionSheetState();
@@ -50,6 +59,7 @@ class _ReflectionSheetState extends State<_ReflectionSheet> {
   ReflectionStatus? _status;
   Barrier? _barrier;
   int? _enjoyment;
+  bool _saved = false;
 
   @override
   void initState() {
@@ -80,7 +90,7 @@ class _ReflectionSheetState extends State<_ReflectionSheet> {
       bodyBuilder: (_) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          for (final choice in reflectionChoices) ...[
+          for (final choice in reflectionChoices.where((c) => widget.allowed?.contains(c.status) ?? true)) ...[
             LiltChoiceCard(
               title: choice.label,
               kind: LiltChoiceKind.radio,
@@ -115,11 +125,13 @@ class _ReflectionSheetState extends State<_ReflectionSheet> {
       ),
       footer: LiltButton(
         label: 'Save',
-        onPressed: status == null
+        onPressed: status == null || _saved
             ? null
-            : () => Navigator.of(context).pop(
-                  ReflectionAnswer(status: status, enjoyment: _enjoyment, barrier: _barrier),
-                ),
+            : () {
+                // One tap only: a second quick tap must not close the screen under the sheet.
+                setState(() => _saved = true);
+                Navigator.of(context).pop(ReflectionAnswer(status: status, enjoyment: _enjoyment, barrier: _barrier));
+              },
       ),
     );
   }

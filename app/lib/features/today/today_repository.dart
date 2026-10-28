@@ -32,6 +32,35 @@ class PlannedItem {
   String get title => item.title;
 }
 
+/// How many days back an unanswered item is still offered under "From earlier" [assumption]. It is not deleted
+/// or counted as anything when it ages out (BR-009): it just stops asking.
+const reflectWindowDays = 7;
+
+/// How far up the scale an answer is: an answer may be changed to the same or a higher one, never lowered
+/// (BR-007, EQ-011, docs/data-model.md rules for code that uses the schema).
+int reflectionRank(ReflectionStatus status) => switch (status) {
+      ReflectionStatus.completed => 2,
+      ReflectionStatus.partly => 1,
+      ReflectionStatus.skipped || ReflectionStatus.unknown => 0,
+    };
+
+/// The answers a person can change `from` to: all three for something not answered or answered "didn't get to it",
+/// "partly" or "done" for partly, only "done" for done.
+Set<ReflectionStatus> allowedAnswers(ReflectionStatus from) => {
+      for (final s in [ReflectionStatus.completed, ReflectionStatus.partly, ReflectionStatus.skipped])
+        if (from == ReflectionStatus.unknown || reflectionRank(s) >= reflectionRank(from)) s,
+    };
+
+enum ReflectionSave {
+  saved,
+
+  /// The new answer was lower than the one stored, so nothing was written.
+  refusedLower,
+
+  /// The plan item is gone.
+  missing,
+}
+
 /// A pause as Today needs it: `endDay` is the first day the person is active again (docs/data-model.md: a
 /// 1 week pause from Friday 23 October ends Friday 30 October). A null `endDay` means until resumed.
 class ActivePause {
@@ -66,12 +95,15 @@ class TodayRepository {
           ..orderBy([
             OrderingTerm(expression: _db.planItems.plannedDay),
             OrderingTerm(expression: _db.planItems.plannedTime),
+            OrderingTerm(expression: const CustomExpression<int>('plan_item.rowid')),
           ]))
         .get();
+    final since = addDays(today, -reflectWindowDays);
     return [
       for (final r in rows)
         if (r.readTable(_db.planItems).plannedDay.compareTo(today) >= 0 ||
-            r.readTable(_db.reflections).status == ReflectionStatus.unknown)
+            (r.readTable(_db.reflections).status == ReflectionStatus.unknown &&
+                r.readTable(_db.planItems).plannedDay.compareTo(since) >= 0))
           PlannedItem(
             item: r.readTable(_db.planItems),
             reflection: r.readTable(_db.reflections),
@@ -83,7 +115,11 @@ class TodayRepository {
   /// Saves how it went (docs/data-model.md §7, frame 3.11). The barrier is asked only after "partly" or "didn't get
   /// to it" (BR-008), so it is cleared for "done"; enjoyment is not asked after "didn't get to it". Changing an
   /// answer to "done" clears the barrier.
-  Future<void> saveReflection(
+  ///
+  /// An answer is never lowered: Done cannot become Partly or Didn't get to it, and Partly cannot become Didn't get
+  /// to it, because that would take a day away from active days and the grid (BR-007, EQ-011). The follow-ups
+  /// (barrier, enjoyment) can always be changed.
+  Future<ReflectionSave> saveReflection(
     String planItemId, {
     required ReflectionStatus status,
     int? enjoyment,
@@ -92,14 +128,23 @@ class TodayRepository {
     if (status == ReflectionStatus.unknown) throw ArgumentError.value(status, 'status', 'an answer is required');
     final asksBarrier = status == ReflectionStatus.partly || status == ReflectionStatus.skipped;
     final asksEnjoyment = status != ReflectionStatus.skipped;
-    await (_db.update(_db.reflections)..where((t) => t.planItemId.equals(planItemId))).write(
-      ReflectionsCompanion(
-        status: Value(status),
-        enjoyment: Value(asksEnjoyment ? enjoyment : null),
-        barrier: Value(asksBarrier ? barrier : null),
-        updatedAt: Value(DateTime.now().toUtc()),
-      ),
-    );
+    return _db.transaction(() async {
+      final current =
+          await (_db.select(_db.reflections)..where((t) => t.planItemId.equals(planItemId))).getSingleOrNull();
+      if (current == null) return ReflectionSave.missing;
+      if (current.status != ReflectionStatus.unknown && reflectionRank(status) < reflectionRank(current.status)) {
+        return ReflectionSave.refusedLower;
+      }
+      await (_db.update(_db.reflections)..where((t) => t.planItemId.equals(planItemId))).write(
+        ReflectionsCompanion(
+          status: Value(status),
+          enjoyment: Value(asksEnjoyment ? enjoyment : null),
+          barrier: Value(asksBarrier ? barrier : null),
+          updatedAt: Value(DateTime.now().toUtc()),
+        ),
+      );
+      return ReflectionSave.saved;
+    });
   }
 
   // ---- options
@@ -232,6 +277,12 @@ class TodayRepository {
   /// Undo for "I'll try this": the plan item goes (its unknown reflection with it). An offer from the hero chain
   /// goes back to waiting; one that was created by accepting a compact card is removed.
   Future<void> undoAccept(String offerId, {required bool wasNew}) => _db.transaction(() async {
+        // A plan item that has been answered is never deleted: totals never go down (docs/data-model.md).
+        final item = await (_db.select(_db.planItems)..where((t) => t.offerId.equals(offerId))).getSingleOrNull();
+        if (item != null) {
+          final r = await (_db.select(_db.reflections)..where((t) => t.planItemId.equals(item.id))).getSingleOrNull();
+          if (r != null && r.status != ReflectionStatus.unknown) return;
+        }
         await (_db.delete(_db.planItems)..where((t) => t.offerId.equals(offerId))).go();
         if (wasNew) {
           await (_db.delete(_db.optionOffers)..where((t) => t.id.equals(offerId))).go();
