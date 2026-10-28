@@ -178,6 +178,23 @@ void main() {
       await _save(tester, key, 't06_paused_$tag');
     });
 
+    testWidgets('reflection at $tag%', (tester) async {
+      if (_dir.isEmpty) return;
+      final (_, key) = await open(tester, scale: scale);
+      await tap(tester, 'I’ll try this');
+      await tester.pump(const Duration(seconds: 5));
+      await tester.pumpAndSettle();
+      await _save(tester, key, 'r01_planned_with_primary_$tag');
+      await tap(tester, 'How did it go?');
+      await _save(tester, key, 'r02_sheet_nothing_chosen_$tag');
+      await tap(tester, 'Partly');
+      await tap(tester, 'Low energy');
+      await tap(tester, 'Enjoyed it');
+      await _save(tester, key, 'r03_sheet_partly_$tag');
+      await tap(tester, 'Save');
+      await _save(tester, key, 'r04_saved_$tag');
+    });
+
     testWidgets('nothing fits at $tag%', (tester) async {
       if (_dir.isEmpty) return;
       Future<void> oneAction(LiltDatabase db) async {

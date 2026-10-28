@@ -18,6 +18,20 @@ class StoredOffer {
   OfferStatus get status => offer.status;
 }
 
+/// One thing in the plan with how it went. [reflection] is `unknown` until the person answers (BR-009).
+class PlannedItem {
+  const PlannedItem({required this.item, required this.reflection, required this.action});
+
+  final PlanItem item;
+  final Reflection reflection;
+
+  /// Null for a one-off the person typed in, or an action no longer in the library.
+  final ActionInfo? action;
+
+  bool get isOpen => reflection.status == ReflectionStatus.unknown;
+  String get title => item.title;
+}
+
 /// A pause as Today needs it: `endDay` is the first day the person is active again (docs/data-model.md: a
 /// 1 week pause from Friday 23 October ends Friday 30 October). A null `endDay` means until resumed.
 class ActivePause {
@@ -39,6 +53,54 @@ class TodayRepository {
   final LiltDatabase _db;
 
   Future<TodayInputs> inputs() => loadTodayInputs(_db);
+
+  // ---- plan and reflections
+
+  /// The plan: everything planned for today or later, and anything from an earlier day that has not been
+  /// answered yet (so it can still be reflected on, UF-003). Read by the day it was planned for, not the day it
+  /// was offered. Ordered by day and time.
+  Future<List<PlannedItem>> planItems(String today, Map<String, ActionInfo> actionsById) async {
+    final rows = await (_db.select(_db.planItems).join([
+      innerJoin(_db.reflections, _db.reflections.planItemId.equalsExp(_db.planItems.id)),
+    ])
+          ..orderBy([
+            OrderingTerm(expression: _db.planItems.plannedDay),
+            OrderingTerm(expression: _db.planItems.plannedTime),
+          ]))
+        .get();
+    return [
+      for (final r in rows)
+        if (r.readTable(_db.planItems).plannedDay.compareTo(today) >= 0 ||
+            r.readTable(_db.reflections).status == ReflectionStatus.unknown)
+          PlannedItem(
+            item: r.readTable(_db.planItems),
+            reflection: r.readTable(_db.reflections),
+            action: actionsById[r.readTable(_db.planItems).actionId],
+          ),
+    ];
+  }
+
+  /// Saves how it went (docs/data-model.md §7, frame 3.11). The barrier is asked only after "partly" or "didn't get
+  /// to it" (BR-008), so it is cleared for "done"; enjoyment is not asked after "didn't get to it". Changing an
+  /// answer to "done" clears the barrier.
+  Future<void> saveReflection(
+    String planItemId, {
+    required ReflectionStatus status,
+    int? enjoyment,
+    Barrier? barrier,
+  }) async {
+    if (status == ReflectionStatus.unknown) throw ArgumentError.value(status, 'status', 'an answer is required');
+    final asksBarrier = status == ReflectionStatus.partly || status == ReflectionStatus.skipped;
+    final asksEnjoyment = status != ReflectionStatus.skipped;
+    await (_db.update(_db.reflections)..where((t) => t.planItemId.equals(planItemId))).write(
+      ReflectionsCompanion(
+        status: Value(status),
+        enjoyment: Value(asksEnjoyment ? enjoyment : null),
+        barrier: Value(asksBarrier ? barrier : null),
+        updatedAt: Value(DateTime.now().toUtc()),
+      ),
+    );
+  }
 
   // ---- options
 

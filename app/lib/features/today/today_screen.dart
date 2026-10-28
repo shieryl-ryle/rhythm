@@ -5,9 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/theme.dart';
 import '../../ui/ui.dart';
 import 'option_cards.dart';
+import 'reflection_sheet.dart';
 import 'rhythm_grid.dart';
 import 'today_controller.dart';
 import 'today_logic.dart';
+import 'today_repository.dart';
 import 'today_sheets.dart';
 
 /// S-004 Today (frames 1.16, 2.3, 2.5, 2.8, 9.3): this week's rhythm, the time and energy chips, one expanded
@@ -110,7 +112,7 @@ class _TodayBody extends ConsumerWidget {
       TodayMode.nothingFitsChips => 'Nothing fits those choices',
       TodayMode.nothingFitsChoices => 'Nothing to suggest right now',
       TodayMode.allDone => 'That’s all for today',
-      TodayMode.options => view.accepted.isNotEmpty
+      TodayMode.options => view.hasPlan
           ? 'Today’s plan'
           : (view.hasHistory ? 'Here’s what fits today' : 'Your first ideas'),
     };
@@ -119,7 +121,7 @@ class _TodayBody extends ConsumerWidget {
       sortKey: const OrdinalSortKey(1),
       child: view.hasHistory ? RhythmGridCard(days: view.grid) : WeekStripCard(days: view.weekStrip),
     );
-    final showChips = mode == TodayMode.options && view.accepted.isEmpty || mode == TodayMode.nothingFitsChips;
+    final showChips = mode == TodayMode.options && !view.hasPlan || mode == TodayMode.nothingFitsChips;
     final titleWidget = Semantics(
       header: true,
       liveRegion: true,
@@ -151,7 +153,55 @@ class _TodayBody extends ConsumerWidget {
         );
     }
 
+    // "How did it go?": the sheet, then the one sentence that says what will change (F-003). Closing it without
+    // saving changes nothing: the reflection stays unknown (BR-009).
+    Future<void> reflect(PlannedItem p) async {
+      final messenger = ScaffoldMessenger.of(context);
+      final answer = await showReflectionSheet(
+        context,
+        activityTitle: p.title,
+        initial: p.isOpen
+            ? null
+            : ReflectionAnswer(
+                status: p.reflection.status,
+                enjoyment: p.reflection.enjoyment,
+                barrier: p.reflection.barrier,
+              ),
+      );
+      if (answer == null) return;
+      final sentence = await c.saveReflection(p, answer);
+      if (sentence == null) return;
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(sentence),
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.fromLTRB(LiltSpacing.lg, 0, LiltSpacing.lg, LiltSpacing.lg),
+          ),
+        );
+    }
+
     final children = <Widget>[];
+
+    // Plan items from later days and from earlier days still waiting for an answer (UF-003), below the options.
+    void planSections() {
+      void section(String heading, List<PlannedItem> items, {bool reflectable = false}) {
+        if (items.isEmpty) return;
+        children
+          ..add(const SizedBox(height: LiltSpacing.sm))
+          ..add(Semantics(header: true, child: Text(heading, style: LiltText.body.copyWith(fontWeight: FontWeight.w600))))
+          ..add(const SizedBox(height: LiltSpacing.md));
+        for (final p in items) {
+          children
+            ..add(PlannedCard(planned: p, today: view.today, onReflect: reflectable ? () => reflect(p) : null))
+            ..add(const SizedBox(height: LiltSpacing.md));
+        }
+      }
+
+      section('Coming up', view.upcomingItems);
+      section('From earlier', view.earlierOpen, reflectable: true);
+    }
 
     if (mode == TodayMode.paused) {
       // Frame 2.8: the pause comes first, the rhythm under it. A plan made before pausing stays visible.
@@ -162,9 +212,9 @@ class _TodayBody extends ConsumerWidget {
         ..add(const SizedBox(height: LiltSpacing.lg))
         ..add(LiltButton(label: 'Resume now', onPressed: c.resume))
         ..add(const SizedBox(height: LiltSpacing.lg));
-      for (final a in view.accepted) {
+      for (final p in view.todayItems) {
         children
-          ..add(PlannedCard(offer: a, today: view.today))
+          ..add(PlannedCard(planned: p, today: view.today, onReflect: () => reflect(p)))
           ..add(const SizedBox(height: LiltSpacing.md));
       }
       children.add(rhythm);
@@ -212,10 +262,15 @@ class _TodayBody extends ConsumerWidget {
 
       switch (mode) {
         case TodayMode.options:
-          if (view.accepted.isNotEmpty) {
-            for (final a in view.accepted) {
+          if (view.hasPlan) {
+            for (final p in view.todayItems) {
               children
-                ..add(PlannedCard(offer: a, today: view.today, onNotToday: notToday))
+                ..add(PlannedCard(
+                  planned: p,
+                  today: view.today,
+                  onReflect: () => reflect(p),
+                  onNotToday: notToday,
+                ))
                 ..add(const SizedBox(height: LiltSpacing.md));
             }
             if (view.compact.isNotEmpty) {
@@ -251,6 +306,7 @@ class _TodayBody extends ConsumerWidget {
               ))
               ..add(const SizedBox(height: LiltSpacing.md));
           }
+          planSections();
 
         case TodayMode.nothingFitsChips:
           // State N2: the chips are the cause. The button relaxes them for today only; it plans nothing (BR-005).
