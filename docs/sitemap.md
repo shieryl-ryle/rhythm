@@ -64,6 +64,39 @@ IDs: `S-001…` main screens · `S-09x` error/blocked states · `S-1xx` dialogs/
 | S-114 | Move it to later | Pick a later time (3.4) | F-002 | S-103 | Consented | idle |
 | S-115 | My plan fell through | Alternative for the same time slot (3.5) | F-002 | S-103 | Consented | idle |
 
+### S-004 when few or no options fit
+Senior UI review of 2026-10-27 (record: [docs/reviews/pre-task-005-build-plan-2026-10-27.md](reviews/pre-task-005-build-plan-2026-10-27.md)). It
+extends frame 9.3 "Today · nothing fits" (163:5310); no new frame is needed, and Figma 9.3 is updated after the build.
+
+**Detection (two pure calls).** Run `rankOptions` with the person's chips. If it returns options, show them. If it
+returns none, run it again with the time and energy chips removed. Options now: state **N2** (the chips are the
+cause). Still none: state **N3** (leave-outs, access or an empty library).
+
+**Rules for all states.** Nothing is auto-planned (BR-005): the relax button only shows options, and the person
+still taps "I'll try this". Any option shown gets its normal reason (BR-004). Never relax leave-outs or access
+automatically (BR-011); only today's time and energy chips may change. "Not today" stays on screen (BR-006), and
+S-103 hides its "Something lighter" row when lighter would be empty. No red, no warning icon, nothing written onto
+today's grid tile, no "ran out" wording (BR-007). Hide the chips in N3, because they cannot fix it. The title is
+Instrument Serif italic and a live region; at 200% text the buttons stack at full width and the title wraps. Day 1
+(frame 1.16) uses the same states with the state title in place of "Your first ideas". The old "Show a lighter
+option" button is removed from this state: lighter mode is 10 minutes and low energy, which is what the chips
+already say.
+
+| | N2: time or energy is the cause | N3: nothing even without the chips |
+|---|---|---|
+| Title | Nothing fits those choices | Nothing to suggest right now |
+| Body | Change the time or energy, or add something of your own. | Your leave-out and access choices cover everything we have. You can change them any time. |
+| Primary (filled) | "Show options up to {n} min" (raise the time first: 20, 30, 45). If energy is the blocker: "Show {medium or high}-energy options". If both: "Show options for any time and energy" | "Review my choices": opens `/setup?edit=1` at the leave-out step (frame 1.14), with "Save" instead of "Show me today" |
+| Text button 1 | Add an activity (opens S-109, same label as Today) | Add an activity |
+| Text button 2 | Not today (opens S-103) | Not today |
+
+Tapping the N2 primary sets the chip for today only and the person can see and undo it.
+
+**Fewer than 3 options (k of them).** Show the counter "1 of k" only when k is 2 or more. With k = 1 hide the counter
+and "Something else". On the last option hide "Something else" instead of cycling back (EQ-010 counts every swap as
+not accepted). "Not today" keeps its place so nothing jumps. The hero card cycles the ranker's top options (one per
+activity, EQ-003); the compact cards below are the person's other followed activities.
+
 ## 3. Information architecture
 ```
 First run: Welcome & consent (S-001, + What we store S-108) → My Starting Point (S-003) → Today (S-004)
