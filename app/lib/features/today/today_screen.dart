@@ -5,9 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/theme.dart';
 import '../../ui/ui.dart';
 import 'option_cards.dart';
+import 'reflection_sheet.dart';
 import 'rhythm_grid.dart';
 import 'today_controller.dart';
 import 'today_logic.dart';
+import 'today_repository.dart';
 import 'today_sheets.dart';
 
 /// S-004 Today (frames 1.16, 2.3, 2.5, 2.8, 9.3): this week's rhythm, the time and energy chips, one expanded
@@ -110,7 +112,7 @@ class _TodayBody extends ConsumerWidget {
       TodayMode.nothingFitsChips => 'Nothing fits those choices',
       TodayMode.nothingFitsChoices => 'Nothing to suggest right now',
       TodayMode.allDone => 'That’s all for today',
-      TodayMode.options => view.accepted.isNotEmpty
+      TodayMode.options => view.hasPlan
           ? 'Today’s plan'
           : (view.hasHistory ? 'Here’s what fits today' : 'Your first ideas'),
     };
@@ -119,7 +121,7 @@ class _TodayBody extends ConsumerWidget {
       sortKey: const OrdinalSortKey(1),
       child: view.hasHistory ? RhythmGridCard(days: view.grid) : WeekStripCard(days: view.weekStrip),
     );
-    final showChips = mode == TodayMode.options && view.accepted.isEmpty || mode == TodayMode.nothingFitsChips;
+    final showChips = mode == TodayMode.options && !view.hasPlan || mode == TodayMode.nothingFitsChips;
     final titleWidget = Semantics(
       header: true,
       liveRegion: true,
@@ -151,7 +153,64 @@ class _TodayBody extends ConsumerWidget {
         );
     }
 
+    // "How did it go?": the sheet, then the one sentence that says what will change (F-003). Closing it without
+    // saving changes nothing: the reflection stays unknown (BR-009).
+    Future<void> reflect(PlannedItem p) async {
+      final messenger = ScaffoldMessenger.of(context);
+      final answer = await showReflectionSheet(
+        context,
+        activityTitle: p.title,
+        allowed: allowedAnswers(p.reflection.status),
+        initial: p.isOpen
+            ? null
+            : ReflectionAnswer(
+                status: p.reflection.status,
+                enjoyment: p.reflection.enjoyment,
+                barrier: p.reflection.barrier,
+              ),
+      );
+      if (answer == null) return;
+      // The sentence about what will change appears on the card, not in a snackbar that disappears.
+      await c.saveReflection(p, answer);
+      messenger.hideCurrentSnackBar();
+    }
+
     final children = <Widget>[];
+
+    void heading(String text) => children
+      ..add(const SizedBox(height: LiltSpacing.sm))
+      ..add(Semantics(header: true, child: Text(text, style: LiltText.body.copyWith(fontWeight: FontWeight.w600))))
+      ..add(const SizedBox(height: LiltSpacing.md));
+
+    // A planned card, and under an answered one the "What changes next" sentence (frame 2.6).
+    void planned(PlannedItem p, {bool reflectable = true, VoidCallback? notToday}) {
+      children.add(PlannedCard(
+        planned: p,
+        today: view.today,
+        onReflect: reflectable ? () => reflect(p) : null,
+        onNotToday: notToday,
+      ));
+      if (!p.isOpen) {
+        children
+          ..add(const SizedBox(height: LiltSpacing.md))
+          ..add(WhatChangesNext(planned: p));
+      }
+      children.add(const SizedBox(height: LiltSpacing.md));
+    }
+
+    // Plan items from later days and from earlier days still waiting for an answer (UF-003).
+    void planSections() {
+      void section(String text, List<PlannedItem> items, {bool reflectable = false}) {
+        if (items.isEmpty) return;
+        heading(text);
+        for (final p in items) {
+          planned(p, reflectable: reflectable);
+        }
+      }
+
+      section('Coming up', view.upcomingItems);
+      section('From earlier', view.earlierOpen, reflectable: true);
+    }
 
     if (mode == TodayMode.paused) {
       // Frame 2.8: the pause comes first, the rhythm under it. A plan made before pausing stays visible.
@@ -162,11 +221,10 @@ class _TodayBody extends ConsumerWidget {
         ..add(const SizedBox(height: LiltSpacing.lg))
         ..add(LiltButton(label: 'Resume now', onPressed: c.resume))
         ..add(const SizedBox(height: LiltSpacing.lg));
-      for (final a in view.accepted) {
-        children
-          ..add(PlannedCard(offer: a, today: view.today))
-          ..add(const SizedBox(height: LiltSpacing.md));
+      for (final p in view.todayItems) {
+        planned(p);
       }
+      planSections();
       children.add(rhythm);
     } else {
       // At large text the rhythm card moves under the options, so the first screen has the action on it.
@@ -212,18 +270,13 @@ class _TodayBody extends ConsumerWidget {
 
       switch (mode) {
         case TodayMode.options:
-          if (view.accepted.isNotEmpty) {
-            for (final a in view.accepted) {
-              children
-                ..add(PlannedCard(offer: a, today: view.today, onNotToday: notToday))
-                ..add(const SizedBox(height: LiltSpacing.md));
+          if (view.hasPlan) {
+            if (view.todayItems.isNotEmpty) heading('Today');
+            for (final p in view.todayItems) {
+              planned(p, notToday: notToday);
             }
-            if (view.compact.isNotEmpty) {
-              children
-                ..add(const SizedBox(height: LiltSpacing.sm))
-                ..add(Semantics(header: true, child: Text('Still open', style: LiltText.body.copyWith(fontWeight: FontWeight.w600))))
-                ..add(const SizedBox(height: LiltSpacing.md));
-            }
+            planSections();
+            if (view.compact.isNotEmpty) heading('Still open');
           } else if (view.shown != null) {
             final shown = view.shown!;
             children
@@ -251,6 +304,7 @@ class _TodayBody extends ConsumerWidget {
               ))
               ..add(const SizedBox(height: LiltSpacing.md));
           }
+          if (!view.hasPlan) planSections();
 
         case TodayMode.nothingFitsChips:
           // State N2: the chips are the cause. The button relaxes them for today only; it plans nothing (BR-005).
@@ -262,6 +316,7 @@ class _TodayBody extends ConsumerWidget {
             ..add(LiltButton(label: relax.label, onPressed: () => c.setChips(relax.chips)))
             ..add(const SizedBox(height: LiltSpacing.sm))
             ..add(LiltButton(label: 'Not today', kind: LiltButtonKind.text, expand: true, onPressed: notToday));
+          planSections();
 
         case TodayMode.nothingFitsChoices:
           // State N3: nothing fits even without the chips, so the chips are hidden: they cannot fix it.
@@ -272,12 +327,14 @@ class _TodayBody extends ConsumerWidget {
             ))
             ..add(const SizedBox(height: LiltSpacing.lg))
             ..add(LiltButton(label: 'Not today', kind: LiltButtonKind.text, expand: true, onPressed: notToday));
+          planSections();
 
         case TodayMode.allDone:
           children
             ..add(Text('Rest counts too. Come back tomorrow for new ideas.', style: LiltText.body.copyWith(color: LiltColors.inkMuted)))
             ..add(const SizedBox(height: LiltSpacing.lg))
             ..add(LiltButton(label: 'Not today', kind: LiltButtonKind.text, expand: true, onPressed: notToday));
+          planSections();
 
         case TodayMode.paused:
           break;

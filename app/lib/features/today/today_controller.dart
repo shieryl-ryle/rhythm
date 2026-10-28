@@ -5,6 +5,8 @@ import '../../data/providers.dart';
 import '../../domain/day.dart';
 import '../../domain/grid.dart';
 import '../../domain/lapse.dart';
+import 'reflection_copy.dart';
+import 'reflection_sheet.dart';
 import 'today_data.dart';
 import 'today_logic.dart';
 import 'today_repository.dart';
@@ -43,6 +45,7 @@ class TodayView {
     required this.weekStrip,
     required this.lighterAvailable,
     required this.followedPaths,
+    required this.planned,
   });
 
   final String today;
@@ -65,6 +68,17 @@ class TodayView {
   final bool lighterAvailable;
   final Map<ActivityKind, SetupPath> followedPaths;
 
+  /// The plan: today and later, and anything earlier that is still unanswered (read by the planned day).
+  final List<PlannedItem> planned;
+
+  List<PlannedItem> get todayItems => [for (final p in planned) if (p.item.plannedDay == today) p];
+  List<PlannedItem> get upcomingItems => [for (final p in planned) if (p.item.plannedDay.compareTo(today) > 0) p];
+  List<PlannedItem> get earlierOpen =>
+      [for (final p in planned) if (p.item.plannedDay.compareTo(today) < 0 && p.isOpen) p];
+
+  /// Something is planned for today, so the hero card steps aside and the screen is "Today's plan".
+  bool get hasPlan => accepted.isNotEmpty || todayItems.isNotEmpty;
+
   StoredOffer? get shown => shownOffer(offers);
 
   /// Offers the person accepted today: the plan.
@@ -80,8 +94,11 @@ class TodayView {
 
   List<TodayOption> get compact {
     // Once something is accepted there is no hero card, so every other followed activity can show.
-    final heroActivity = accepted.isNotEmpty ? null : shown?.action.activity;
-    final acceptedActivities = {for (final a in accepted) a.action.activity};
+    final heroActivity = hasPlan ? null : shown?.action.activity;
+    final acceptedActivities = {
+      for (final a in accepted) a.action.activity,
+      for (final p in todayItems) p.item.activity,
+    };
     final declinedIds = {for (final o in offers) if (o.status == OfferStatus.declined) o.action.id};
     // An activity the hero stepped past with "Something else" does not come back as a compact card.
     final steppedPast = {for (final o in offers) if (o.status == OfferStatus.replaced) o.action.activity};
@@ -141,13 +158,13 @@ class TodayController extends AsyncNotifier<TodayView> {
 
   /// Runs one action. A second tap while one is running is ignored (a double tap must not plan twice), and an
   /// action started on a screen left over from yesterday refreshes the screen instead of writing under the old day.
-  Future<void> _act(Future<void> Function(TodayView view) body) async {
+  Future<void> _act(Future<void> Function(TodayView view) body, {bool requireSameDay = true}) async {
     final view = state.valueOrNull;
     if (view == null || _busy) return;
     _busy = true;
     try {
       _assertConsentNow();
-      if (view.today != _clockDay) {
+      if (requireSameDay && view.today != _clockDay) {
         await _reload();
         return;
       }
@@ -210,13 +227,14 @@ class TodayController extends AsyncNotifier<TodayView> {
       offers = await _repo.offersFor(today, actionsById);
     }
 
+    final planned = await _repo.planItems(today, actionsById);
     final shown = shownOffer(offers);
     // "Something lighter" is offered only if a lighter option exists and the one shown is not already that light;
     // otherwise the row would do nothing (spec: never a dead row).
     final shownIsLight = shown != null && shown.action.durationMin <= 10 && shown.action.energyNeeded == Energy.low;
     final lighterAvailable =
         pause == null && shown != null && !shownIsLight && plan(_chips, lighter: true).kind == TodayKind.options;
-    final accepted = offers.any((o) => o.status == OfferStatus.accepted);
+    final accepted = offers.any((o) => o.status == OfferStatus.accepted) || planned.any((p) => p.item.plannedDay == today);
     final waiting = shown != null;
 
     final mode = pause != null
@@ -240,6 +258,7 @@ class TodayController extends AsyncNotifier<TodayView> {
       weekStrip: _weekStrip(today, inputs),
       lighterAvailable: lighterAvailable,
       followedPaths: inputs.followedPaths,
+      planned: planned,
     );
   }
 
@@ -360,6 +379,33 @@ class TodayController extends AsyncNotifier<TodayView> {
         await _repo.swapToLighter(view.today, shown, plan, _chips);
         await _reload();
       });
+
+  // ---- reflection
+
+  /// Saves how it went and returns the one sentence that says what will change (F-003). Closing the sheet without
+  /// saving never reaches here, so the reflection stays unknown (BR-009).
+  Future<String?> saveReflection(PlannedItem item, ReflectionAnswer answer) async {
+    String? sentence;
+    // An answer belongs to its plan item, not to the day it was given, so it is saved even if midnight passed
+    // while the sheet was open; the screen then shows the new day.
+    await _act(
+      (_) async {
+        final result = await _repo.saveReflection(
+          item.item.id,
+          status: answer.status,
+          enjoyment: answer.enjoyment,
+          barrier: answer.barrier,
+        );
+        // The sentence only when something was written: never a confirmation for a save that did not happen.
+        if (result == ReflectionSave.saved) {
+          sentence = whatChangesNext(status: answer.status, enjoyment: answer.enjoyment, barrier: answer.barrier);
+        }
+        await _reload();
+      },
+      requireSameDay: false,
+    );
+    return sentence;
+  }
 
   // ---- pause
 

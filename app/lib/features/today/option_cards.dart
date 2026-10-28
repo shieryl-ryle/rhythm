@@ -5,6 +5,7 @@ import '../../data/enums.dart';
 import '../../ui/ui.dart';
 import '../starting_point/setup_copy.dart';
 import 'rhythm_grid.dart';
+import 'reflection_copy.dart';
 import 'today_logic.dart';
 import 'today_repository.dart';
 
@@ -222,38 +223,104 @@ class CompactCard extends StatelessWidget {
   }
 }
 
-/// An option the person accepted: it is in today's plan (frame 2.5). The planned card has no button yet; telling
-/// Lilt how it went comes with the Reflection sheet.
-class PlannedCard extends StatelessWidget {
-  const PlannedCard({super.key, required this.offer, required this.today, this.onNotToday});
+/// "What changes next" (frame 2.6): one sentence under an answered card, with a left rule and not a grey box
+/// (docs/DESIGN.md). It stays on the page, so it can be read slowly or read aloud, and it is worked out from the
+/// stored answer, so it is still there after a restart. A live region, so it is announced once when it appears.
+class WhatChangesNext extends StatelessWidget {
+  const WhatChangesNext({super.key, required this.planned});
 
-  final StoredOffer offer;
+  final PlannedItem planned;
+
+  @override
+  Widget build(BuildContext context) {
+    final r = planned.reflection;
+    final sentence = whatChangesNext(status: r.status, enjoyment: r.enjoyment, barrier: r.barrier);
+    return Semantics(
+      liveRegion: true,
+      container: true,
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(width: 3, color: LiltColors.primary),
+            const SizedBox(width: LiltSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('What changes next', style: LiltText.label.copyWith(fontWeight: FontWeight.w600)),
+                  const SizedBox(height: LiltSpacing.xs),
+                  Text(sentence, style: LiltText.body),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Something in the plan (frame 2.5, 2.6). Planned and not yet answered, today: "How did it go?" is the one
+/// primary. Answered: the answer shows, with "Change my answer". From an earlier day and still open: a quieter
+/// "How did it go?". Later: no button. Nothing here says overdue or missed (BR-007, BR-009).
+class PlannedCard extends StatelessWidget {
+  const PlannedCard({
+    super.key,
+    required this.planned,
+    required this.today,
+    this.onReflect,
+    this.onNotToday,
+  });
+
+  final PlannedItem planned;
   final String today;
 
-  /// Opens the Not today sheet, so the pause is reachable from the planned state (BR-006). Null while paused.
+  /// Opens the Reflection sheet. Null when it is not time to reflect yet.
+  final VoidCallback? onReflect;
+
+  /// Opens the Not today sheet, so the pause is reachable from the planned state (BR-006).
   final VoidCallback? onNotToday;
 
   @override
   Widget build(BuildContext context) {
-    final o = offer.offer;
+    final item = planned.item;
+    final status = planned.reflection.status;
+    final isToday = item.plannedDay == today;
+    final isEarlier = item.plannedDay.compareTo(today) < 0;
     final when = [
-      o.suggestedDay == today ? 'Today' : weekdayDate(o.suggestedDay),
-      if (o.suggestedTime != null) o.suggestedTime!,
+      isToday ? 'Today' : weekdayDate(item.plannedDay),
+      if (item.plannedTime != null) item.plannedTime!,
     ].join(' ');
+    final minutes = item.durationMin == null ? '' : ' · ${item.durationMin} min';
+
     return _CardShell(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ActivityTag(activity: offer.action.activity, trailing: 'Planned'),
+          ActivityTag(activity: item.activity, trailing: statusLabel(status)),
           const SizedBox(height: LiltSpacing.md),
           Semantics(
             header: true,
-            child: Text(offer.action.title, style: LiltText.body.copyWith(fontWeight: FontWeight.w600, height: 1.3)),
+            child: Text(item.title, style: LiltText.body.copyWith(fontWeight: FontWeight.w600, height: 1.3)),
           ),
           const SizedBox(height: LiltSpacing.xs),
-          Text('$when · ${offer.action.durationMin} min', style: LiltText.label.copyWith(fontWeight: FontWeight.w400)),
-          if (onNotToday != null)
+          Text(
+            planned.isOpen ? '$when$minutes' : affirmation(status),
+            style: LiltText.label.copyWith(fontWeight: FontWeight.w400),
+          ),
+          if (planned.isOpen && onReflect != null && (isToday || isEarlier)) ...[
+            const SizedBox(height: LiltSpacing.lg),
+            LiltButton(
+              label: 'How did it go?',
+              kind: isToday ? LiltButtonKind.primary : LiltButtonKind.secondary,
+              onPressed: onReflect,
+            ),
+          ],
+          if (planned.isOpen && isToday && onNotToday != null)
             LiltButton(label: 'Not today', kind: LiltButtonKind.text, flush: true, onPressed: onNotToday),
+          if (!planned.isOpen && onReflect != null)
+            LiltButton(label: 'Change my answer', kind: LiltButtonKind.text, flush: true, onPressed: onReflect),
         ],
       ),
     );

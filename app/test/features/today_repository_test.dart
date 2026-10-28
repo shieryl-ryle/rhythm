@@ -213,6 +213,86 @@ void main() {
     expect(await repo.activePause(today), isNull);
   });
 
+  group('saving a reflection never lowers an answer (BR-007, EQ-011)', () {
+    Future<String> planned() async {
+      final p = await plan();
+      await repo.createHeroChain(today, p, const TodayChips());
+      await repo.accept(shownOffer(await offers())!);
+      return (await db.select(db.planItems).get()).single.id;
+    }
+
+    Future<ReflectionStatus> status() async => (await db.select(db.reflections).get()).single.status;
+
+    test('Done cannot become Partly or Didn\'t get to it', () async {
+      final id = await planned();
+      expect(await repo.saveReflection(id, status: ReflectionStatus.completed), ReflectionSave.saved);
+      expect(await repo.saveReflection(id, status: ReflectionStatus.partly), ReflectionSave.refusedLower);
+      expect(await repo.saveReflection(id, status: ReflectionStatus.skipped), ReflectionSave.refusedLower);
+      expect(await status(), ReflectionStatus.completed);
+      expect((await repo.inputs()).reflectedDays, {today});
+    });
+
+    test('Partly cannot become Didn\'t get to it, but can become Done', () async {
+      final id = await planned();
+      await repo.saveReflection(id, status: ReflectionStatus.partly);
+      expect(await repo.saveReflection(id, status: ReflectionStatus.skipped), ReflectionSave.refusedLower);
+      expect(await status(), ReflectionStatus.partly);
+      expect(await repo.saveReflection(id, status: ReflectionStatus.completed), ReflectionSave.saved);
+    });
+
+    test('the same answer can be saved again with different follow-ups', () async {
+      final id = await planned();
+      await repo.saveReflection(id, status: ReflectionStatus.partly, barrier: Barrier.time, enjoyment: 2);
+      expect(
+        await repo.saveReflection(id, status: ReflectionStatus.partly, barrier: Barrier.weather, enjoyment: 3),
+        ReflectionSave.saved,
+      );
+      final r = (await db.select(db.reflections).get()).single;
+      expect(r.barrier, Barrier.weather);
+      expect(r.enjoyment, 3);
+    });
+
+    test('Didn\'t get to it can be raised, and unknown can become anything', () async {
+      final id = await planned();
+      expect(await repo.saveReflection(id, status: ReflectionStatus.skipped, barrier: Barrier.time), ReflectionSave.saved);
+      expect(await repo.saveReflection(id, status: ReflectionStatus.completed), ReflectionSave.saved);
+      expect((await db.select(db.reflections).get()).single.barrier, isNull, reason: 'Done clears the barrier');
+    });
+
+    test('enjoyment is not stored for Didn\'t get to it, and a barrier is not stored for Done', () async {
+      final id = await planned();
+      await repo.saveReflection(id, status: ReflectionStatus.skipped, enjoyment: 3, barrier: Barrier.weather);
+      var r = (await db.select(db.reflections).get()).single;
+      expect(r.enjoyment, isNull);
+      expect(r.barrier, Barrier.weather);
+      await repo.saveReflection(id, status: ReflectionStatus.completed, enjoyment: 2, barrier: Barrier.weather);
+      r = (await db.select(db.reflections).get()).single;
+      expect(r.enjoyment, 2);
+      expect(r.barrier, isNull);
+    });
+
+    test('a plan item that is gone reports missing, so no false confirmation is shown', () async {
+      expect(await repo.saveReflection('plan_nope', status: ReflectionStatus.completed), ReflectionSave.missing);
+    });
+
+    test('"unknown" is not an answer', () async {
+      final id = await planned();
+      expect(() => repo.saveReflection(id, status: ReflectionStatus.unknown), throwsArgumentError);
+    });
+
+    test('Undo never deletes a plan item that has been answered', () async {
+      final p = await plan();
+      await repo.createHeroChain(today, p, const TodayChips());
+      final shown = shownOffer(await offers())!;
+      await repo.accept(shown);
+      final id = (await db.select(db.planItems).get()).single.id;
+      await repo.saveReflection(id, status: ReflectionStatus.completed);
+      await repo.undoAccept(shown.offer.id, wasNew: false);
+      expect(await db.select(db.planItems).get(), hasLength(1));
+      expect(await db.select(db.reflections).get(), hasLength(1));
+    });
+  });
+
   test('"Not today" declines the shown offer', () async {
     final p = await plan();
     await repo.createHeroChain(today, p, const TodayChips());

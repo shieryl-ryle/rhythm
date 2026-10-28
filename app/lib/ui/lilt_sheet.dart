@@ -48,6 +48,11 @@ class LiltSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context);
     final keyboard = media.viewInsets.bottom;
+    // At large text the title scrolls with the body and only the close button stays pinned (docs/DESIGN.md,
+    // Sheets: "the close (×) stays pinned, the body scrolls"), so the title does not eat the sheet.
+    final large = media.textScaler.scale(1) >= 1.5;
+    // 28 dp under the last button already covers the gesture inset: the larger of the two, not the sum.
+    final bottom = media.padding.bottom > 28 ? media.padding.bottom : 28.0;
     final maxHeight = (media.size.height - media.padding.top) * 0.9;
 
     return AnimatedPadding(
@@ -82,10 +87,12 @@ class LiltSheet extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Expanded(
-                      child: Semantics(
-                        header: true,
-                        child: Text(title, style: LiltText.display),
-                      ),
+                      child: large
+                          ? const SizedBox.shrink()
+                          : Semantics(
+                              header: true,
+                              child: Text(title, style: LiltText.display),
+                            ),
                     ),
                     IconButton(
                       onPressed: () => Navigator.of(context).maybePop(),
@@ -103,11 +110,15 @@ class LiltSheet extends StatelessWidget {
                     LiltSpacing.xl,
                     0,
                     LiltSpacing.xl,
-                    footer == null ? LiltSpacing.xxl - LiltSpacing.xs + media.padding.bottom : LiltSpacing.lg,
+                    footer == null ? bottom : LiltSpacing.lg,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      if (large) ...[
+                        Semantics(header: true, child: Text(title, style: LiltText.display)),
+                        const SizedBox(height: LiltSpacing.sm),
+                      ],
                       if (subtitle != null) ...[
                         Text(subtitle!, style: LiltText.body.copyWith(color: LiltColors.inkMuted)),
                         const SizedBox(height: LiltSpacing.lg),
@@ -124,7 +135,7 @@ class LiltSheet extends StatelessWidget {
                     LiltSpacing.xl,
                     LiltSpacing.lg,
                     LiltSpacing.xl,
-                    LiltSpacing.xxl - LiltSpacing.xs + media.padding.bottom,
+                    bottom,
                   ),
                   child: footer,
                 ),

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -334,9 +336,9 @@ void main() {
   group('LiltSegmented', () {
     Widget control(void Function(int) onChanged) => LiltSegmented<int>(
           segments: const [
-            LiltSegment(value: 3, label: '3 days'),
-            LiltSegment(value: 7, label: '1 week'),
-            LiltSegment(value: 14, label: '2 weeks'),
+            LiltSegment(value: 3, label: 'Day'),
+            LiltSegment(value: 7, label: 'Week'),
+            LiltSegment(value: 14, label: 'Month'),
           ],
           value: 7,
           onChanged: onChanged,
@@ -351,7 +353,7 @@ void main() {
       final segmented = find.byType(LiltSegmented<int>);
       expect(find.descendant(of: segmented, matching: find.byType(Row)), findsOneWidget);
       expect(find.descendant(of: segmented, matching: find.byType(Column)), findsNothing);
-      await tester.tap(find.text('2 weeks'));
+      await tester.tap(find.text('Month'));
       expect(picked, 14);
     });
 
@@ -359,7 +361,39 @@ void main() {
       await _pump(tester, control((_) {}), textScale: 2);
       final segmented = find.byType(LiltSegmented<int>);
       expect(find.descendant(of: segmented, matching: find.byType(Column)), findsOneWidget);
-      expect(tester.getTopLeft(find.text('2 weeks')).dy, greaterThan(tester.getTopLeft(find.text('3 days')).dy + 40));
+      expect(tester.getTopLeft(find.text('Month')).dy, greaterThan(tester.getTopLeft(find.text('Day')).dy + 40));
+      expect(tester.takeException(), isNull);
+    });
+  });
+
+  group('LiltSegmented stacks when a label does not fit, not only at 1.5x (docs/DESIGN.md)', () {
+    setUpAll(() async {
+      // The real font, so label widths are the ones a phone draws.
+      final loader = FontLoader('Geist');
+      for (final f in ['Regular', 'Medium', 'SemiBold']) {
+        loader.addFont(Future.value(ByteData.sublistView(File('assets/fonts/geist/Geist-$f.ttf').readAsBytesSync())));
+      }
+      await loader.load();
+    });
+
+    Widget enjoyment() => LiltSegmented<int>(
+          segments: const [
+            LiltSegment(value: 1, label: 'Not for me'),
+            LiltSegment(value: 2, label: 'Okay'),
+            LiltSegment(value: 3, label: 'Enjoyed it'),
+          ],
+          value: 2,
+          onChanged: (_) {},
+        );
+
+    testWidgets('one row at normal size on a 360 dp phone', (tester) async {
+      await _pump(tester, Padding(padding: const EdgeInsets.all(24), child: enjoyment()));
+      expect(find.descendant(of: find.byType(LiltSegmented<int>), matching: find.byType(Column)), findsNothing);
+    });
+
+    testWidgets('stacked at 130% text, where "Not for me" would wrap', (tester) async {
+      await _pump(tester, Padding(padding: const EdgeInsets.all(24), child: enjoyment()), textScale: 1.3);
+      expect(find.descendant(of: find.byType(LiltSegmented<int>), matching: find.byType(Column)), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
   });

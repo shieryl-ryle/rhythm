@@ -59,6 +59,8 @@ void main() {
       'lib/features/today/option_cards.dart',
       'lib/features/today/today_sheets.dart',
       'lib/features/today/today_logic.dart',
+      'lib/features/today/reflection_sheet.dart',
+      'lib/features/today/reflection_copy.dart',
       'lib/app/app_shell.dart',
     ]) {
       for (final m in literal.allMatches(File(file).readAsStringSync())) {
