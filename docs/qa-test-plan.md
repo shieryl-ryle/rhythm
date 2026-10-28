@@ -21,7 +21,7 @@ tests; TC-042 runs manually against the free tier with synthetic data only.
 |---|---|---|---|
 | TC-001 | F-001 | Complete setup with behaviour, reason, stage, goal, one exclusion → profile saved; Today shows options; finish in ≤ 2 min (manual timing) | yes: `integration_test/first_run_test.dart` + manual timing |
 | TC-002 | F-002 | Today shows 1–3 options with reasons; accept, edit, replace, and pause each update `option_offer.status` correctly | yes: `app/test/features/today_screen_test.dart`, `today_repository_test.dart`, `today_logic_test.dart` (edit is not built yet) |
-| TC-003 | F-003 | Mark completed / partly / skipped with optional details in ≤ 3 taps; saved row matches | yes: `test/features/reflection/reflection_test.dart` |
+| TC-003 | F-003 | Mark completed / partly / skipped with optional details in ≤ 3 taps; saved row matches | yes: `test/features/reflection_test.dart` |
 | TC-004 | F-004 | Observations list; confirm, edit, delete work; saved actions reappear as options | yes: `test/features/what_works/what_works_test.dart` |
 | TC-005 | F-005 | With seeded lapse → app opens My Way Back with "Welcome back"; previous approach and a different one offered; choosing one gives a smaller first action | yes: `integration_test/return_test.dart` |
 | TC-006 | F-006 | Grid renders one tile per day with levels per EQ-002; paused day drawn as level 0 with semantics label "paused" (ADR-012); totals shown | yes: `test/features/progress/grid_test.dart` (golden) |
