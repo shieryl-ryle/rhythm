@@ -56,12 +56,14 @@ Future<FakeSetupRepository> _open(
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   final setup = repo ?? FakeSetupRepository();
+  final db = inMemoryDatabase();
+  addTearDown(db.close);
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
         consentRepositoryProvider.overrideWithValue(_AgreedConsent()),
         setupRepositoryProvider.overrideWithValue(override ?? setup),
-        libraryLoaderProvider.overrideWithValue(NoopLibraryLoader()),
+        ...todayTestOverrides(db),
         ...setupTestOverrides(),
         ...more,
       ],
@@ -520,7 +522,7 @@ void main() {
     testWidgets('a person who is already set up never sees setup', (tester) async {
       await _open(tester, repo: FakeSetupRepository(done: true));
       expect(find.text('What brings you here?'), findsNothing);
-      expect(find.text('Here’s what fits today'), findsOneWidget);
+      expect(find.text('Your first ideas'), findsOneWidget);
     });
   });
 

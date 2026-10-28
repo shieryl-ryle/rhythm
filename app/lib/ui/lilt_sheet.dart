@@ -19,6 +19,9 @@ Future<T?> showLiltSheet<T>(
   return showModalBottomSheet<T>(
     context: context,
     isScrollControlled: true,
+    // On the root navigator, so a sheet sits on the bottom edge of the screen over the tab bar and the scrim
+    // covers everything (docs/DESIGN.md, Sheets).
+    useRootNavigator: true,
     useSafeArea: true,
     barrierColor: LiltColors.scrim,
     backgroundColor: Colors.transparent,

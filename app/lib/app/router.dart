@@ -8,6 +8,7 @@ import '../features/starting_point/setup_controller.dart';
 import '../features/starting_point/setup_screen.dart';
 import '../features/support/support_screen.dart';
 import '../features/today/today_screen.dart';
+import 'app_shell.dart';
 
 /// Routes from docs/sitemap.md §4. Without consent every route except the support message redirects to
 /// /welcome (BR-014); after consent and until setup is finished everything goes to /setup.
@@ -40,7 +41,31 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/welcome', builder: (_, _) => const ConsentScreen()),
       GoRoute(path: '/setup', builder: (_, _) => const SetupScreen()),
       GoRoute(path: '/support', builder: (_, _) => const SupportScreen()),
-      GoRoute(path: '/today', builder: (_, _) => const TodayScreen()),
+      // The four tabs. Discover, Together and My rhythm are not built yet and say so.
+      StatefulShellRoute.indexedStack(
+        builder: (_, _, shell) => AppShell(shell: shell),
+        branches: [
+          StatefulShellBranch(routes: [GoRoute(path: '/today', builder: (_, _) => const TodayScreen())]),
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: '/discover',
+              builder: (_, _) => const ComingSoonScreen(title: 'Discover', body: 'Browse and save activities. Coming soon.'),
+            ),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: '/together',
+              builder: (_, _) => const ComingSoonScreen(title: 'Together', body: 'Events and clubs near you. Coming soon.'),
+            ),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: '/rhythm',
+              builder: (_, _) => const ComingSoonScreen(title: 'My rhythm', body: 'Your full rhythm and what works for you. Coming soon.'),
+            ),
+          ]),
+        ],
+      ),
     ],
   );
 });

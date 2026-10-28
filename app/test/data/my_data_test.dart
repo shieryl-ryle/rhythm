@@ -130,7 +130,7 @@ void main() {
     expect((await userRowCounts(db))['consent'], 1);
     expect((await userRowCounts(db))['followed_activity'], 0, reason: 'setup stores nothing until the end');
     await completeSetup(tester);
-    expect(find.text('Here’s what fits today'), findsOneWidget);
+    expect(find.text('Your first ideas'), findsOneWidget);
     expect((await userRowCounts(db))['profile'], 1);
     expect(await db.select(db.actions).get(), isNotEmpty);
 
@@ -140,7 +140,8 @@ void main() {
 
     expect(calls, ['cancel notifications']);
     expect(find.text('Welcome to Lilt'), findsOneWidget);
-    expect((await userRowCounts(db)).values.every((n) => n == 0), isTrue);
+    final after = await userRowCounts(db);
+    expect(after.values.every((n) => n == 0), isTrue, reason: after.toString());
     // The library is not personal data: delete-all keeps it.
     expect(await db.select(db.actions).get(), isNotEmpty);
   });
