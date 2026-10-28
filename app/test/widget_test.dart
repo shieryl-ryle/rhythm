@@ -5,6 +5,7 @@ import 'package:lilt/app/app.dart';
 import 'package:lilt/data/consent_repository.dart';
 import 'package:lilt/data/library/library_loader.dart';
 import 'package:lilt/data/providers.dart';
+import 'package:lilt/features/starting_point/setup_controller.dart';
 import 'package:lilt/features/today/stub_actions.dart';
 
 import 'support/test_support.dart';
@@ -28,11 +29,14 @@ void main() {
   testWidgets('consent comes first, nothing is stored until the person agrees, then Today shows 3 actions',
       (tester) async {
     final repo = FakeConsentRepository();
+    final setup = FakeSetupRepository();
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           consentRepositoryProvider.overrideWithValue(repo),
+          setupRepositoryProvider.overrideWithValue(setup),
           libraryLoaderProvider.overrideWithValue(NoopLibraryLoader()),
+          ...setupTestOverrides(),
         ],
         child: const LiltApp(),
       ),
@@ -47,8 +51,14 @@ void main() {
     await tester.tap(find.text('I agree, continue'));
     await tester.pumpAndSettle();
 
-    // S-004: three hard-coded library actions.
+    // S-003: after consent the person is asked about themselves first, and nothing is stored until the end.
     expect(repo.writes, 1);
+    expect(find.text('What brings you here?'), findsOneWidget);
+    expect(setup.saves, 0);
+    await completeSetup(tester);
+    expect(setup.saves, 1);
+
+    // S-004: three hard-coded library actions.
     expect(find.text('Here’s what fits today'), findsOneWidget);
     expect(stubActions.length, 3);
     for (final action in stubActions) {
@@ -93,7 +103,9 @@ void main() {
       ProviderScope(
         overrides: [
           consentRepositoryProvider.overrideWithValue(repo),
+          setupRepositoryProvider.overrideWithValue(FakeSetupRepository(done: true)),
           libraryLoaderProvider.overrideWithValue(NoopLibraryLoader()),
+          ...setupTestOverrides(),
         ],
         child: const LiltApp(),
       ),
@@ -110,7 +122,9 @@ void main() {
       ProviderScope(
         overrides: [
           consentRepositoryProvider.overrideWithValue(repo),
+          setupRepositoryProvider.overrideWithValue(FakeSetupRepository(done: true)),
           libraryLoaderProvider.overrideWithValue(_FailingLibraryLoader()),
+          ...setupTestOverrides(),
         ],
         child: const LiltApp(),
       ),

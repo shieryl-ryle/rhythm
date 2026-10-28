@@ -111,6 +111,7 @@ void main() {
         overrides: [
           databaseProvider.overrideWithValue(db),
           libraryLoaderProvider.overrideWithValue(DriftLibraryLoader(db, readAssetFile)),
+          ...setupTestOverrides(),
           deleteAllHooksProvider.overrideWithValue([() async => calls.add('cancel notifications')]),
         ],
         child: const LiltApp(),
@@ -125,8 +126,12 @@ void main() {
 
     await tester.tap(find.text('I agree, continue'));
     await tester.pumpAndSettle();
-    expect(find.text('Here’s what fits today'), findsOneWidget);
+    expect(find.text('What brings you here?'), findsOneWidget);
     expect((await userRowCounts(db))['consent'], 1);
+    expect((await userRowCounts(db))['followed_activity'], 0, reason: 'setup stores nothing until the end');
+    await completeSetup(tester);
+    expect(find.text('Here’s what fits today'), findsOneWidget);
+    expect((await userRowCounts(db))['profile'], 1);
     expect(await db.select(db.actions).get(), isNotEmpty);
 
     final container = ProviderScope.containerOf(tester.element(find.byType(LiltApp)));

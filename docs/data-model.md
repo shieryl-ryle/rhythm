@@ -109,7 +109,7 @@ its own card on Today.
 |---|---|---|---|---|
 | `id` | text | no | `fol_…` | PK |
 | `activity` | activity_kind | no | — | |
-| `custom_name` | text 🔒 | yes | null | The typed name when `activity` = `other` ("Can't find it? Type it", red-flag checked, EQ-008) |
+| `custom_name` | text 🔒 | yes | null | The typed name when `activity` = `other` ("Not listed? Add it yourself", red-flag checked, EQ-008) |
 | `path` | path | no | — | Shown on 7.2 as "Keeping it going", "Picking up again", "New to try" |
 | `progress` | progress | yes | null | `keep_going` only (frame 1.7) |
 | `hard_because` | text | yes | null | Comma set of `hard_because`; asked when `progress` is `up_and_down` or `getting_harder` (frame 1.7; optional) |
@@ -315,12 +315,12 @@ The on-screen label is the source of truth for wording; the stored value is a st
 |---|---|---|---|
 | 1.3, 1.4 | What brings you here? (tick all that fit) | Keep going with something I do now | `followed_activity.path` = `keep_going` |
 | | | Pick up something I stopped | `pick_up_again` |
-| | | Add something new to what I do | `add_new` |
+| | | Add something new to what I do | Not stored by setup (decision 2026-10-28, rules review agreed): the activity they already do (9.12) is stored with `path` = `keep_going`, and `add_new` is kept for what they choose later in Discover or Add (3.9 "New to me"). If Keep going is also ticked, the question is not asked again |
 | | | Start being active for the first time | `start_fresh` (can't be combined with the others) |
 | 1.5 | What do you do now? (pick one) | Walking, Running, Gym, Cycling, Swimming, Basketball, Racket sports, Yoga, Other | `followed_activity.activity` = the matching `activity_kind` (Other opens search 1.6; a typed name goes to `custom_name`) |
 | 1.8 | What would you like to pick up again? (pick one) | Running, Gym, Swimming, Cycling, Basketball, Yoga, Dance, Other | same |
-| 9.12 | Add something new, first question | Walking, Running, Gym, Cycling, Swimming, Yoga, Other | same (the activity the person already does; what to add is chosen later in Discover or Add) |
-| 9.13 | Start fresh, first question | Dancing, Team sports, Racket sports, Not sure yet | `dance`, `team_sports`, `racket_sports`, `not_sure` (no specific activity; starters are offered, EV-005) |
+| 9.12 | Add something new, "What do you already do?" | Walking, Running, Gym, Cycling, Swimming, Yoga, Other | `followed_activity.activity` with `path` = `keep_going` (the activity the person already does; what to add is chosen later in Discover or Add) |
+| 9.13 | Start fresh, "What sounds fun to you?" (pick one, eight tickless chips) | Walking, Dancing, Cycling, Swimming, Team sports, Racket sports, Yoga, Not sure yet | `followed_activity.activity` = `walking`, `dance`, `cycling`, `swimming`, `team_sports`, `racket_sports`, `yoga` or `not_sure`, with `path` = `start_fresh` ("Not sure yet" has no specific activity; starters are offered, EV-005). Decided 2026-10-28: the frame (eight chips) is the source of truth, not the earlier list of four |
 | 1.6, 9.1 | Search the library; "Not listed? Add it yourself" | A library match, or a typed name | The matching `activity_kind`; a typed name is `other` with `custom_name` (red-flag checked, EQ-008). What an `other` activity is offered: library starters |
 | 1.7 | How's the gym going? | Going well / Up and down / Getting harder | `progress` = `going_well` / `up_and_down` / `getting_harder` |
 | 1.7 | What's making it harder? (optional) | Finding time / Energy / Getting bored / Cost / Motivation | `hard_because` = `finding_time` / `energy` / `getting_bored` / `cost` / `motivation` |
@@ -373,7 +373,8 @@ The on-screen label is the source of truth for wording; the stored value is a st
 - **Discover follow (3.9) sets the path:** `already_play` → `keep_going`, `used_to_play` → `pick_up_again`, `new_to_me` → `add_new`.
 - **Clock times behind the free-time slots** (for `suggested_time`): `early_morning` 07:00, `lunch` 12:30, `after_work` 18:30, `weekends` Saturday 10:00 [assumption, from frames 2.3 and 3.4].
 - **"Prefer not to say" is exclusive** on every multi-choice question: picking it clears the others, and picking another clears it. "Nothing to leave out" (1.14) and "None of these" (1.12 access) are exclusive in the same way.
-- **Required or skippable:** 1.3 to 1.9 and 1.12 to 1.14 need an answer (Next stays disabled until one is picked); 1.10 and 1.11 have Skip, 1.7's "What's making it harder?" is optional.
+- **Required or skippable:** 1.3 to 1.9 and 1.12 (at least one free time) need an answer (Next stays disabled until one is picked); 1.10 and 1.11 have Skip, which clears what was ticked on that question; 1.7's "What's making it harder?", 1.13 (why it matters, none is fine) and 1.14 (leave out; "Nothing to leave out" is the starting state) are optional.
+- **A leave-out can overlap something they follow** (follow Swimming and leave out Swimming; leave out Team sports and follow basketball). The leave-out wins (BR-011): the wizard says so on the leave-out question, and Today then has nothing for that activity.
 - **Changing a reflection from Partly or Didn't get to it to Done clears `barrier`** (it is asked only after those two answers, BR-008).
 - **Order:** followed activities and their Today cards are in `followed_at` order. The ⋮ on a Today card opens Edit (3.2). The ⋮ on 7.2 has no frame; the builder offers Unfollow.
 - **Saved (Discover):** the cards are library actions, so Saved is `saved_action`. A Together club card is not saved locally; it links to Together.
@@ -396,7 +397,7 @@ The on-screen label is the source of truth for wording; the stored value is a st
   - **Retired actions:** the loader never deletes, so an action removed from the library stays in `action`. The ranker and any suggestion code must offer only rows whose `library_version` is the current one (the version in `actions.json`), so a retired action is never suggested again, while history that points at it stays readable. (No `retired` column; revisit if the ranker needs it.)
   - **Versions:** the loader skips a load when that `library_version` is already loaded with at least as many rows, so every content change, including a one-word edit, must bump `library_version`.
   - **Tags:** `needs_home_equipment` means kit the person owns (bike, racket, ball, mat). `after_dark` is only on outdoor actions (an indoor evening class is not "outdoors after dark"). Setup (frame 1.14) has no climbing-gym access answer, so bouldering is not tagged for access; revisit if the owner adds one.
-- **Rows created after consent (TASK-005):** `profile` and `notification_setting` are inserted when setup starts, not before consent. A `reflection` row (status `unknown`) is created with each plan item by the plan repository.
+- **Rows created after consent (TASK-005):** the setup wizard keeps its answers in memory and writes the `profile` row, `followed_activity` and `preference` rows in one transaction at "Show me today", so leaving halfway stores nothing (BR-014); `notification_setting` is inserted when the person opens reminders, not before consent. A `reflection` row (status `unknown`) is created with each plan item by the plan repository.
 - **Domain inputs (TASK-005 and later):** only `pause` rows with kind `pause` become paused days for the lapse rule (EQ-001), not `lighter` or `reschedule`. Free text the person edits, including observation text, goes through the red-flag check (EQ-008) before it is saved. Editing or back-filling a reflection must not lower a reflected day, and the domain derives totals by counting, so the repository must not allow it (BR-007). A lapse that starts while reminders are booked must cancel the daily ones (EQ-005).
 - **Resuming a pause:** the repository sets `end_day` to the resume day.
 - **Delete-all hooks:** the notification cancellation (F-008) and the Together account deletion (F-018, BR-017) must be registered through `deleteAllHooksProvider`. Each must be idempotent. A test must fail if either is missing once those features exist.

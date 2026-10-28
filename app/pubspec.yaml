@@ -67,6 +67,7 @@ flutter:
   # The activity library and the safety lists (docs/methods.md DS-001 to DS-003).
   assets:
     - assets/library/
+    - assets/support/
 
   # Geist (SIL OFL 1.1, see assets/fonts/geist/OFL.txt) is the body font from docs/DESIGN.md.
   # It is bundled so the web build makes no request to a font CDN (BR-015).

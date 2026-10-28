@@ -192,11 +192,11 @@ entry point.
    the app stores nothing).
 2. My Starting Point, step 1: "What brings you here?"
    1. **Continue:** which activity, how it's going, what's getting harder.
-   2. **Add a new one:** what they already do, then what they'd like to add or are curious about.
+   2. **Add a new one:** what they already do (frame 9.12). What to add is chosen later in Discover or Add. If "Continue" is also ticked, the question is not asked twice.
    3. **Pick up again:** which activity, roughly when it stopped, and why it stopped. The reasons
       are neutral options, plus "prefer not to say", and the question can be skipped (BR-008).
       Then what would make it easier now.
-   4. **Start fresh:** what they enjoy or are curious about ("not sure yet" allowed).
+   4. **Start fresh:** "What sounds fun to you?", one of eight chips (frame 9.13) including "Not sure yet".
 3. Shared steps: usual free times, access and memberships, what gets in the way, what to leave
    out, and an optional reason.
 4. See the first suggestion on Today, with the grid at the top.
@@ -245,7 +245,7 @@ entry point.
   needed.
 - [ ] Follow-ups appear one question at a time. Every setup question uses a Next button, with no auto-advance (DESIGN.md); a single-choice answer selects and the person taps Next, and
   earlier answers fold into a summary that can be changed.
-- [ ] "Other" opens an activity search over the library, with "Can't find it? Type it" as the only
+- [ ] "Other" opens an activity search over the library, with "Not listed? Add it yourself" as the only
   free text (red-flag checked, BR-003).
 - [ ] Setup has no other free text. "Why it matters" is a set of tap options, including "Prefer not
   to say".
