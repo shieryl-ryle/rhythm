@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lilt/data/library/library_models.dart';
-import 'package:lilt/features/today/stub_actions.dart';
 
 import '../support/test_support.dart';
 
@@ -21,11 +20,6 @@ void main() {
   List<MapEntry<String, String>> allVisibleText() => [
         for (final a in library.actions)
           for (final text in a.userVisibleText) MapEntry(a.id, text),
-        for (final s in stubActions) ...[
-          MapEntry('stub ${s.title}', s.title),
-          MapEntry('stub ${s.title}', s.detail),
-          MapEntry('stub ${s.title}', s.reason),
-        ],
       ];
 
   test('the blocked-claims list has about 40 terms', () {

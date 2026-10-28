@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lilt/data/library/library_models.dart';
-import 'package:lilt/features/today/stub_actions.dart';
 
 import '../support/test_support.dart';
 
@@ -36,11 +35,6 @@ void main() {
   test('no library or stub text uses a never-use word', () {
     final texts = [
       for (final a in library.actions) ...a.userVisibleText.map((t) => MapEntry(a.id, t)),
-      for (final s in stubActions) ...[
-        MapEntry('stub ${s.title}', s.title),
-        MapEntry('stub ${s.title}', s.detail),
-        MapEntry('stub ${s.title}', s.reason),
-      ],
     ];
     final hits = <String>[];
     for (final entry in texts) {

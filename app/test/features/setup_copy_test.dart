@@ -55,6 +55,11 @@ void main() {
       'lib/features/starting_point/activity_search_screen.dart',
       'lib/features/support/support_screen.dart',
       'lib/features/starting_point/setup_model.dart',
+      'lib/features/today/today_screen.dart',
+      'lib/features/today/option_cards.dart',
+      'lib/features/today/today_sheets.dart',
+      'lib/features/today/today_logic.dart',
+      'lib/app/app_shell.dart',
     ]) {
       for (final m in literal.allMatches(File(file).readAsStringSync())) {
         final text = m.group(1)!;

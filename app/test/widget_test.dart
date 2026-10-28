@@ -6,7 +6,6 @@ import 'package:lilt/data/consent_repository.dart';
 import 'package:lilt/data/library/library_loader.dart';
 import 'package:lilt/data/providers.dart';
 import 'package:lilt/features/starting_point/setup_controller.dart';
-import 'package:lilt/features/today/stub_actions.dart';
 
 import 'support/test_support.dart';
 
@@ -26,16 +25,18 @@ class FakeConsentRepository implements ConsentRepository {
 }
 
 void main() {
-  testWidgets('consent comes first, nothing is stored until the person agrees, then Today shows 3 actions',
+  testWidgets('consent comes first, nothing is stored until the person agrees, then setup, then Today',
       (tester) async {
     final repo = FakeConsentRepository();
     final setup = FakeSetupRepository();
+    final db = inMemoryDatabase();
+    addTearDown(db.close);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           consentRepositoryProvider.overrideWithValue(repo),
           setupRepositoryProvider.overrideWithValue(setup),
-          libraryLoaderProvider.overrideWithValue(NoopLibraryLoader()),
+          ...todayTestOverrides(db),
           ...setupTestOverrides(),
         ],
         child: const LiltApp(),
@@ -58,12 +59,9 @@ void main() {
     await completeSetup(tester);
     expect(setup.saves, 1);
 
-    // S-004: three hard-coded library actions.
-    expect(find.text('Here’s what fits today'), findsOneWidget);
-    expect(stubActions.length, 3);
-    for (final action in stubActions) {
-      expect(find.text(action.title), findsOneWidget);
-    }
+    // S-004: a first day has no history, so the options are ideas to start with.
+    expect(find.text('Your first ideas'), findsOneWidget);
+    expect(find.text('I’ll try this'), findsWidgets);
     expect(find.text('Welcome to Lilt'), findsNothing);
   });
 
@@ -99,12 +97,14 @@ void main() {
 
   testWidgets('a person who already agreed goes straight to Today', (tester) async {
     final repo = FakeConsentRepository()..agreed = true;
+    final db = inMemoryDatabase();
+    addTearDown(db.close);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           consentRepositoryProvider.overrideWithValue(repo),
           setupRepositoryProvider.overrideWithValue(FakeSetupRepository(done: true)),
-          libraryLoaderProvider.overrideWithValue(NoopLibraryLoader()),
+          ...todayTestOverrides(db),
           ...setupTestOverrides(),
         ],
         child: const LiltApp(),
@@ -112,7 +112,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Here’s what fits today'), findsOneWidget);
+    expect(find.text('Your first ideas'), findsOneWidget);
     expect(find.byType(Scaffold), findsWidgets);
   });
 
@@ -131,7 +131,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Here’s what fits today'), findsOneWidget);
+    // Today cannot rank an empty library, so it says so; the person is still consented and set up.
+    expect(find.text('Today didn’t load'), findsOneWidget);
     expect(find.text('Welcome to Lilt'), findsNothing);
     final container = ProviderScope.containerOf(tester.element(find.byType(LiltApp)));
     expect(container.read(libraryReadyProvider).hasError, isTrue);

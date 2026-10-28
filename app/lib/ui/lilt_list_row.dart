@@ -14,6 +14,7 @@ class LiltListRow extends StatelessWidget {
     this.subtitle,
     this.chevron = true,
     this.divider = true,
+    this.selected = false,
   });
 
   final String title;
@@ -22,10 +23,14 @@ class LiltListRow extends StatelessWidget {
   final bool chevron;
   final bool divider;
 
+  /// A choice in a list of choices: shows a tick, and tells screen readers it is selected.
+  final bool selected;
+
   @override
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
+      selected: selected,
       label: subtitle == null ? title : '$title, $subtitle',
       excludeSemantics: true,
       child: LiltFocusRing(
@@ -51,7 +56,8 @@ class LiltListRow extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (chevron) const Icon(Icons.chevron_right, color: LiltColors.ink),
+                if (selected) const Icon(Icons.check, color: LiltColors.primary),
+                if (chevron && !selected) const Icon(Icons.chevron_right, color: LiltColors.ink),
               ],
             ),
           ),

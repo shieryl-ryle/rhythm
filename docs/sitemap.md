@@ -64,6 +64,9 @@ IDs: `S-001…` main screens · `S-09x` error/blocked states · `S-1xx` dialogs/
 | S-114 | Move it to later | Pick a later time (3.4) | F-002 | S-103 | Consented | idle |
 | S-115 | My plan fell through | Alternative for the same time slot (3.5) | F-002 | S-103 | Consented | idle |
 
+### S-004 as built (TASK-005 piece b1, 2026-10-28)
+Built: the tab shell (Discover, Together and My rhythm say "coming soon"), the rhythm card (12 weeks, or this week on day one), the time and energy chips with their lists, one expanded option with its reason, "I'll try this", "Something else" ("N of M", gone on the last option), compact cards for other followed activities, today's plan, "Still open", the two nothing-fits states, "Not today" with "Something lighter" and the pause (3 days, 1 week, 2 weeks), and Paused with "Resume now". **Not built yet, so not drawn as dead controls:** the ⋮ menu and ⓘ "why this" on cards, "Try something new", "Add an activity", "Move it to later", "My plan fell through", "I'm starting" and its states, and "How did it go?" (the Reflection sheet, next), "See all" on the rhythm card, the "Review my choices" button in state N3 (needs edit mode), and Settings behind the header avatar.
+
 ### S-004 when few or no options fit
 Senior UI review of 2026-10-27 (record: [docs/reviews/pre-task-005-build-plan-2026-10-27.md](reviews/pre-task-005-build-plan-2026-10-27.md)). It
 extends frame 9.3 "Today · nothing fits" (163:5310); no new frame is needed, and Figma 9.3 is updated after the build.

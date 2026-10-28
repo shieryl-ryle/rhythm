@@ -50,6 +50,8 @@ or `partly`. "Paused day" = a day inside a `pause` of kind `pause`.
 | Reflection | ≤ 3 taps | PRD F-003 acceptance |
 | Notification caps | 1/day, 5/7 days, lapse check-in 1/7 days | [assumption] EQ-005 |
 | Quiet hours default | 21:00–07:00 | [assumption], as in frame 7.3 |
+| Dark hours for "Outdoors after dark" | 18:00–06:00; the slot times 07:00, 12:30, 18:30 and Saturday 10:00 decide it, not the season | [assumption] EQ-003 |
+| Today's compact cards | Up to 2: the best option for each other followed activity, never the activity the hero shows | [assumption] sitemap S-004 |
 | AI timeout | 4 s | [assumption] EQ-006 |
 | AI calls per device per day | 30 | [assumption] EQ-006 |
 | Gemini model | `gemini-3.5-flash-lite` | [ADR-003](adr/ADR-003-gemini-via-firebase-ai-logic.md) |

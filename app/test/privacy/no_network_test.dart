@@ -62,7 +62,7 @@ void main() {
     await tester.tap(find.text('I agree, continue'));
     await tester.pumpAndSettle();
     await completeSetup(tester);
-    expect(find.text('Here’s what fits today'), findsOneWidget);
+    expect(find.text('Your first ideas'), findsOneWidget);
 
     final container = ProviderScope.containerOf(tester.element(find.byType(LiltApp)));
     final json = await container.read(myDataServiceProvider).exportJson();
