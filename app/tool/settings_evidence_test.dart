@@ -121,6 +121,8 @@ void main() {
       await tester.pumpAndSettle();
       await _save(tester, key, 's03_settings_demo_$tag');
       await tap(tester, 'Load demo data: Rana');
+      await _save(tester, key, 's03b_demo_confirm_$tag');
+      await tester.tap(find.widgetWithText(OutlinedButton, 'Load demo data'));
       await tester.pump(const Duration(seconds: 1));
       await tester.pumpAndSettle();
       await _save(tester, key, 's04_today_rana_$tag');

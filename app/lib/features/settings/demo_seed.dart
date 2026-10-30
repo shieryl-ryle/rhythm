@@ -9,7 +9,7 @@ import '../../domain/observation.dart';
 import '../starting_point/setup_model.dart';
 import '../starting_point/setup_repository.dart';
 
-/// Demo builds only (`--dart-define=DEMO=true`): Settings shows "Load demo data (synthetic)". A release build
+/// Demo builds only (`--dart-define=DEMO=true`): Settings shows "Load demo data: Rana" or "Sam". A build without it
 /// never shows it and never loads anything (seed/README.md).
 const demoBuild = bool.fromEnvironment('DEMO');
 
@@ -51,7 +51,7 @@ class DemoSeed {
 
       switch (persona) {
         case DemoPersona.rana:
-          await _rana(today);
+          await _rana(today, now);
         case DemoPersona.sam:
           await _sam(today);
       }
@@ -124,7 +124,7 @@ class DemoSeed {
   /// and back two days ago through My Way Back (what changed: moved; a different approach). Four walks with
   /// company were enjoyed, so one observation is confirmed and one is proposed. Some days were never answered
   /// (BR-009).
-  Future<void> _rana(String today) async {
+  Future<void> _rana(String today, DateTime now) async {
     // Earlier weeks: now and then, never three open days in a row (that would be a lapse of its own).
     const mix = [
       ReflectionStatus.completed,
@@ -246,7 +246,7 @@ class DemoSeed {
             source: ObsSource.rule,
             status: const Value(ObsStatus.confirmed),
             patternKey: confirmed,
-            confirmedAt: Value(DateTime.now().toUtc()),
+            confirmedAt: Value(now.toUtc()),
           ),
         );
     await _db.into(_db.observations).insert(

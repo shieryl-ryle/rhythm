@@ -15,6 +15,8 @@ class LiltListRow extends StatelessWidget {
     this.chevron = true,
     this.divider = true,
     this.selected = false,
+    this.trailing,
+    this.liveRegion = false,
   });
 
   final String title;
@@ -26,11 +28,20 @@ class LiltListRow extends StatelessWidget {
   /// A choice in a list of choices: shows a tick, and tells screen readers it is selected.
   final bool selected;
 
+  /// An icon at the end for a row that does something rather than opening a screen (a chevron means "opens").
+  final Widget? trailing;
+
+  /// The row's lines change while the person is on it (a state such as "Copied"), so a screen reader announces them.
+  final bool liveRegion;
+
   @override
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
       selected: selected,
+      liveRegion: liveRegion,
+      // excludeSemantics drops the tap handler below, so the row says it can be activated itself.
+      onTap: onTap,
       label: subtitle == null ? title : '$title, $subtitle',
       excludeSemantics: true,
       child: LiltFocusRing(
@@ -57,7 +68,8 @@ class LiltListRow extends StatelessWidget {
                   ),
                 ),
                 if (selected) const Icon(Icons.check, color: LiltColors.primary),
-                if (chevron && !selected) const Icon(Icons.chevron_right, color: LiltColors.ink),
+                ?trailing,
+                if (chevron && !selected && trailing == null) const Icon(Icons.chevron_right, color: LiltColors.ink),
               ],
             ),
           ),

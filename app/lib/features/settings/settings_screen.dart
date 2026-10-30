@@ -10,6 +10,9 @@ import 'settings_providers.dart';
 
 enum _Export { idle, working, done, failed }
 
+/// What the person asked for and could not get, so the row can say so and be tried again.
+enum _Failed { none, delete, demo }
+
 /// S-008 Settings & My Data, the first version: get support, export, delete everything, and in a demo build
 /// the synthetic people. Reminders, "edit my starting point" and sharing come with the screens they open.
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -21,6 +24,7 @@ class SettingsScreen extends ConsumerStatefulWidget {
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   _Export _export = _Export.idle;
+  _Failed _failed = _Failed.none;
   bool _busy = false;
 
   Future<void> _runExport() async {
@@ -37,21 +41,64 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Future<void> _confirmDelete() async {
     final delete = await showDialog<bool>(
       context: context,
-      builder: (_) => const _DeleteDialog(),
+      builder: (_) => const _ConfirmDialog(
+        title: 'Delete everything?',
+        body:
+            'This removes everything Lilt has saved on this phone: your starting point, plans, answers and notes. It can’t be undone.',
+        keepLabel: 'Keep my data',
+        actionLabel: 'Delete everything',
+        danger: true,
+      ),
     );
     if (delete != true || _busy || !mounted) return;
-    setState(() => _busy = true);
-    // Deleting sends the person back to the consent screen (BR-014, BR-017).
-    await ref.read(deleteEverythingProvider)();
+    setState(() {
+      _busy = true;
+      _failed = _Failed.none;
+    });
+    try {
+      // Deleting sends the person back to the consent screen (BR-014, BR-017).
+      await ref.read(deleteEverythingProvider)();
+    } on Object {
+      // Nothing is removed when a step fails (docs/data-model.md), so say so and let them try again.
+      if (mounted) {
+        setState(() {
+          _busy = false;
+          _failed = _Failed.delete;
+        });
+      }
+    }
   }
 
   Future<void> _loadDemo(DemoPersona persona) async {
     if (_busy) return;
-    setState(() => _busy = true);
-    await ref.read(loadDemoProvider)(persona);
-    if (!mounted) return;
-    setState(() => _busy = false);
-    context.go('/today');
+    final load = await showDialog<bool>(
+      context: context,
+      builder: (_) => _ConfirmDialog(
+        title: 'Load ${persona.label}?',
+        body: 'This replaces everything on this phone with invented data for ${persona.label}.',
+        keepLabel: 'Keep what I have',
+        actionLabel: 'Load demo data',
+        danger: false,
+      ),
+    );
+    if (load != true || !mounted) return;
+    setState(() {
+      _busy = true;
+      _failed = _Failed.none;
+    });
+    try {
+      await ref.read(loadDemoProvider)(persona);
+      if (!mounted) return;
+      setState(() => _busy = false);
+      context.go('/today');
+    } on Object {
+      if (mounted) {
+        setState(() {
+          _busy = false;
+          _failed = _Failed.demo;
+        });
+      }
+    }
   }
 
   @override
@@ -60,7 +107,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final demoLoaded = ref.watch(demoDataLoadedProvider).valueOrNull ?? false;
 
     final exportNote = switch (_export) {
-      _Export.idle => 'Everything on this phone, as one file of text',
+      _Export.idle => 'Copies everything on this phone as text',
       _Export.working => 'Exporting…',
       _Export.done => 'Copied. Paste it into a note or a file to keep it.',
       _Export.failed => 'That didn’t work. Try again.',
@@ -83,6 +130,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ],
               ),
             ),
+            if (demoLoaded) const DemoBanner(),
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(LiltSpacing.lg, LiltSpacing.sm, LiltSpacing.lg, LiltSpacing.xl),
@@ -91,10 +139,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   children: [
                     Semantics(header: true, child: const Text('Settings', style: LiltText.display)),
                     const SizedBox(height: LiltSpacing.lg),
-                    if (demoLoaded) ...[
-                      const DemoBanner(),
-                      const SizedBox(height: LiltSpacing.lg),
-                    ],
                     LiltListRow(
                       title: 'Need support?',
                       subtitle: 'Help from people, any time',
@@ -104,11 +148,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: 'Export my data',
                       subtitle: exportNote,
                       chevron: false,
+                      liveRegion: true,
+                      divider: false,
+                      trailing: Icon(_export == _Export.done ? Icons.check : Icons.copy_outlined, color: LiltColors.ink),
                       onTap: _export == _Export.working ? null : _runExport,
                     ),
+                    // Its own group, so a thumb aimed at Export does not land on it.
+                    const SizedBox(height: LiltSpacing.xl),
                     LiltListRow(
                       title: 'Delete everything',
-                      subtitle: 'Removes all data from this phone',
+                      subtitle: _failed == _Failed.delete ? 'That didn’t work. Nothing was removed. Try again.' : 'Removes all data from this phone',
+                      chevron: false,
+                      liveRegion: true,
                       divider: false,
                       onTap: _busy ? null : _confirmDelete,
                     ),
@@ -124,7 +175,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       for (final p in DemoPersona.values)
                         LiltListRow(
                           title: 'Load demo data: ${p.label}',
-                          subtitle: p.story,
+                          subtitle: _failed == _Failed.demo ? 'That didn’t work. Try again.' : p.story,
+                          chevron: false,
+                          liveRegion: true,
+                          divider: p != DemoPersona.values.last,
                           onTap: _busy ? null : () => _loadDemo(p),
                         ),
                     ],
@@ -139,10 +193,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 }
 
-/// The destructive dialog (docs/DESIGN.md): the safe choice is the one filled button, and the destructive one
-/// is outlined in the danger colour. The body scrolls at large text and the buttons stay in place.
-class _DeleteDialog extends StatelessWidget {
-  const _DeleteDialog();
+/// A confirmation dialog (docs/DESIGN.md): the safe choice is the one filled button, and the other is outlined,
+/// in the danger colour when it destroys something. The body scrolls at large text, with a visible scroll bar, and
+/// the buttons stay in place.
+class _ConfirmDialog extends StatelessWidget {
+  const _ConfirmDialog({
+    required this.title,
+    required this.body,
+    required this.keepLabel,
+    required this.actionLabel,
+    required this.danger,
+  });
+
+  final String title;
+  final String body;
+  final String keepLabel;
+  final String actionLabel;
+  final bool danger;
 
   @override
   Widget build(BuildContext context) {
@@ -156,27 +223,27 @@ class _DeleteDialog extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Flexible(
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Semantics(header: true, child: const Text('Delete everything?', style: LiltText.display)),
-                    const SizedBox(height: LiltSpacing.md),
-                    Text(
-                      'This removes everything Lilt has saved on this phone: your starting point, plans, answers and notes. It can’t be undone.',
-                      style: LiltText.body,
-                    ),
-                  ],
+              child: Scrollbar(
+                thumbVisibility: true,
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Semantics(header: true, child: Text(title, style: LiltText.display.copyWith(fontSize: 28))),
+                      const SizedBox(height: LiltSpacing.md),
+                      Text(body, style: LiltText.body),
+                    ],
+                  ),
                 ),
               ),
             ),
             const SizedBox(height: LiltSpacing.lg),
-            LiltButton(label: 'Keep my data', onPressed: () => Navigator.of(context).pop(false)),
-            const SizedBox(height: LiltSpacing.sm),
+            LiltButton(label: keepLabel, onPressed: () => Navigator.of(context).pop(false)),
+            const SizedBox(height: LiltSpacing.md),
             LiltButton(
-              label: 'Delete everything',
+              label: actionLabel,
               kind: LiltButtonKind.secondary,
-              danger: true,
+              danger: danger,
               onPressed: () => Navigator.of(context).pop(true),
             ),
           ],

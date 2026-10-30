@@ -8,8 +8,8 @@
 go stale: the lapse and the return would drift into the past. Same persona and same day give the same rows (no
 randomness). It starts with the delete-all path (BR-017), records consent and finishes setup, then writes the
 history. Every row has an id that starts with `demo_`, which is how the app knows to label it. Available only in
-demo builds (`--dart-define=DEMO=true`), from Settings → "Load demo data: Rana" or "Sam". A release build never
-shows it and never loads anything.
+demo builds (`--dart-define=DEMO=true`), from Settings → "Load demo data: Rana" or "Sam". A build without
+`DEMO=true` never shows it and never loads anything.
 
 ```
 cd app && flutter run --dart-define=DEMO=true          # then Settings → Load demo data: Rana

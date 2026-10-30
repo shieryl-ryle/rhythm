@@ -87,7 +87,7 @@ void main() {
       expect(find.text('I’ll try this'), findsWidgets);
     });
 
-    testWidgets('a release build has no demo rows and no demo label', (tester) async {
+    testWidgets('a build without DEMO=true has no demo rows and no demo label', (tester) async {
       await _open(tester);
       await _openSettings(tester);
       expect(find.textContaining('demo data'), findsNothing);
@@ -184,6 +184,9 @@ void main() {
       expect(find.text('Demo data · invented, not a real person'), findsNothing, reason: 'nothing is loaded yet');
 
       await _tap(tester, 'Load demo data: Rana');
+      expect(find.text('Load Rana?'), findsOneWidget);
+      expect(await _rows(db, 'return_event'), 0, reason: 'nothing happens until they say yes');
+      await tester.tap(find.widgetWithText(OutlinedButton, 'Load demo data'));
       await tester.pump(const Duration(seconds: 1));
       await tester.pumpAndSettle();
 
@@ -196,10 +199,12 @@ void main() {
       final db = await _open(tester, demo: true);
       await _openSettings(tester);
       await _tap(tester, 'Load demo data: Rana');
+      await tester.tap(find.widgetWithText(OutlinedButton, 'Load demo data'));
       await tester.pumpAndSettle();
       await _openSettings(tester);
       expect(find.text('Demo data · invented, not a real person'), findsOneWidget, reason: 'on Settings too');
       await _tap(tester, 'Load demo data: Sam');
+      await tester.tap(find.widgetWithText(OutlinedButton, 'Load demo data'));
       await tester.pumpAndSettle();
       expect(await _rows(db, 'return_event'), 0);
 
@@ -224,12 +229,130 @@ void main() {
       expect(await container.read(demoDataLoadedProvider.future), isFalse);
     });
 
-    testWidgets('a release build does not load anything even if asked (BR-017)', (tester) async {
+    testWidgets('a build without DEMO=true does not load anything even if asked (BR-017)', (tester) async {
       final db = await _open(tester);
       final container = ProviderScope.containerOf(tester.element(find.byType(LiltApp)));
       await container.read(loadDemoProvider)(DemoPersona.rana);
       expect(await _rows(db, 'return_event'), 0);
       expect((await db.select(db.followedActivities).get()).single.activity, ActivityKind.gym);
+    });
+  });
+
+  group('when something fails', () {
+    testWidgets('"Keep what I have" loads nothing', (tester) async {
+      final db = await _open(tester, demo: true);
+      await _openSettings(tester);
+      await _tap(tester, 'Load demo data: Rana');
+      await tester.tap(find.text('Keep what I have'));
+      await tester.pumpAndSettle();
+      expect(await _rows(db, 'return_event'), 0);
+      expect((await db.select(db.followedActivities).get()).single.activity, ActivityKind.gym);
+    });
+
+    testWidgets('a demo load that fails sends the person to the consent screen, never to a phone with no consent (BR-014)',
+        (tester) async {
+      final db = await _open(tester, demo: true);
+      // Delete-all works, then the seed fails on its first plan item.
+      final container = ProviderScope.containerOf(tester.element(find.byType(LiltApp)));
+      await db.customStatement("CREATE TRIGGER boom BEFORE INSERT ON plan_item BEGIN SELECT RAISE(ABORT, 'boom'); END");
+      Object? error;
+      try {
+        await container.read(loadDemoProvider)(DemoPersona.rana);
+      } on Object catch (e) {
+        error = e;
+      }
+      expect(error, isNotNull);
+      await tester.pumpAndSettle();
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpAndSettle();
+      expect(find.text('Settings'), findsNothing);
+      expect(find.text('Today’s plan'), findsNothing);
+      expect(await _rows(db, 'consent'), 0);
+      expect(await _rows(db, 'followed_activity'), 0, reason: 'a half-loaded person is never left behind');
+    });
+
+    testWidgets('a demo load that fails before deleting anything leaves the person and their data where they were', (tester) async {
+      final db = inMemoryDatabase();
+      addTearDown(db.close);
+      tester.view.physicalSize = const Size(360, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await DriftConsentRepository(db).agree();
+      await DriftSetupRepository(db).save(_runner);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            ...todayTestOverrides(db),
+            assetReaderProvider.overrideWithValue(readAssetFile),
+            demoBuildProvider.overrideWithValue(true),
+            deleteAllHooksProvider.overrideWithValue([() async => throw StateError('could not cancel reminders')]),
+          ],
+          child: const LiltApp(),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await _openSettings(tester);
+      await _tap(tester, 'Load demo data: Rana');
+      await tester.tap(find.widgetWithText(OutlinedButton, 'Load demo data'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('That didn’t work. Try again.'), findsWidgets);
+      expect(find.text('Settings'), findsOneWidget);
+      expect(await _rows(db, 'consent'), 1);
+      expect(await _rows(db, 'followed_activity'), 1);
+    });
+
+    testWidgets('a delete that fails says so, removes nothing, and can be tried again (BR-017)', (tester) async {
+      var fail = true;
+      final db = inMemoryDatabase();
+      addTearDown(db.close);
+      tester.view.physicalSize = const Size(360, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await DriftConsentRepository(db).agree();
+      await DriftSetupRepository(db).save(_runner);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            ...todayTestOverrides(db),
+            assetReaderProvider.overrideWithValue(readAssetFile),
+            demoBuildProvider.overrideWithValue(false),
+            deleteAllHooksProvider.overrideWithValue([
+              () async {
+                if (fail) throw StateError('could not cancel reminders');
+              },
+            ]),
+          ],
+          child: const LiltApp(),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await _openSettings(tester);
+      await _tap(tester, 'Delete everything');
+      await tester.tap(find.widgetWithText(OutlinedButton, 'Delete everything'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('That didn’t work. Nothing was removed. Try again.'), findsOneWidget);
+      expect(await _rows(db, 'followed_activity'), 1);
+
+      fail = false;
+      await _tap(tester, 'Delete everything');
+      await tester.tap(find.widgetWithText(OutlinedButton, 'Delete everything'));
+      await tester.pumpAndSettle();
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpAndSettle();
+      expect(await _rows(db, 'followed_activity'), 0);
+    });
+  });
+
+  group('screen reader', () {
+    testWidgets('the export state is announced when it changes', (tester) async {
+      final handle = tester.ensureSemantics();
+      await _open(tester);
+      await _openSettings(tester);
+      final row = find.bySemanticsLabel(RegExp('^Export my data'));
+      expect(tester.getSemantics(row), matchesSemantics(isButton: true, isLiveRegion: true, hasSelectedState: true, hasTapAction: true, label: 'Export my data, Copies everything on this phone as text'));
+      handle.dispose();
     });
   });
 
@@ -248,6 +371,10 @@ void main() {
 
           await _openSettings(tester);
           await check('settings');
+          await _tap(tester, 'Load demo data: Rana');
+          await check('demo dialog');
+          await tester.tap(find.text('Keep what I have'));
+          await tester.pumpAndSettle();
           await _tap(tester, 'Delete everything');
           await check('delete dialog');
           expect(find.text('Keep my data'), findsOneWidget);

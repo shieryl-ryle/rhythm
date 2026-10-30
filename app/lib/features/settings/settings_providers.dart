@@ -2,10 +2,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/providers.dart';
+import '../starting_point/setup_controller.dart';
 import '../today/today_controller.dart';
 import 'demo_seed.dart';
 
-/// Whether this is a demo build. Tests replace it; a release build is always false (BR-017: no way to put
+/// Whether this is a demo build. Tests replace it; a build without DEMO=true is always false (BR-017: no way to put
 /// invented data on a real person's phone).
 final demoBuildProvider = Provider<bool>((ref) => demoBuild);
 
@@ -26,8 +27,29 @@ final loadDemoProvider = Provider<Future<void> Function(DemoPersona)>((ref) {
   return (persona) async {
     if (!ref.read(demoBuildProvider)) return;
     // The library is what the plan rows point at.
-    await ref.read(libraryLoaderProvider).load();
-    await DemoSeed(ref.read(databaseProvider), ref.read(myDataServiceProvider)).load(persona, now: ref.read(clockProvider)());
+    try {
+      await ref.read(libraryLoaderProvider).load();
+      await DemoSeed(ref.read(databaseProvider), ref.read(myDataServiceProvider)).load(persona, now: ref.read(clockProvider)());
+    } on Object {
+      // The seed starts by deleting everything, including consent. If it stops after that, the screen must not go
+      // on believing consent is still on record (BR-014): read it again, and the router shows the consent screen.
+      // If nothing was deleted, consent is still on record and the person stays where they are.
+      var recorded = false;
+      try {
+        recorded = await ref.read(consentRepositoryProvider).hasAgreed();
+      } on Object {
+        recorded = false;
+      }
+      if (!recorded) {
+        ref
+          ..invalidate(consentProvider)
+          ..invalidate(setupDoneProvider);
+      }
+      ref
+        ..invalidate(todayControllerProvider)
+        ..invalidate(demoDataLoadedProvider);
+      rethrow;
+    }
     // Consent and setup are both on record again, so only what reads the data is refreshed.
     ref
       ..invalidate(todayControllerProvider)
