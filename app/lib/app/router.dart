@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../data/providers.dart';
 import '../features/consent/consent_screen.dart';
+import '../features/settings/settings_screen.dart';
 import '../features/starting_point/setup_controller.dart';
 import '../features/starting_point/setup_screen.dart';
 import '../features/support/support_screen.dart';
@@ -41,6 +42,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/welcome', builder: (_, _) => const ConsentScreen()),
       GoRoute(path: '/setup', builder: (_, _) => const SetupScreen()),
       GoRoute(path: '/support', builder: (_, _) => const SupportScreen()),
+      GoRoute(path: '/settings', builder: (_, _) => const SettingsScreen()),
       // The four tabs. Discover, Together and My rhythm are not built yet and say so.
       StatefulShellRoute.indexedStack(
         builder: (_, _, shell) => AppShell(shell: shell),
