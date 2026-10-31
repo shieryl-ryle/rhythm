@@ -338,8 +338,15 @@ class _ConfirmedCardState extends ConsumerState<_ConfirmedCard> {
       ObservationKeep() => true,
       ObservationReworded(:final text) => await c.edit(id, text),
       ObservationRemoved() => await c.remove(id),
+      // BR-003: nothing was stored. Show the support message and leave the card as it was.
+      ObservationFlagged() => await _showSupport(),
     };
     if (mounted) setState(() => _failed = !ok);
+  }
+
+  Future<bool> _showSupport() async {
+    await context.push('/support');
+    return true;
   }
 
   @override

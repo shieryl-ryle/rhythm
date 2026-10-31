@@ -271,6 +271,58 @@ void main() {
       expect((await _observations(db)).where((o) => o.status == ObsStatus.deleted), hasLength(1));
     });
 
+    testWidgets('reworded text that matches the red-flag list stores nothing and shows support (BR-003, EQ-008)', (
+      tester,
+    ) async {
+      final db = await _rana(tester);
+      await _openRhythm(tester);
+      final before = (await _observations(db)).map((o) => '${o.id}${o.status.code}${o.text_}').toList();
+      await _tap(tester, 'Edit');
+      await tester.tap(find.text('Say it differently'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'I want to die');
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+      expect(find.text('You don’t have to handle this alone'), findsOneWidget);
+      final after = (await _observations(db)).map((o) => '${o.id}${o.status.code}${o.text_}').toList();
+      expect(after, before, reason: 'the words are not stored');
+    });
+
+    testWidgets('when the red-flag check cannot run the words are not kept, and the sheet says so (BR-003)', (
+      tester,
+    ) async {
+      final db = inMemoryDatabase();
+      addTearDown(db.close);
+      await DriftLibraryLoader(db, readAssetFile).load();
+      await DemoSeed(db, MyDataService(db)).load(DemoPersona.rana, now: fixedNow());
+      tester.view.physicalSize = const Size(360, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            ...todayTestOverrides(db),
+            assetReaderProvider.overrideWithValue(readAssetFile),
+            demoBuildProvider.overrideWithValue(false),
+            redFlagDetectorProvider.overrideWith((ref) => throw StateError('list did not load')),
+          ],
+          child: const LiltApp(),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await _openRhythm(tester);
+      await _tap(tester, 'Edit');
+      await tester.tap(find.text('Say it differently'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'Walking with a friend');
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+      expect(find.text('That did not work. Please try again.'), findsOneWidget);
+      expect((await _observations(db)).any((o) => o.text_ == 'Walking with a friend'), isFalse);
+    });
+
     testWidgets('closing the sheet changes nothing', (tester) async {
       final db = await _rana(tester);
       await _openRhythm(tester);

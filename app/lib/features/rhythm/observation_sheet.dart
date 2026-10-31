@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/theme.dart';
 import '../../data/database.dart';
+import '../../domain/red_flags.dart';
 import '../../ui/ui.dart';
+import '../support/support_providers.dart';
 import 'rhythm_repository.dart';
 
 /// What the person chose in the observation sheet.
@@ -20,6 +23,11 @@ class ObservationReworded extends ObservationChoice {
   const ObservationReworded(this.text);
 
   final String text;
+}
+
+/// What they typed matched the red-flag list (EQ-008): nothing is stored and the support message is shown (BR-003).
+class ObservationFlagged extends ObservationChoice {
+  const ObservationFlagged();
 }
 
 /// They do not want it any more.
@@ -43,19 +51,20 @@ Future<ObservationChoice?> showObservationSheet(BuildContext context, Observatio
   );
 }
 
-class _ObservationSheet extends StatefulWidget {
+class _ObservationSheet extends ConsumerStatefulWidget {
   const _ObservationSheet({required this.observation});
 
   final Observation observation;
 
   @override
-  State<_ObservationSheet> createState() => _ObservationSheetState();
+  ConsumerState<_ObservationSheet> createState() => _ObservationSheetState();
 }
 
-class _ObservationSheetState extends State<_ObservationSheet> {
+class _ObservationSheetState extends ConsumerState<_ObservationSheet> {
   late final TextEditingController _text = TextEditingController(text: widget.observation.text_);
   bool _reword = false;
   bool _done = false;
+  bool _checkFailed = false;
 
   @override
   void dispose() {
@@ -70,6 +79,22 @@ class _ObservationSheetState extends State<_ObservationSheet> {
     if (_done) return;
     setState(() => _done = true);
     Navigator.of(context).pop(choice);
+  }
+
+  /// Their own words go through the red-flag check before anything is kept (EQ-008, BR-003). If the check cannot
+  /// run the words are not used, and the sheet says so rather than doing nothing.
+  Future<void> _save() async {
+    if (!_reword) return _finish(const ObservationKeep());
+    final typed = _text.text.trim();
+    final RedFlagDetector detector;
+    try {
+      detector = await ref.read(redFlagDetectorProvider.future);
+    } on Object {
+      if (mounted) setState(() => _checkFailed = true);
+      return;
+    }
+    if (!mounted) return;
+    _finish(detector.check(typed) != null ? const ObservationFlagged() : ObservationReworded(typed));
   }
 
   @override
@@ -107,7 +132,7 @@ class _ObservationSheetState extends State<_ObservationSheet> {
               enableIMEPersonalizedLearning: false,
               textInputAction: TextInputAction.done,
               style: LiltText.body,
-              onChanged: (_) => setState(() {}),
+              onChanged: (_) => setState(() => _checkFailed = false),
               decoration: InputDecoration(
                 labelText: 'In your words',
                 filled: true,
@@ -123,6 +148,13 @@ class _ObservationSheetState extends State<_ObservationSheet> {
               ),
             ),
           ],
+          if (_checkFailed) ...[
+            const SizedBox(height: LiltSpacing.md),
+            Semantics(
+              liveRegion: true,
+              child: const Text('That did not work. Please try again.', style: LiltText.body),
+            ),
+          ],
           const SizedBox(height: LiltSpacing.md),
           Center(
             child: LiltButton(
@@ -133,12 +165,7 @@ class _ObservationSheetState extends State<_ObservationSheet> {
           ),
         ],
       ),
-      footer: LiltButton(
-        label: 'Save',
-        onPressed: !_canSave || _done
-            ? null
-            : () => _finish(_reword ? ObservationReworded(_text.text.trim()) : const ObservationKeep()),
-      ),
+      footer: LiltButton(label: 'Save', onPressed: !_canSave || _done ? null : _save),
     );
   }
 }
