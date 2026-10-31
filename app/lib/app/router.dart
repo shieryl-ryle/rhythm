@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../data/providers.dart';
 import '../features/consent/consent_screen.dart';
+import '../features/rhythm/history_screen.dart';
+import '../features/rhythm/rhythm_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/starting_point/setup_controller.dart';
 import '../features/starting_point/setup_screen.dart';
@@ -43,7 +45,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/setup', builder: (_, _) => const SetupScreen()),
       GoRoute(path: '/support', builder: (_, _) => const SupportScreen()),
       GoRoute(path: '/settings', builder: (_, _) => const SettingsScreen()),
-      // The four tabs. Discover, Together and My rhythm are not built yet and say so.
+      // The full history is a page above the tabs, with Back (frame 6.4).
+      GoRoute(path: '/rhythm/history', builder: (_, _) => const HistoryScreen()),
+      // The four tabs. Discover and Together are not built yet and say so.
       StatefulShellRoute.indexedStack(
         builder: (_, _, shell) => AppShell(shell: shell),
         branches: [
@@ -61,10 +65,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             ),
           ]),
           StatefulShellBranch(routes: [
-            GoRoute(
-              path: '/rhythm',
-              builder: (_, _) => const ComingSoonScreen(title: 'My rhythm', body: 'Your full rhythm and what works for you. Coming soon.'),
-            ),
+            GoRoute(path: '/rhythm', builder: (_, _) => const RhythmScreen()),
           ]),
         ],
       ),

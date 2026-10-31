@@ -17,7 +17,7 @@ class RhythmGridCard extends StatelessWidget {
   String get _summary {
     final active = days.where((d) => !d.cell.isPause && d.cell.level > 0).length;
     final today = days.where((d) => d.isToday).firstOrNull;
-    final todayWords = today == null ? '' : ' Today: ${_Tile(day: today, height: 0).label.split(': ').last}.';
+    final todayWords = today == null ? '' : ' Today: ${RhythmTile(day: today, height: 0).label.split(': ').last}.';
     return 'Your rhythm, last $rhythmWeeks weeks. $active days with activity.$todayWords';
   }
 
@@ -27,7 +27,7 @@ class RhythmGridCard extends StatelessWidget {
     for (var i = 0; i < days.length; i += 7) {
       weeks.add(days.sublist(i, i + 7 > days.length ? days.length : i + 7));
     }
-    return _Card(
+    return RhythmCard(
       title: 'Your rhythm · last $rhythmWeeks weeks',
       semanticsOverride: _summary,
       child: LayoutBuilder(
@@ -44,7 +44,7 @@ class RhythmGridCard extends StatelessWidget {
                   children: [
                     for (var d = 0; d < weeks[w].length; d++) ...[
                       if (d > 0) const SizedBox(height: 3),
-                      _Tile(day: weeks[w][d], width: tile, height: 8),
+                      RhythmTile(day: weeks[w][d], width: tile, height: 8),
                     ],
                   ],
                 ),
@@ -64,7 +64,7 @@ class RhythmGridSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ExcludeSemantics(
-      child: _Card(
+      child: RhythmCard(
         title: '',
         showTitle: false,
         child: LayoutBuilder(
@@ -107,7 +107,7 @@ class WeekStripCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const letters = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-    return _Card(
+    return RhythmCard(
       title: 'This week · starts today',
       child: Row(
         children: [
@@ -118,7 +118,7 @@ class WeekStripCard extends StatelessWidget {
                 children: [
                   ExcludeSemantics(child: Text(letters[i], style: LiltText.label.copyWith(fontSize: 12))),
                   const SizedBox(height: 6),
-                  _Tile(day: days[i], height: 12),
+                  RhythmTile(day: days[i], height: 12),
                 ],
               ),
             ),
@@ -129,8 +129,8 @@ class WeekStripCard extends StatelessWidget {
   }
 }
 
-class _Card extends StatelessWidget {
-  const _Card({required this.title, required this.child, this.semanticsOverride, this.showTitle = true});
+class RhythmCard extends StatelessWidget {
+  const RhythmCard({super.key, required this.title, required this.child, this.semanticsOverride, this.showTitle = true});
 
   final String title;
   final Widget child;
@@ -167,8 +167,8 @@ class _Card extends StatelessWidget {
   }
 }
 
-class _Tile extends StatelessWidget {
-  const _Tile({required this.day, this.width, required this.height});
+class RhythmTile extends StatelessWidget {
+  const RhythmTile({super.key, required this.day, this.width, required this.height});
 
   final GridDay day;
   final double? width;

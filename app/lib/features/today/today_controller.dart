@@ -5,6 +5,7 @@ import '../../data/providers.dart';
 import '../../domain/day.dart';
 import '../../domain/grid.dart';
 import '../../domain/lapse.dart';
+import '../../domain/models.dart';
 import 'reflection_copy.dart';
 import 'reflection_sheet.dart';
 import 'today_data.dart';
@@ -29,6 +30,34 @@ class GridDay {
   final String day;
   final GridCell cell;
   final bool isToday;
+}
+
+/// The days from [from] to [to], each with its level from that day's reflections (EQ-002) and a paused day drawn
+/// as level 0 (ADR-012). Days after [today] are left out unless [includeFuture]. Today and My rhythm share it, so
+/// the two grids can never disagree.
+List<GridDay> gridDays({
+  required String from,
+  required String to,
+  required String today,
+  required List<ReflectionRecord> reflections,
+  required List<PauseSpan> pauses,
+  bool includeFuture = false,
+}) {
+  final paused = pausedDays(pauses, today);
+  final byDay = <String, List<ReflectionStatus>>{};
+  for (final r in reflections) {
+    (byDay[r.day] ??= []).add(r.status);
+  }
+  final days = <GridDay>[];
+  for (var d = from; d.compareTo(to) <= 0; d = addDays(d, 1)) {
+    if (!includeFuture && d.compareTo(today) > 0) break;
+    days.add(GridDay(
+      day: d,
+      isToday: d == today,
+      cell: gridCell(statuses: byDay[d] ?? const [], dailyGoal: 1, paused: paused.contains(d)),
+    ));
+  }
+  return days;
 }
 
 /// Everything the Today screen draws.
@@ -278,23 +307,15 @@ class TodayController extends AsyncNotifier<TodayView> {
     return _days(start, addDays(start, 6), today, inputs, includeFuture: true);
   }
 
-  List<GridDay> _days(String from, String to, String today, TodayInputs inputs, {bool includeFuture = false}) {
-    final paused = pausedDays(inputs.pauses, today);
-    final byDay = <String, List<ReflectionStatus>>{};
-    for (final r in inputs.reflections) {
-      (byDay[r.day] ??= []).add(r.status);
-    }
-    final days = <GridDay>[];
-    for (var d = from; d.compareTo(to) <= 0; d = addDays(d, 1)) {
-      if (!includeFuture && d.compareTo(today) > 0) break;
-      days.add(GridDay(
-        day: d,
-        isToday: d == today,
-        cell: gridCell(statuses: byDay[d] ?? const [], dailyGoal: 1, paused: paused.contains(d)),
-      ));
-    }
-    return days;
-  }
+  List<GridDay> _days(String from, String to, String today, TodayInputs inputs, {bool includeFuture = false}) =>
+      gridDays(
+        from: from,
+        to: to,
+        today: today,
+        reflections: inputs.reflections,
+        pauses: inputs.pauses,
+        includeFuture: includeFuture,
+      );
 
   // ---- chips
 

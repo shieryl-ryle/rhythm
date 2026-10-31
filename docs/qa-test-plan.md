@@ -24,7 +24,7 @@ tests; TC-042 runs manually against the free tier with synthetic data only.
 | TC-003 | F-003 | Mark completed / partly / skipped with optional details in ≤ 3 taps; saved row matches | yes: `test/features/reflection_test.dart` |
 | TC-004 | F-004 | Observations list; confirm, edit, delete work; saved actions reappear as options | yes: `test/features/what_works/what_works_test.dart` |
 | TC-005 | F-005 | With seeded lapse → app opens My Way Back with "Welcome back"; previous approach and a different one offered; choosing one gives a smaller first action | yes: `integration_test/return_test.dart` |
-| TC-006 | F-006 | Grid renders one tile per day with levels per EQ-002; paused day drawn as level 0 with semantics label "paused" (ADR-012); totals shown | yes: `test/features/progress/grid_test.dart` (golden) |
+| TC-006 | F-006 | Grid renders one tile per day with levels per EQ-002; paused day drawn as level 0 with semantics label "paused" (ADR-012); totals shown | yes: `test/features/progress/grid_test.dart` (golden); My rhythm totals, grid summary, history and day detail in `test/features/rhythm_test.dart` |
 | TC-007 | F-007 | Consent before data; export file contains all tables; delete-all leaves zero user rows | yes: `test/data/my_data_test.dart`, and through the screen `test/features/settings_test.dart` |
 | TC-008 | F-008 | Off by default; enabling schedules within caps; disabling cancels all | yes: `test/notifications/scheduler_test.dart` + manual on device |
 
@@ -40,7 +40,7 @@ tests; TC-042 runs manually against the free tier with synthetic data only.
 | TC-015 | BR-007 | Seed a 10-day lapse → active days and returns unchanged or higher; no string from the guilt-word list on Today, Progress, Way Back, or notification copy | yes: `test/content/guilt_words_test.dart` + `counting_test.dart` |
 | TC-016 | BR-008 | What-changed question includes "prefer not to say" and can be skipped; no copy states a cause | yes: widget test |
 | TC-017 | BR-009 | Accepted option with no reflection → status `unknown`; ranking score unchanged vs. no offer | yes: `test/domain/ranking_test.dart` |
-| TC-018 | BR-010 | Proposed observation does not change ranking; after confirm it does; after delete it stops | yes: `ranking_test.dart` |
+| TC-018 | BR-010 | Proposed observation does not change ranking; after confirm it does; after delete it stops | yes: `ranking_test.dart`; the My rhythm side (confirm, Not really, reword, remove, never re-proposed, one a day) in `test/features/rhythm_test.dart` |
 | TC-019 | BR-011 | Exclude a category → 100 ranking runs never return it | yes: `ranking_test.dart` |
 | TC-020 | BR-012 | Fresh install → zero scheduled notifications until opt-in and time chosen | yes: `scheduler_test.dart` |
 | TC-021 | BR-013 | Caps enforced; none in quiet hours or pause; lapse → only the weekly check-in, off when disabled | yes: `scheduler_test.dart` |
