@@ -8,9 +8,11 @@ import '../../domain/observation.dart';
 import '../today/today_controller.dart';
 import '../today/today_data.dart';
 
-/// Weeks the My rhythm card shows (frame 6.1). Today shows 12; the full history (6.4) goes back as far as there
-/// is anything to show.
+/// The most weeks the My rhythm card shows (frame 6.1). It shows as many as there is history for, and at least
+/// [myRhythmMinWeeks], so a newer person does not see an empty stretch. Today shows 12; the full history (6.4)
+/// goes back as far as there is anything to show.
 const myRhythmWeeks = 17;
+const myRhythmMinWeeks = 12;
 
 /// The longest an edited observation can be. It is shown on one card, so it stays a sentence.
 const maxObservationLength = 140;
@@ -74,10 +76,11 @@ class RhythmRepository {
       _db.observations,
     )..orderBy([(t) => OrderingTerm(expression: t.createdAt, mode: OrderingMode.desc)])).get();
 
-    final gridStart = addDays(weekStart(today), -7 * (myRhythmWeeks - 1));
     final first = inputs.reflections
         .map((r) => r.day)
         .fold<String?>(null, (a, d) => a == null || d.compareTo(a) < 0 ? d : a);
+    final historyWeeks = first == null ? 0 : daysBetween(weekStart(first), weekStart(today)) ~/ 7 + 1;
+    final gridStart = addDays(weekStart(today), -7 * (historyWeeks.clamp(myRhythmMinWeeks, myRhythmWeeks) - 1));
     final historyStart = first == null ? null : weekStart(first);
 
     List<GridDay> days(String from) =>

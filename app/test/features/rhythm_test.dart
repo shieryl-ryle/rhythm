@@ -198,6 +198,39 @@ void main() {
     });
   });
 
+  group('the grid window', () {
+    test(
+      'a newer person sees 12 weeks, an older one at most 17, and the history link starts at the first plan',
+      () async {
+        final db = await _rana(null);
+        final repo = RhythmRepository(db);
+        final rana = await repo.read(today: '2026-10-23', now: fixedNow());
+        // The current week is part-way through, so count weeks by rounding up.
+        final weeks = (rana.grid.length / 7).ceil();
+        expect(weeks, inInclusiveRange(myRhythmMinWeeks, myRhythmWeeks));
+        expect(rana.grid.first.day, addDays('2026-10-19', -7 * (weeks - 1)));
+
+        // 100 days of history is more than 17 weeks, so the window stops at 17.
+        final item = await db
+            .into(db.planItems)
+            .insertReturning(
+              PlanItemsCompanion.insert(
+                title: 'Walk',
+                activity: ActivityKind.walking,
+                plannedDay: '2026-07-01',
+                source: PlanSource.custom,
+              ),
+            );
+        await db
+            .into(db.reflections)
+            .insert(ReflectionsCompanion.insert(planItemId: item.id, status: const Value(ReflectionStatus.completed)));
+        final long = await repo.read(today: '2026-10-23', now: fixedNow());
+        expect((long.grid.length / 7).ceil(), myRhythmWeeks);
+        expect(long.history.first.day, weekStart('2026-07-01'));
+      },
+    );
+  });
+
   group('wording', () {
     test('totals read as the frame does and never use loss words (BR-007)', () {
       expect(totalsLine(31, 2), 'Active on 31 days. Came back 2 times after a break.');
@@ -531,7 +564,7 @@ void main() {
       await _rana(tester);
       await _openRhythm(tester);
       // No count in the spoken label: a window count can fall as old days leave it (BR-007).
-      expect(find.bySemanticsLabel(RegExp(r'^Your rhythm, last 17 weeks\.$')), findsOneWidget);
+      expect(find.bySemanticsLabel(RegExp(r'^Your rhythm, last \d+ weeks\.$')), findsOneWidget);
       handle.dispose();
     });
   });

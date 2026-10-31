@@ -124,7 +124,7 @@ class _GridCard extends StatelessWidget {
         children: [
           Semantics(
             container: true,
-            label: 'Your rhythm, last $myRhythmWeeks weeks.',
+            label: 'Your rhythm, last ${(data.grid.length / 7).ceil()} weeks.',
             child: ExcludeSemantics(
               child: MonthGrid(days: data.grid, firstDay: data.history.isEmpty ? null : data.history.first.day),
             ),

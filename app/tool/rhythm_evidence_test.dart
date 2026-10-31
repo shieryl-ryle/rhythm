@@ -138,6 +138,12 @@ void main() {
       await tester.tap(find.text('Say it differently'));
       await tester.pumpAndSettle();
       await _save(tester, key, 'r04_observation_reword_$tag');
+      // Words that match the red-flag list: nothing is kept and the support message opens (BR-003).
+      await tester.enterText(find.byType(TextField), 'I want to die');
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+      await _save(tester, key, 'r10_red_flag_support_$tag');
     });
 
     testWidgets('history and the day detail at $tag%', (tester) async {
