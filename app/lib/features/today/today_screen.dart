@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../app/theme.dart';
 import '../../ui/ui.dart';
@@ -49,9 +50,7 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
         child: Column(
           children: [
             LiltHeader(
-              onProfile: () => ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Settings are coming soon.')),
-              ),
+              onProfile: () => context.push('/settings'),
             ),
             Expanded(
               child: async.when(
