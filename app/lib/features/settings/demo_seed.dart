@@ -246,6 +246,7 @@ class DemoSeed {
             source: ObsSource.rule,
             status: const Value(ObsStatus.confirmed),
             patternKey: confirmed,
+            createdAt: Value(now.toUtc()),
             confirmedAt: Value(now.toUtc()),
           ),
         );
@@ -255,6 +256,7 @@ class DemoSeed {
             text_: observationText(proposed)!,
             source: ObsSource.rule,
             patternKey: proposed,
+            createdAt: Value(now.toUtc()),
           ),
         );
   }

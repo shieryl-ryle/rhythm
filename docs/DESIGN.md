@@ -21,7 +21,7 @@ colors:
   grid-1: "#B5BCFF"
   grid-2: "#6C78FF"
   grid-3: "#2F3BFF"
-  grid-pause: "#E1E3E0"
+  grid-pause: "#E5E7EF"
   eq-peak: "#2F3BFF"
   eq-dip: "#6C78FF"
   eq-comeback: "#FF7A1A"

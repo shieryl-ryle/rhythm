@@ -20,7 +20,7 @@ abstract final class LiltColors {
   static const grid1 = Color(0xFFB5BCFF);
   static const grid2 = Color(0xFF6C78FF);
   static const grid3 = Color(0xFF2F3BFF);
-  static const gridPause = Color(0xFFE1E3E0);
+  static const gridPause = Color(0xFFE5E7EF);
 
   /// The three equalizer bars of the logo mark, in order: peak, dip, comeback.
   static const eqPeak = Color(0xFF2F3BFF);

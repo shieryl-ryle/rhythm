@@ -9,6 +9,18 @@ void main() {
   const s = ReflectionStatus.skipped;
   const u = ReflectionStatus.unknown;
 
+  test('with the daily goal at 1 no day is ever level 1, so the legend needs no entry for it', () {
+    // Level 1 is a share under half a day's goal, which a goal of 1 cannot produce (the least is one partly = 0.5).
+    // A daily goal above 1 needs a legend entry and a colour at least 3:1 against grid-0 first (docs/sitemap.md S-006).
+    const all = [ReflectionStatus.completed, ReflectionStatus.partly, ReflectionStatus.skipped, ReflectionStatus.unknown];
+    for (final a in all) {
+      for (final b in all) {
+        expect(gridCell(statuses: [a, b], dailyGoal: 1, paused: false).level, isNot(1));
+      }
+      expect(gridCell(statuses: [a], dailyGoal: 1, paused: false).level, isNot(1));
+    }
+  });
+
   final cases = <({String name, List<ReflectionStatus> statuses, int goal, bool paused, GridCell cell})>[
     (name: 'goal 1, nothing', statuses: [], goal: 1, paused: false, cell: const GridCell(level: 0)),
     (name: 'goal 1, completed', statuses: [c], goal: 1, paused: false, cell: const GridCell(level: 3)),
