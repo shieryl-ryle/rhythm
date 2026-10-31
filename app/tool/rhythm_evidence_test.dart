@@ -7,7 +7,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lilt/app/app.dart';
+import 'package:lilt/data/consent_repository.dart';
+import 'package:lilt/data/database.dart';
+import 'package:lilt/data/enums.dart';
 import 'package:lilt/data/library/library_loader.dart';
+import 'package:lilt/domain/day.dart';
+import 'package:lilt/features/starting_point/setup_model.dart';
+import 'package:lilt/features/starting_point/setup_repository.dart';
 import 'package:lilt/data/my_data.dart';
 import 'package:lilt/features/settings/demo_seed.dart';
 import 'package:lilt/features/settings/settings_providers.dart';
@@ -40,6 +46,14 @@ Future<void> _save(WidgetTester tester, GlobalKey key, String name) async {
   });
 }
 
+const _runner = SetupAnswers(
+  paths: {SetupPath.keepGoing},
+  keepActivity: ActivityKind.gym,
+  progress: Progress.goingWell,
+  freeTimes: {'lunch'},
+  access: {'gym_membership'},
+);
+
 void main() {
   setUpAll(() async {
     await _font('Geist', [
@@ -55,14 +69,26 @@ void main() {
     }
   });
 
-  Future<GlobalKey> open(WidgetTester tester, {double scale = 1, Size size = const Size(360, 800)}) async {
+  late LiltDatabase db;
+
+  Future<GlobalKey> open(
+    WidgetTester tester, {
+    double scale = 1,
+    Size size = const Size(360, 800),
+    bool dayOne = false,
+  }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    final db = inMemoryDatabase();
+    db = inMemoryDatabase();
     addTearDown(db.close);
-    await DriftLibraryLoader(db, readAssetFile).load();
-    await DemoSeed(db, MyDataService(db)).load(DemoPersona.rana, now: fixedNow());
+    if (dayOne) {
+      await DriftConsentRepository(db).agree();
+      await DriftSetupRepository(db).save(_runner);
+    } else {
+      await DriftLibraryLoader(db, readAssetFile).load();
+      await DemoSeed(db, MyDataService(db)).load(DemoPersona.rana, now: fixedNow());
+    }
     final key = GlobalKey();
     await tester.pumpWidget(
       ProviderScope(
@@ -121,7 +147,41 @@ void main() {
       await _save(tester, key, 'r05_history_$tag');
       await tester.tap(find.bySemanticsLabel(RegExp('^Thursday 15 October')));
       await tester.pumpAndSettle();
-      await _save(tester, key, 'r06_day_detail_$tag');
+      await _save(tester, key, 'r06_day_detail_empty_$tag');
+      await tester.tapAt(const Offset(180, 40));
+      await tester.pumpAndSettle();
+      // A done day, and a day that was never answered: the two states of an entry.
+      await tester.tap(find.bySemanticsLabel(RegExp('^Wednesday 21 October')));
+      await tester.pumpAndSettle();
+      await _save(tester, key, 'r07_day_detail_done_$tag');
+      await tester.tapAt(const Offset(180, 40));
+      await tester.pumpAndSettle();
+      final unanswered = await (db.select(db.reflections)..where((t) => t.status.equals('unknown'))).get();
+      final item = await (db.select(db.planItems)..where((t) => t.id.equals(unanswered.first.planItemId))).getSingle();
+      final d = parseDay(item.plannedDay);
+      const months = [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
+      ];
+      await tester.tap(find.bySemanticsLabel(RegExp('^\\w+ ${d.day} ${months[d.month - 1]}')));
+      await tester.pumpAndSettle();
+      await _save(tester, key, 'r08_day_detail_not_shared_$tag');
+    });
+
+    testWidgets('day one at $tag%', (tester) async {
+      if (_dir.isEmpty) return;
+      final key = await open(tester, scale: scale, dayOne: true);
+      await _save(tester, key, 'r09_day_one_$tag');
     });
   }
 }

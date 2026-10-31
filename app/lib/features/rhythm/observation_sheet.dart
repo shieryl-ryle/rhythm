@@ -100,11 +100,13 @@ class _ObservationSheetState extends ConsumerState<_ObservationSheet> {
   @override
   Widget build(BuildContext context) {
     return LiltSheet(
-      title: widget.observation.text_,
-      subtitle: 'Does this still fit you?',
+      // The question is the title: the sentence can be up to 140 characters and would fill the sheet in display type.
+      title: 'Does this still fit?',
       bodyBuilder: (_) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Text('“${widget.observation.text_}”', style: LiltText.body.copyWith(color: LiltColors.inkMuted)),
+          const SizedBox(height: LiltSpacing.lg),
           LiltChoiceCard(
             title: 'It still fits',
             kind: LiltChoiceKind.radio,
@@ -154,6 +156,10 @@ class _ObservationSheetState extends ConsumerState<_ObservationSheet> {
               liveRegion: true,
               child: const Text('That did not work. Please try again.', style: LiltText.body),
             ),
+          ],
+          if (_reword) ...[
+            const SizedBox(height: LiltSpacing.sm),
+            Text('This changes the words only.', style: LiltText.label.copyWith(color: LiltColors.inkMuted)),
           ],
           const SizedBox(height: LiltSpacing.md),
           Center(

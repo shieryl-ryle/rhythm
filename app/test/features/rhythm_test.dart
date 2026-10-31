@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lilt/app/app.dart';
+import 'package:lilt/app/theme.dart';
 import 'package:lilt/data/consent_repository.dart';
 import 'package:lilt/data/database.dart';
 import 'package:lilt/data/enums.dart';
@@ -244,9 +245,10 @@ void main() {
       final db = await _rana(tester);
       await _openRhythm(tester);
       await _tap(tester, 'Edit');
-      expect(find.text('Does this still fit you?'), findsOneWidget);
+      expect(find.text('Does this still fit?'), findsOneWidget);
       await tester.tap(find.text('Say it differently'));
       await tester.pumpAndSettle();
+      expect(find.text('This changes the words only.'), findsOneWidget);
       await tester.enterText(find.byType(TextField), 'Walking with a friend is the best part');
       await tester.pumpAndSettle();
       await tester.tap(find.text('Save'));
@@ -334,17 +336,69 @@ void main() {
       expect(after, before);
     });
 
-    testWidgets('day one: no history link, a plain line, and nothing is invented', (tester) async {
+    testWidgets('day one is frame 9.7: two empty weeks, today ringed, one line, nothing else', (tester) async {
       final db = inMemoryDatabase();
       addTearDown(db.close);
       await DriftConsentRepository(db).agree();
       await DriftSetupRepository(db).save(_runner);
       await _pump(tester, db);
       await _openRhythm(tester);
-      expect(find.text('Your days will show up here as you answer “How did it go?”.'), findsOneWidget);
+      expect(find.text('Your first two weeks'), findsOneWidget);
+      expect(find.text('Each day you check in fills a tile.'), findsOneWidget);
       expect(find.text('See every day'), findsNothing);
+      expect(find.text('What works for me'), findsNothing);
       expect(find.text('We noticed', skipOffstage: false), findsNothing);
       expect(find.textContaining('Active on'), findsNothing);
+      expect(find.text('Done'), findsNothing, reason: 'no legend until there is something to explain');
+    });
+  });
+
+  group('what the cards say they do', () {
+    testWidgets('a confirmed note about what gets in the way does not say it is used for suggestions (EQ-009)', (
+      tester,
+    ) async {
+      final db = await _rana(null);
+      await db
+          .into(db.observations)
+          .insert(
+            ObservationsCompanion.insert(
+              text_: 'Weather often gets in the way of running',
+              source: ObsSource.rule,
+              status: const Value(ObsStatus.confirmed),
+              patternKey: 'activity:running:barrier_weather',
+              createdAt: Value(fixedNow().toUtc()),
+            ),
+          );
+      await _pump(tester, db);
+      await _openRhythm(tester);
+      // The list builds only what is near the screen, so scroll down to the later card.
+      await tester.scrollUntilVisible(
+        find.text('Confirmed · a note for you'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(find.text('Confirmed · a note for you'), findsOneWidget);
+      expect(find.text('Confirmed · used for suggestions', skipOffstage: false), findsOneWidget);
+    });
+
+    testWidgets('a pattern that was never confirmed is asked as "Does this fit?"', (tester) async {
+      await _rana(tester);
+      await _openRhythm(tester);
+      expect(find.textContaining('Does this fit?'), findsOneWidget);
+      expect(find.textContaining('Does this still fit?'), findsNothing);
+    });
+
+    testWidgets('Edit says which note it opens, for a screen reader', (tester) async {
+      final handle = tester.ensureSemantics();
+      await _rana(tester);
+      await _openRhythm(tester);
+      await tester.scrollUntilVisible(find.text('Edit'), 200, scrollable: find.byType(Scrollable).first);
+      expect(find.bySemanticsLabel(RegExp('^Edit: ')), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('a paused day is drawn exactly like an empty one (ADR-012)', (tester) async {
+      expect(LiltColors.gridPause, LiltColors.grid0);
     });
   });
 
@@ -456,11 +510,28 @@ void main() {
       handle.dispose();
     });
 
+    for (final scale in [1.0, 2.0]) {
+      testWidgets('day one passes the checks at 360x800 and ${(scale * 100).round()}%', (tester) async {
+        final handle = tester.ensureSemantics();
+        final db = inMemoryDatabase();
+        addTearDown(db.close);
+        await DriftConsentRepository(db).agree();
+        await DriftSetupRepository(db).save(_runner);
+        await _pump(tester, db, textScale: scale);
+        await _openRhythm(tester);
+        await expectLater(tester, meetsGuideline(textContrastGuideline));
+        await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
+        await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+        handle.dispose();
+      });
+    }
+
     testWidgets('the grid reads as one summary, not eighty tiles', (tester) async {
       final handle = tester.ensureSemantics();
       await _rana(tester);
       await _openRhythm(tester);
-      expect(find.bySemanticsLabel(RegExp(r'^Your rhythm, last 17 weeks\. \d+ days with activity\.$')), findsOneWidget);
+      // No count in the spoken label: a window count can fall as old days leave it (BR-007).
+      expect(find.bySemanticsLabel(RegExp(r'^Your rhythm, last 17 weeks\.$')), findsOneWidget);
       handle.dispose();
     });
   });

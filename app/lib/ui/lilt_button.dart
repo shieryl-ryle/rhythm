@@ -26,6 +26,7 @@ class LiltButton extends StatelessWidget {
     this.danger = false,
     this.flush = false,
     this.expand,
+    this.semanticLabel,
   }) : assert(!flush || kind == LiltButtonKind.text, 'Only a text button can be flush');
 
   final String label;
@@ -38,6 +39,9 @@ class LiltButton extends StatelessWidget {
 
   /// Full width. Defaults to true for primary and secondary, false for text.
   final bool? expand;
+
+  /// What a screen reader says when the visible label alone is not enough ("Edit" on a list of cards).
+  final String? semanticLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -120,11 +124,14 @@ class LiltButton extends StatelessWidget {
         ),
     };
 
+    final spoken = semanticLabel != null && !loading;
     return Semantics(
       container: true,
-      label: loading ? '$label, loading' : null,
-      excludeSemantics: loading,
-      button: loading,
+      label: loading ? '$label, loading' : semanticLabel,
+      excludeSemantics: loading || spoken,
+      button: loading || spoken,
+      // excludeSemantics drops the tap handler below, so the button says it can be activated itself.
+      onTap: spoken ? onPressed : null,
       enabled: onPressed != null,
       child: button,
     );

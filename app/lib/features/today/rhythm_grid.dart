@@ -15,10 +15,9 @@ class RhythmGridCard extends StatelessWidget {
 
   /// What a screen reader says for the whole grid: one node instead of eighty-four tiles, with today named.
   String get _summary {
-    final active = days.where((d) => !d.cell.isPause && d.cell.level > 0).length;
     final today = days.where((d) => d.isToday).firstOrNull;
     final todayWords = today == null ? '' : ' Today: ${RhythmTile(day: today, height: 0).label.split(': ').last}.';
-    return 'Your rhythm, last $rhythmWeeks weeks. $active days with activity.$todayWords';
+    return 'Your rhythm, last $rhythmWeeks weeks.$todayWords';
   }
 
   @override

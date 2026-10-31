@@ -28,7 +28,8 @@ Future<void> showDaySheet(BuildContext context, GridDay day) {
   return showLiltSheet<void>(
     context,
     title: longDate(day.day),
-    subtitle: daySummary(day),
+    // A day with nothing done has no line of its own: its entries say how each went, and an empty one says so.
+    subtitle: day.cell.isPause || day.cell.level > 0 ? daySummary(day) : null,
     bodyBuilder: (_) => _DayEntries(day: day.day),
   );
 }
@@ -146,7 +147,12 @@ class _EntryCardState extends ConsumerState<_EntryCard> {
           Text(_statusLine(e), style: LiltText.label.copyWith(color: LiltColors.inkMuted)),
           Align(
             alignment: Alignment.centerRight,
-            child: LiltButton(label: answered ? 'Edit' : 'Add answer', kind: LiltButtonKind.text, onPressed: _answer),
+            child: LiltButton(
+              label: answered ? 'Edit' : 'Add answer',
+              semanticLabel: '${answered ? 'Edit' : 'Add answer'}: ${e.title}',
+              kind: LiltButtonKind.text,
+              onPressed: _answer,
+            ),
           ),
           if (_failed)
             Semantics(liveRegion: true, child: const Text('That didn’t save. Try again.', style: LiltText.body)),

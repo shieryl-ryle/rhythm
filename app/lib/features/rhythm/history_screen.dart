@@ -205,22 +205,22 @@ class _DayCell extends StatelessWidget {
       label: label,
       onTap: open,
       excludeSemantics: true,
-      child: Padding(
-        padding: const EdgeInsets.all(2),
-        child: Material(
-          color: color,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(LiltRadius.sm),
-            side: d.isToday ? const BorderSide(color: LiltColors.primary, width: 2) : BorderSide.none,
-          ),
-          child: InkWell(
-            onTap: open,
-            customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(LiltRadius.sm)),
-            child: SizedBox(
-              height: 44,
-              child: Center(
-                child: Text('$number', style: LiltText.label.copyWith(fontSize: 14, color: textColor)),
+      child: InkWell(
+        onTap: open,
+        customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(LiltRadius.sm)),
+        child: Padding(
+          padding: const EdgeInsets.all(2),
+          child: Ink(
+            height: 44,
+            decoration: ShapeDecoration(
+              color: color,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(LiltRadius.sm),
+                side: d.isToday ? const BorderSide(color: LiltColors.primary, width: 2) : BorderSide.none,
               ),
+            ),
+            child: Center(
+              child: Text('$number', style: LiltText.label.copyWith(fontSize: 14, color: textColor)),
             ),
           ),
         ),

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../app/theme.dart';
 import '../../data/database.dart';
 import '../../domain/day.dart';
+import '../../domain/patterns.dart';
 import '../../ui/ui.dart';
 import '../today/rhythm_grid.dart';
 import '../today/today_controller.dart';
@@ -76,22 +77,24 @@ class _Body extends ConsumerWidget {
         Semantics(header: true, child: const Text('My rhythm', style: LiltText.display)),
         const SizedBox(height: LiltSpacing.lg),
         _GridCard(data: data),
-        const SizedBox(height: LiltSpacing.section),
-        Semantics(
-          header: true,
-          child: Text('What works for me', style: LiltText.body.copyWith(fontSize: 20, fontWeight: FontWeight.w600)),
-        ),
-        const SizedBox(height: LiltSpacing.md),
-        if (data.proposed != null) ...[
-          _ProposedCard(observation: data.proposed!),
-          const SizedBox(height: LiltSpacing.md),
-        ],
-        for (final o in data.confirmed) ...[_ConfirmedCard(observation: o), const SizedBox(height: LiltSpacing.md)],
-        if (data.proposed == null && data.confirmed.isEmpty)
-          const Text(
-            'Nothing here yet. When a pattern shows up in how your days go, it will wait here for you to say if it fits.',
-            style: LiltText.body,
+        if (!data.isEmpty) ...[
+          const SizedBox(height: LiltSpacing.section),
+          Semantics(
+            header: true,
+            child: Text('What works for me', style: LiltText.body.copyWith(fontSize: 20, fontWeight: FontWeight.w600)),
           ),
+          const SizedBox(height: LiltSpacing.md),
+          if (data.proposed != null) ...[
+            _ProposedCard(observation: data.proposed!),
+            const SizedBox(height: LiltSpacing.md),
+          ],
+          for (final o in data.confirmed) ...[_ConfirmedCard(observation: o), const SizedBox(height: LiltSpacing.md)],
+          if (data.proposed == null && data.confirmed.isEmpty)
+            const Text(
+              'Nothing here yet. When a pattern shows up in how your days go, it will wait here for you to say if it fits.',
+              style: LiltText.body,
+            ),
+        ],
       ],
     );
   }
@@ -111,11 +114,8 @@ class _GridCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final empty = data.totals.activeDays == 0 && data.totals.returns == 0;
-    final line = empty
-        ? 'Your days will show up here as you answer “How did it go?”.'
-        : totalsLine(data.totals.activeDays, data.totals.returns);
-    final active = data.grid.where((d) => !d.cell.isPause && d.cell.level > 0).length;
+    if (data.totals.activeDays == 0 && data.totals.returns == 0) return _FirstWeeksCard(today: data.today);
+    final line = totalsLine(data.totals.activeDays, data.totals.returns);
     return RhythmCard(
       title: '',
       showTitle: false,
@@ -124,8 +124,10 @@ class _GridCard extends StatelessWidget {
         children: [
           Semantics(
             container: true,
-            label: 'Your rhythm, last $myRhythmWeeks weeks. $active days with activity.',
-            child: ExcludeSemantics(child: MonthGrid(days: data.grid)),
+            label: 'Your rhythm, last $myRhythmWeeks weeks.',
+            child: ExcludeSemantics(
+              child: MonthGrid(days: data.grid, firstDay: data.history.isEmpty ? null : data.history.first.day),
+            ),
           ),
           const SizedBox(height: LiltSpacing.md),
           const GridLegend(),
@@ -146,14 +148,19 @@ class _GridCard extends StatelessWidget {
   }
 }
 
+final _monthStyle = LiltText.label.copyWith(fontSize: 12, color: LiltColors.inkMuted);
+
 const _monthShort = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 /// The grid with a month name above the first week that holds the 1st of that month, as in frame 6.1.
 class MonthGrid extends StatelessWidget {
-  const MonthGrid({super.key, required this.days});
+  const MonthGrid({super.key, required this.days, this.firstDay});
 
   /// Oldest first, starting on a Monday.
   final List<GridDay> days;
+
+  /// The first day anything was planned. Days before it are left unfilled, as in the calendar, not drawn as rest.
+  final String? firstDay;
 
   @override
   Widget build(BuildContext context) {
@@ -171,7 +178,9 @@ class MonthGrid extends StatelessWidget {
         for (var w = 0; w < weeks.length; w++) {
           final first = weeks[w].where((d) => parseDay(d.day).day == 1).firstOrNull;
           // Keep at least three columns between names so they never run into each other.
-          if (first != null && w - last >= 3) {
+          // A name over columns that are left unfilled (before the first plan) would label nothing.
+          final blank = firstDay != null && weeks[w].last.day.compareTo(firstDay!) < 0;
+          if (first != null && !blank && w - last >= 3) {
             labels[w] = _monthShort[parseDay(first.day).month - 1];
             last = w;
           }
@@ -180,16 +189,17 @@ class MonthGrid extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-              // Grows with the text size so the month names never sit on the first row of tiles.
-              height: MediaQuery.textScalerOf(context).scale(12) * 1.6,
               width: box.maxWidth,
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
+                  // An invisible name sets the row's height, so it is measured at any text size and the names
+                  // never sit on the first row of tiles.
+                  Opacity(opacity: 0, child: Text('Oct', style: _monthStyle)),
                   for (final e in labels.entries)
                     Positioned(
                       left: e.key * (tile + gap),
-                      child: Text(e.value, style: LiltText.label.copyWith(fontSize: 12, color: LiltColors.inkMuted)),
+                      child: Text(e.value, style: _monthStyle),
                     ),
                 ],
               ),
@@ -202,7 +212,10 @@ class MonthGrid extends StatelessWidget {
                     children: [
                       for (var d = 0; d < weeks[w].length; d++) ...[
                         if (d > 0) const SizedBox(height: 3),
-                        RhythmTile(day: weeks[w][d], width: tile, height: 9),
+                        if (firstDay != null && weeks[w][d].day.compareTo(firstDay!) < 0)
+                          SizedBox(width: tile, height: 9)
+                        else
+                          RhythmTile(day: weeks[w][d], width: tile, height: 9),
                       ],
                     ],
                   ),
@@ -243,6 +256,65 @@ class GridLegend extends StatelessWidget {
         item(LiltColors.grid2, 'Partly'),
         item(LiltColors.grid0, 'Rest or not shared'),
       ],
+    );
+  }
+}
+
+/// Only an enjoyed pattern adds to a suggestion's score (EQ-009); a "gets in the way" note, or the person's own
+/// words with no pattern behind them, is kept for them and says so.
+String _confirmedLine(String patternKey) => PatternKey.tryParse(patternKey)?.isPositive ?? false
+    ? 'Confirmed · used for suggestions'
+    : 'Confirmed · a note for you';
+
+/// Day one (frame 9.7): this week and the next as empty tiles, today outlined, and one line. Nothing is grey for
+/// "nothing yet": an empty tile is just not filled yet.
+class _FirstWeeksCard extends StatelessWidget {
+  const _FirstWeeksCard({required this.today});
+
+  final String today;
+
+  @override
+  Widget build(BuildContext context) {
+    final start = weekStart(today);
+    Widget row(int week) => Padding(
+      padding: EdgeInsets.only(top: week == 0 ? 0 : LiltSpacing.sm),
+      child: Row(
+        children: [
+          for (var i = 0; i < 7; i++) ...[
+            if (i > 0) const SizedBox(width: LiltSpacing.sm),
+            Expanded(child: _tile(addDays(start, week * 7 + i))),
+          ],
+        ],
+      ),
+    );
+    return RhythmCard(
+      title: '',
+      showTitle: false,
+      semanticsOverride: 'Your first two weeks. Each day you check in fills a tile. Today is ${longDate(today)}.',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Your first two weeks', style: LiltText.body.copyWith(fontWeight: FontWeight.w600)),
+          const SizedBox(height: LiltSpacing.md),
+          row(0),
+          row(1),
+          const SizedBox(height: LiltSpacing.md),
+          Text('Each day you check in fills a tile.', style: LiltText.label.copyWith(color: LiltColors.inkMuted)),
+        ],
+      ),
+    );
+  }
+
+  /// Days before today in this week have no tile; today has the 2 px ring (DESIGN.md, Commit grid tile).
+  Widget _tile(String day) {
+    if (day.compareTo(today) < 0) return const SizedBox(height: 16);
+    final isToday = day == today;
+    return Container(
+      height: 16,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: isToday ? LiltColors.primary : LiltColors.line, width: isToday ? 2 : 1),
+      ),
     );
   }
 }
@@ -288,7 +360,7 @@ class _ProposedCardState extends ConsumerState<_ProposedCard> {
           Text('We noticed', style: LiltText.label.copyWith(color: LiltColors.inkMuted)),
           const SizedBox(height: LiltSpacing.sm),
           Text(
-            '${widget.observation.text_}. Does this still fit?',
+            '${widget.observation.text_}. Does this fit?',
             style: LiltText.body.copyWith(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: LiltSpacing.lg),
@@ -359,9 +431,18 @@ class _ConfirmedCardState extends ConsumerState<_ConfirmedCard> {
         children: [
           Text(widget.observation.text_, style: LiltText.body),
           const SizedBox(height: LiltSpacing.xs),
-          Text('Confirmed · used for suggestions', style: LiltText.label.copyWith(color: LiltColors.inkMuted)),
+          Text(
+            _confirmedLine(widget.observation.patternKey),
+            style: LiltText.label.copyWith(color: LiltColors.inkMuted),
+          ),
           const SizedBox(height: LiltSpacing.xs),
-          LiltButton(label: 'Edit', kind: LiltButtonKind.text, flush: true, onPressed: _edit),
+          LiltButton(
+            label: 'Edit',
+            semanticLabel: 'Edit: ${widget.observation.text_}',
+            kind: LiltButtonKind.text,
+            flush: true,
+            onPressed: _edit,
+          ),
           if (_failed)
             Semantics(liveRegion: true, child: const Text('That didn’t save. Try again.', style: LiltText.body)),
         ],
