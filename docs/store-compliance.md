@@ -23,7 +23,7 @@
 | Rule | Applies if | Status | Source | Verified |
 |---|---|---|---|---|
 | Target API level meets the current requirement (from 2026-08-31: new apps and updates target Android 16 / API 36) | Always | ☐ | [Android target SDK requirements](https://developer.android.com/google/play/requirements/target-sdk) | — |
-| **Closed test** with the required number of opted-in testers for the required consecutive days before production (currently reported as 12 testers / 14 days) | New **personal** developer account | ☐ | Play Console Help → app testing requirements | — |
+| **Closed test** with the required number of opted-in testers for the required consecutive days before production (currently reported as 12 testers / 14 days). Whether organization accounts are exempt is **unverified**: Google's Requirements page does not say | New **personal** developer account | ☐ | Play Console Help → app testing requirements | — |
 | Data safety form completed and matches actual behaviour (incl. SDKs) | Always | ☐ | Play Console → App content | — |
 | Privacy policy URL live and linked | Always (and required for most data collection) | ☐ | Play Console → App content | — |
 | Account deletion: in-app path **and** a web link to request deletion | App supports account creation | ☐ | Play Console → Data safety / account deletion policy | — |
