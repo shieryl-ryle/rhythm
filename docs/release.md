@@ -12,13 +12,17 @@
 ## 0. Identifiers (fill once)
 | Item | iOS | Android |
 |---|---|---|
-| App ID | Bundle ID `TBD: com.example.app` | Application ID `TBD: com.example.app` |
-| Store record | App Store Connect app `TBD: name` | Play Console app `TBD: name` |
-| Developer account | TBD: Apple team name (personal / organization) | TBD: Play developer account (personal / organization) |
+| App ID | Bundle ID `io.github.shierylryle.lilt` (ADR-018) | Application ID `io.github.shierylryle.lilt` (set in `app/android/app/build.gradle.kts`) |
+| Store record | App Store Connect app `TBD: created by the owner` | Play Console app `TBD: after the hackathon` |
+| Developer account | Apple, individual, held by the owner (US$99 a year) | TBD after the hackathon: Play developer account (personal / organization undecided) |
 | Signing | Xcode automatic signing, team `TBD: TEAM_ID` | Upload key in `upload-keystore.jks` (path in key.properties, outside repo); Play App Signing enabled |
 
 **Account type matters:** new *personal* Google Play accounts must run a closed test before
-production access is granted (see Store compliance §Google Play). Organization accounts are exempt.
+production access is granted (see Store compliance §Google Play). Whether organization accounts are exempt is
+unverified: Google's page is silent and the claim comes from third parties.
+
+**Order (ADR-018):** iOS through TestFlight first, from a Mac, under an individual Apple account; Google Play after
+the hackathon.
 
 ## 1. Versioning
 `pubspec.yaml`: `version: X.Y.Z+N`

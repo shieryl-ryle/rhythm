@@ -52,9 +52,9 @@ F-003), from the web or APK build, in about 3 minutes, and can reach My rhythm a
 
 | Outcome | Must all be true on 2026-11-06 | Action |
 |---|---|---|
-| **GO** (at most 1 owner-day, 11-09 to 11-13) | TASK-001 live (web build, release APK installs, `flutter analyze` and the widget test green); TASK-002, 003 and 005 merged and the loop walkable; no P0 critical-path task blocked; the cut-list decision for Together is already written down (PRD §12, the "New ideas keep expanding scope" row) | Account and app ID, Play Console app record, signed build to Closed testing, tester list, recruit about 20 testers |
-| **GO PARTIALLY** (at most 0.25 day) | TASK-001 live and TASK-002 and 003 merged, but TASK-005 not walkable | Lock the app ID, create the app record, upload to Internal testing for the owner and the backup holder. No recruiting until the loop is walkable, and no later than 2026-11-16; after that, apply SKIP |
-| **SKIP** | TASK-001 not live, or TASK-002 or 003 not merged, or TASK-005 not started | Apply the PRD §12 cut list; no logistics work; the Play clock starts after 2026-11-21 |
+| **GO** (at most 1 owner-day, 11-09 to 11-13) | TASK-001 live (web build, release APK installs, `flutter analyze` and the widget test green); TASK-002, 003 and 005 merged and the loop walkable; no P0 critical-path task blocked; the cut-list decision for Together is already written down (PRD §12, the "New ideas keep expanding scope" row) | Apple first ([ADR-018](adr/ADR-018-apple-testflight-first-individual-account.md)): App Store Connect app record for `io.github.shierylryle.lilt`, signed build uploaded to TestFlight from Dzelle's Mac, internal testers, then external testers by link (first external build may need Beta App Review); tester list, recruit about 20. Google Play after the hackathon |
+| **GO PARTIALLY** (at most 0.25 day) | TASK-001 live and TASK-002 and 003 merged, but TASK-005 not walkable | Create the app record and upload one build to TestFlight for the owner and the backup holder (internal testers). No recruiting until the loop is walkable, and no later than 2026-11-16; after that, apply SKIP |
+| **SKIP** | TASK-001 not live, or TASK-002 or 003 not merged, or TASK-005 not started | Apply the PRD §12 cut list; no logistics work; store work starts after 2026-11-21 |
 
 Early warning: if TASK-001 is not live by 2026-11-02, say so that day. Record the outcome here as one line with
 the date.
@@ -62,6 +62,9 @@ the date.
 **Outcome:** _(to be recorded on 2026-11-06)_
 
 ### Ungated lead-time items (start now)
-Account type and holder decided by 2026-10-30 (holder: Shieryl; backup: Dzelle, with least-privilege roles); read
-Google's health-app article before creating the account; knockout name search for "Lilt" by 2026-11-04; create the
-Google Play account (not the app record) between 2026-10-28 and 2026-11-02. Apple enrolment not before 2026-11-21.
+Changed 2026-11-04 by [ADR-018](adr/ADR-018-apple-testflight-first-individual-account.md): Apple first. The account
+holder is Shieryl (backup: Dzelle, with least-privilege roles), type individual. Start now: Apple Developer Program
+enrolment (US$99 a year, legal name, two-factor; Apple states no processing time, so start before anything else),
+knockout name search for "Lilt" (due 2026-11-04), the iOS platform and a first signed build on Dzelle's Mac, uploaded
+well before the 2026-11-13 freeze. The app ID is `io.github.shierylryle.lilt` on both stores (Android already
+changed). Google Play account type, the support question and account creation wait until after the hackathon.

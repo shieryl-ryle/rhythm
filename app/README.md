@@ -32,8 +32,8 @@ Check this after any dependency or Flutter upgrade: open the built site with the
 request goes to the same origin.
 
 ## Identifiers still to set
-- Android application ID is the scaffold placeholder `com.example.lilt`. Change it before the first store upload
-  (see `docs/release.md` §0).
+- Android application ID and namespace are `io.github.shierylryle.lilt` (ADR-018); the iOS bundle ID must be the
+  same string. There is no `ios/` folder yet (see `docs/release.md` §0).
 - The release APK is signed with the debug key until the upload keystore exists (`docs/release.md` §2).
 
 ## Layout

@@ -1,4 +1,4 @@
-package com.example.lilt
+package io.github.shierylryle.lilt
 
 import io.flutter.embedding.android.FlutterActivity
 
