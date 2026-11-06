@@ -49,6 +49,7 @@ Future<LiltDatabase> _open(
   Future<void> Function(LiltDatabase db)? seed,
   bool emptyLibrary = false,
   bool realConsent = false,
+  bool screenReader = false,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -68,7 +69,7 @@ Future<LiltDatabase> _open(
         assetReaderProvider.overrideWithValue(readAssetFile),
       ],
       child: MediaQuery(
-        data: MediaQueryData(size: size, textScaler: TextScaler.linear(textScale)),
+        data: MediaQueryData(size: size, textScaler: TextScaler.linear(textScale), accessibleNavigation: screenReader),
         child: const LiltApp(),
       ),
     ),
@@ -414,6 +415,15 @@ void main() {
       expect(find.text('Added to today’s plan'), findsOneWidget);
       await tester.pump(const Duration(seconds: 7));
       await tester.pumpAndSettle();
+      expect(find.text('Added to today’s plan'), findsNothing);
+    });
+
+    testWidgets('with a screen reader on it stays for Undo, and still leaves with the person', (tester) async {
+      await _open(tester, screenReader: true);
+      await _tap(tester, 'I’ll try this');
+      await tester.pump(const Duration(seconds: 30));
+      expect(find.text('Added to today’s plan'), findsOneWidget);
+      await _tap(tester, 'Discover');
       expect(find.text('Added to today’s plan'), findsNothing);
     });
 

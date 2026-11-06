@@ -46,6 +46,8 @@ the hackathon.
 2. [Mobile QA](mobile-qa.md) pre-release checklist passed on real devices.
 3. [Store compliance](store-compliance.md) checklist re-verified; run the `store-reviewer` agent.
 4. Version bumped (§1); release notes drafted (§5).
+5. No `--dart-define=DEMO=true` in any store, TestFlight or APK build: the synthetic-data loader is for the judged
+   web build only ([seed](../seed/README.md)). Check the build command before every upload.
 
 ### Android → Google Play
 1. `flutter build appbundle --release` (add `--obfuscate --split-debug-info=build/symbols` if
