@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lilt/app/app.dart';
 import 'package:lilt/data/consent_repository.dart';
 import 'package:lilt/data/database.dart';
@@ -403,6 +406,42 @@ void main() {
       expect(await db.select(db.planItems).get(), isEmpty);
       expect(await db.select(db.reflections).get(), isEmpty);
       expect(find.text('Your first ideas'), findsOneWidget, reason: 'back to the options');
+    });
+
+    testWidgets('the snackbar goes away by itself', (tester) async {
+      await _open(tester);
+      await _tap(tester, 'I’ll try this');
+      expect(find.text('Added to today’s plan'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 7));
+      await tester.pumpAndSettle();
+      expect(find.text('Added to today’s plan'), findsNothing);
+    });
+
+    testWidgets('it does not follow the person to another tab', (tester) async {
+      await _open(tester);
+      await _tap(tester, 'I’ll try this');
+      expect(find.text('Added to today’s plan'), findsOneWidget);
+      await _tap(tester, 'Discover');
+      expect(find.text('Added to today’s plan'), findsNothing);
+    });
+
+    testWidgets('it does not show over Settings or the support message', (tester) async {
+      await _open(tester);
+      await _tap(tester, 'I’ll try this');
+      await tester.tap(find.byIcon(Icons.person_outline).first);
+      await tester.pumpAndSettle();
+      expect(find.text('Settings'), findsWidgets);
+      expect(find.text('Added to today’s plan'), findsNothing);
+    });
+
+    testWidgets('the support message opens clear of it (BR-003)', (tester) async {
+      await _open(tester);
+      await _tap(tester, 'I’ll try this');
+      expect(find.text('Added to today’s plan'), findsOneWidget);
+      unawaited(GoRouter.of(tester.element(find.byType(Scaffold).first)).push<void>('/support'));
+      await tester.pumpAndSettle();
+      expect(find.text('You don’t have to handle this alone'), findsOneWidget);
+      expect(find.text('Added to today’s plan'), findsNothing);
     });
 
     testWidgets('after "Something else" the activity just left is not a compact card', (tester) async {

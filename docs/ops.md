@@ -7,7 +7,7 @@
 ## Deploy
 | Environment | URL | How to deploy | Who can deploy |
 |---|---|---|---|
-| Web demo (judges) | `https://lilt-app-2026.web.app` (project `lilt-app-2026`; live, first deployed 2026-10-27) | `cd app && flutter build web --release --no-web-resources-cdn && firebase deploy --only hosting` | Team members with the Firebase Hosting Admin role |
+| Web demo (judges) | `https://lilt-app-2026.web.app` (project `lilt-app-2026`; live, first deployed 2026-10-27) | `cd app && flutter build web --release --no-web-resources-cdn --dart-define=DEMO=true`, then `firebase deploy --only hosting --project lilt-app-2026` from the repo root (`firebase.json` is there) | Team members with the Firebase Hosting Admin role |
 | Android APK (judges, testers) | Shared download link (TBD: GitHub release or Drive) | `cd app && flutter build apk --release` → upload `build/app/outputs/flutter-apk/app-release.apk` | Plan owner |
 
 **Deploy checklist:** tests green → build → deploy → open the public URL in a clean browser →

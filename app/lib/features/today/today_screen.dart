@@ -147,6 +147,10 @@ class _TodayBody extends ConsumerWidget {
             content: const Text('Added to today’s plan'),
             behavior: SnackBarBehavior.floating,
             margin: const EdgeInsets.fromLTRB(LiltSpacing.lg, 0, LiltSpacing.lg, LiltSpacing.lg),
+            // A snackbar with an action stays until dismissed unless told otherwise, and this one is app-wide: it
+            // followed the person to every tab and to the support screen.
+            persist: false,
+            duration: const Duration(seconds: 6),
             action: SnackBarAction(label: 'Undo', onPressed: c.undoLastAccept),
           ),
         );

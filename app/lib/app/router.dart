@@ -24,6 +24,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/',
     refreshListenable: refresh,
+    observers: [_ClearSnackBars()],
     redirect: (context, state) {
       final at = state.matchedLocation;
       // S-090 is public: a person in distress is never sent somewhere else first (BR-003).
@@ -72,6 +73,21 @@ final routerProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
+
+/// Opening or leaving a screen above the tabs (Settings, the support message, a sheet) clears any snackbar, so a
+/// message about Today is never drawn over the support message (BR-003).
+class _ClearSnackBars extends NavigatorObserver {
+  void _clear() {
+    final context = navigator?.context;
+    if (context != null) ScaffoldMessenger.maybeOf(context)?.clearSnackBars();
+  }
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) => _clear();
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) => _clear();
+}
 
 class _Splash extends StatelessWidget {
   const _Splash();
