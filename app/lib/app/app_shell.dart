@@ -22,7 +22,11 @@ class AppShell extends ConsumerWidget {
       bottomNavigationBar: LiltNavBar(
         index: shell.currentIndex,
         // Tapping the tab you are on goes back to its first screen.
-        onSelect: (i) => shell.goBranch(i, initialLocation: i == shell.currentIndex),
+        onSelect: (i) {
+          // A message about one screen does not follow the person to another tab.
+          ScaffoldMessenger.of(context).clearSnackBars();
+          shell.goBranch(i, initialLocation: i == shell.currentIndex);
+        },
       ),
     );
   }

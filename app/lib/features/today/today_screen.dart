@@ -138,6 +138,9 @@ class _TodayBody extends ConsumerWidget {
     // "I'll try this" plans it and offers Undo, because a plan item is created (BR-005: only on a tap).
     Future<void> accepted(Future<bool> Function() accept) async {
       final messenger = ScaffoldMessenger.of(context);
+      // With a screen reader on, Undo stays until the person leaves the screen: they need longer than 6 seconds to
+      // hear it and find the button (WCAG 2.2.1).
+      final screenReader = MediaQuery.accessibleNavigationOf(context);
       final planned = await accept();
       if (!planned) return;
       messenger
@@ -147,6 +150,10 @@ class _TodayBody extends ConsumerWidget {
             content: const Text('Added to today’s plan'),
             behavior: SnackBarBehavior.floating,
             margin: const EdgeInsets.fromLTRB(LiltSpacing.lg, 0, LiltSpacing.lg, LiltSpacing.lg),
+            // A snackbar with an action stays until dismissed unless told otherwise, and this one is app-wide: it
+            // followed the person to every tab and to the support screen.
+            persist: screenReader,
+            duration: const Duration(seconds: 6),
             action: SnackBarAction(label: 'Undo', onPressed: c.undoLastAccept),
           ),
         );

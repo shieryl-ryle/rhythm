@@ -232,7 +232,9 @@ Wireframes v5.
 - **Feedback patterns:**
   - Snackbars for quick confirmations (with Undo or Open). They float, 16 dp from each side,
     16 dp above the navigation bar (or 16 dp from the bottom when there is none), and never
-    cover a destructive row or the screen's primary action.
+    cover a destructive row or the screen's primary action. A snackbar goes after 6 seconds, stays while a
+    screen reader is on (WCAG 2.2.1), and is cleared when the person changes tab or opens Settings, the support
+    message or a sheet. Undo on a plan item is the only way to take it back until Edit (S-102) exists.
   - Banners with an action inside for persistent states.
   - Inline progress for running tasks.
   - Explanations ("What changes next", "Why we suggest it") use a left rule, not a grey box.
