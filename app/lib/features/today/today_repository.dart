@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 import '../../data/database.dart';
 import '../../data/enums.dart';
 import '../../domain/day.dart';
+import '../../domain/lapse.dart';
 import '../../domain/models.dart';
 import 'today_data.dart';
 import 'today_logic.dart';
@@ -327,6 +328,36 @@ class TodayRepository {
         final followed = await _followedIds();
         for (final option in lighterPlan.hero) {
           await _insertOffer(day, option, chips, followed);
+        }
+      });
+
+  // ---- returns (EQ-011)
+
+  /// Return days that already have a `return_event`, so recording one is idempotent.
+  Future<Set<String>> recordedReturnDays() async => {for (final r in await _db.select(_db.returnEvents).get()) r.returnDay};
+
+  /// Records each return in [due] once. The answers from My Way Back go on the lapse they were given for
+  /// ([answersLapseStart]), never on another one. A return is a total that only ever goes up (BR-007).
+  Future<void> recordReturns(
+    List<LapseSpan> due, {
+    String? answersLapseStart,
+    String? whatChanged,
+    ReturnApproach? approach,
+  }) =>
+      _db.transaction(() async {
+        // Checked again inside the transaction: two overlapping reads of Today must not both record the same return.
+        final already = await recordedReturnDays();
+        for (final span in due) {
+          if (already.contains(span.returnDay)) continue;
+          final own = answersLapseStart != null && answersLapseStart == span.startDay;
+          await _db.into(_db.returnEvents).insert(
+                ReturnEventsCompanion.insert(
+                  lapseStartDay: span.startDay,
+                  returnDay: span.returnDay!,
+                  whatChanged: Value(own ? whatChanged : null),
+                  approach: Value(own ? approach : null),
+                ),
+              );
         }
       });
 

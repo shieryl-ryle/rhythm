@@ -120,6 +120,27 @@ void main() {
     });
   });
 
+  group('Noor', () {
+    setUp(() => seed.load(DemoPersona.noor, now: now));
+
+    test('is in an open lapse that began five days ago, with no return recorded yet', () async {
+      final inputs = await loadTodayInputs(db);
+      final lapse = openLapse(reflectedDays: reflectedDaysOf(inputs.reflections), pausedDays: const {}, today: today);
+      expect(lapse, isNotNull);
+      expect(lapse!.startDay, addDays(today, -5));
+      expect(await count('return_event'), 0, reason: 'her first reflected day will record it (EQ-011)');
+    });
+
+    test('every row is labelled as demo data', () async {
+      for (final r in await db.select(db.reflections).get()) {
+        expect(r.id, startsWith(demoIdPrefix));
+      }
+      for (final p in await db.select(db.planItems).get()) {
+        expect(p.id, startsWith(demoIdPrefix));
+      }
+    });
+  });
+
   group('loading', () {
     test('is repeatable: the same persona on the same day gives the same rows', () async {
       await seed.load(DemoPersona.rana, now: now);
