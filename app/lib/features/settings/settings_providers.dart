@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/providers.dart';
 import '../starting_point/setup_controller.dart';
 import '../today/today_controller.dart';
+import '../way_back/way_back_logic.dart';
 import 'demo_seed.dart';
 
 /// Whether this is a demo build. Tests replace it; a build without DEMO=true is always false (BR-017: no way to put
@@ -52,6 +53,7 @@ final loadDemoProvider = Provider<Future<void> Function(DemoPersona)>((ref) {
     }
     // Consent and setup are both on record again, so only what reads the data is refreshed.
     ref
+      ..invalidate(wayBackAnswersProvider)
       ..invalidate(todayControllerProvider)
       ..invalidate(demoDataLoadedProvider);
   };

@@ -11,6 +11,7 @@ import '../features/starting_point/setup_controller.dart';
 import '../features/starting_point/setup_screen.dart';
 import '../features/support/support_screen.dart';
 import '../features/today/today_screen.dart';
+import '../features/way_back/way_back_screen.dart';
 import 'app_shell.dart';
 
 /// Routes from docs/sitemap.md §4. Without consent every route except the support message redirects to
@@ -46,6 +47,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/setup', builder: (_, _) => const SetupScreen()),
       GoRoute(path: '/support', builder: (_, _) => const SupportScreen()),
       GoRoute(path: '/settings', builder: (_, _) => const SettingsScreen()),
+      // My Way Back (S-005): offered by a banner on Today after a lapse, and by a link on My rhythm.
+      GoRoute(path: '/way-back', builder: (_, _) => const WayBackScreen()),
       // The full history is a page above the tabs, with Back (frame 6.4).
       GoRoute(path: '/rhythm/history', builder: (_, _) => const HistoryScreen()),
       // The four tabs. Discover and Together are not built yet and say so.

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/theme.dart';
 import '../../ui/ui.dart';
+import '../way_back/way_back_screen.dart';
 import 'option_cards.dart';
 import 'reflection_sheet.dart';
 import 'rhythm_grid.dart';
@@ -237,6 +238,12 @@ class _TodayBody extends ConsumerWidget {
       if (!large) {
         children
           ..add(rhythm)
+          ..add(const SizedBox(height: LiltSpacing.lg));
+      }
+      // After a lapse a banner offers My Way Back (S-005). It is an offer: "Not now" costs nothing (BR-007).
+      if (view.wayBackOffered) {
+        children
+          ..add(WelcomeBackBanner(onFind: () => context.push('/way-back'), onNotNow: c.dismissWayBack))
           ..add(const SizedBox(height: LiltSpacing.lg));
       }
       children

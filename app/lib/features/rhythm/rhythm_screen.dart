@@ -94,6 +94,14 @@ class _Body extends ConsumerWidget {
               'Nothing here yet. When a pattern shows up in how your days go, it will wait here for you to say if it fits.',
               style: LiltText.body,
             ),
+          const SizedBox(height: LiltSpacing.section),
+          // The same My Way Back as the banner on Today, for a person who wants it before a lapse is noticed.
+          LiltButton(
+            label: 'Returning after a break?',
+            kind: LiltButtonKind.text,
+            flush: true,
+            onPressed: () => context.push('/way-back'),
+          ),
         ],
       ],
     );

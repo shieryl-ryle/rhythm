@@ -8,7 +8,7 @@
 go stale: the lapse and the return would drift into the past. Same persona and same day give the same rows (no
 randomness). It starts with the delete-all path (BR-017), records consent and finishes setup, then writes the
 history. Every row has an id that starts with `demo_`, which is how the app knows to label it. Available only in
-demo builds (`--dart-define=DEMO=true`), from Settings → "Load demo data: Rana" or "Sam". A build without
+demo builds (`--dart-define=DEMO=true`), from Settings → "Load demo data: Rana", "Sam" or "Noor". A build without
 `DEMO=true` never shows it and never loads anything.
 
 ```
@@ -31,6 +31,7 @@ cd app && flutter run --dart-define=DEMO=true          # then Settings → Load 
 | Rana: enjoyed walks "with company" ×4 → one proposed and one confirmed observation | demo seed | F-004, BR-010; TC-018, TC-037 |
 | Rana: a 3-day pause during a busy week | demo seed | BR-006 pause marker; TC-014, TC-030 |
 | Rana: reflections with `unknown` on some days | demo seed | BR-009; TC-017 |
+| Persona "Noor" (walked two weeks, then five quiet days): an open lapse today, so Today shows the welcome-back banner; no return seeded | demo seed | F-005, UF-004, EQ-001, EQ-011 |
 | Persona "Sam" (starting gentle stretching): ten-minute stretching, mostly partly done, two days skipped for low energy, one never answered; "Team sports" left out | demo seed | F-002 filters, BR-011, grid levels 1–2; TC-019, TC-030 |
 | Notification settings on, 1 time, quiet hours default | not seeded yet: reminders are not built, and a setting that says "on" with nothing scheduled would mislead | F-008 display; TC-021 |
 

@@ -380,6 +380,7 @@ The on-screen label is the source of truth for wording; the stored value is a st
 - **Saved (Discover):** the cards are library actions, so Saved is `saved_action`. A Together club card is not saved locally; it links to Together.
 - **Comma-set columns** (`hard_because`, `got_in_the_way`, `would_help`, `what_changed`) are acceptable in P0. The export documents them as comma-separated codes.
 - **Stored but not used by any rule in P0:** `usual_barrier`, `motivation` and `access` (except where EQ-003 and EQ-004 name them), `got_in_the_way`, `stopped_ago`, `progress`. They are kept for the person's own summary and for later; no reason text may cite them (BR-004).
+- **My Way Back answers wait in memory (2026-11-08):** `return_event` needs a `return_day`, which does not exist until the first reflected day after the lapse. So the answers from S-005 (`what_changed`, `approach`) are held in memory, tied to the lapse start day, and written onto the `return_event` when that return is recorded. A restart before then loses them and the return is recorded with null answers (BR-008: they are optional). A return is recorded once per return day, from Today's read, so it also covers a day corrected from the day detail.
 - **Motivations have no edit screen of their own in P0;** the person changes them by re-running setup from Settings (S-008 "edit starting point").
 
 ### What the schema enforces (added with TASK-002)

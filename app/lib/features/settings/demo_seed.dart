@@ -16,7 +16,8 @@ const demoBuild = bool.fromEnvironment('DEMO');
 /// The invented people the demo can load. Nothing here is a real person or real participant data.
 enum DemoPersona {
   rana('Rana', 'Moved house, walked for three weeks, a short break, then back'),
-  sam('Sam', 'Starting gentle stretching, a few partly done days');
+  sam('Sam', 'Starting gentle stretching, a few partly done days'),
+  noor('Noor', 'Walked for two weeks, then five quiet days: the welcome-back banner shows');
 
   const DemoPersona(this.label, this.story);
   final String label;
@@ -54,6 +55,8 @@ class DemoSeed {
           await _rana(today, now);
         case DemoPersona.sam:
           await _sam(today);
+        case DemoPersona.noor:
+          await _noor(today);
       }
     });
   }
@@ -76,6 +79,14 @@ class DemoSeed {
             access: {'none'},
             barriers: {'energy'},
             excluded: {'team_sport'},
+          ),
+        DemoPersona.noor => const SetupAnswers(
+            paths: {SetupPath.keepGoing},
+            keepActivity: ActivityKind.walking,
+            progress: Progress.upAndDown,
+            freeTimes: {'lunch'},
+            access: {'none'},
+            barriers: {'time'},
           ),
       };
 
@@ -259,6 +270,31 @@ class DemoSeed {
             createdAt: Value(now.toUtc()),
           ),
         );
+  }
+
+  /// Noor: walked on most days for two weeks, then five quiet days, so a lapse is open today and Today offers the
+  /// welcome-back banner (S-005). No return is seeded: the person's first reflected day will record it (EQ-011).
+  Future<void> _noor(String today) async {
+    const days = {
+      13: ReflectionStatus.completed,
+      12: ReflectionStatus.completed,
+      11: ReflectionStatus.partly,
+      10: ReflectionStatus.completed,
+      8: ReflectionStatus.completed,
+      7: ReflectionStatus.completed,
+      6: ReflectionStatus.partly,
+    };
+    for (final e in days.entries) {
+      final s = e.value;
+      await _day(today, e.key,
+          actionId: 'act_walk_10',
+          activity: ActivityKind.walking,
+          title: 'A ten-minute easy walk',
+          minutes: 10,
+          status: s,
+          enjoyment: s == ReflectionStatus.completed ? 3 : 2,
+          barrier: s == ReflectionStatus.partly ? Barrier.time : null);
+    }
   }
 
   /// Sam: two weeks of ten-minute stretching, mostly partly done, two days skipped for low energy, one never

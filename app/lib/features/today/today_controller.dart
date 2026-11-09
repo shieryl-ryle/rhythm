@@ -6,6 +6,7 @@ import '../../domain/day.dart';
 import '../../domain/grid.dart';
 import '../../domain/lapse.dart';
 import '../../domain/models.dart';
+import '../way_back/way_back_logic.dart';
 import 'reflection_copy.dart';
 import 'reflection_sheet.dart';
 import 'today_data.dart';
@@ -75,7 +76,12 @@ class TodayView {
     required this.lighterAvailable,
     required this.followedPaths,
     required this.planned,
+    this.wayBackOffered = false,
   });
+
+  /// The welcome-back banner is shown (S-005): the person is in a lapse (EQ-001), nothing is planned or paused,
+  /// they have not said "Not now" today, and have not already been through My Way Back for this lapse.
+  final bool wayBackOffered;
 
   final String today;
   final TodayMode mode;
@@ -149,6 +155,9 @@ class TodayController extends AsyncNotifier<TodayView> {
   String? _chipsDay;
   bool _busy = false;
 
+  /// The day "Not now" was tapped on the welcome-back banner. It comes back tomorrow if the lapse goes on.
+  String? _wayBackDismissedDay;
+
   /// What "I'll try this" just did, so Undo can take it back: the offer, and whether accepting created it.
   ({String offerId, bool wasNew})? _lastAccept;
 
@@ -160,6 +169,7 @@ class TodayController extends AsyncNotifier<TodayView> {
     _chips = const TodayChips();
     _chipsDay = null;
     _lastAccept = null;
+    _wayBackDismissedDay = null;
     _assertConsent();
     // The library loads after consent; Today waits for it, so it never ranks an empty one.
     await ref.watch(libraryReadyProvider.future);
@@ -223,6 +233,31 @@ class TodayController extends AsyncNotifier<TodayView> {
     final actionsById = {for (final a in inputs.actions) a.id: a};
     final pause = await _repo.activePause(today);
 
+    // A reflected day that ends a lapse is a return, recorded once (EQ-011). Doing it here covers every way a day
+    // can become reflected (Today, or a changed answer from the day detail).
+    final paused = pausedDays(inputs.pauses, today);
+    final lapses = findLapses(reflectedDays: inputs.reflectedDays, pausedDays: paused, today: today);
+    final due = returnsToRecord(lapses, await _repo.recordedReturnDays());
+    if (due.isNotEmpty) {
+      _assertConsentNow();
+      final answers = ref.read(wayBackAnswersProvider);
+      await _repo.recordReturns(
+        due,
+        answersLapseStart: answers?.lapseStartDay,
+        whatChanged: answers?.whatChangedCsv,
+        approach: answers?.approach,
+      );
+      if (answers != null && due.any((s) => s.startDay == answers.lapseStartDay)) {
+        ref.read(wayBackAnswersProvider.notifier).state = null;
+      }
+    }
+    final lapse = lapses.isNotEmpty && lapses.last.isOpen ? lapses.last : null;
+    // Answers that belong to a lapse that is no longer the open one match nothing, so they are dropped.
+    final stored = ref.read(wayBackAnswersProvider);
+    if (stored != null && stored.lapseStartDay != lapse?.startDay) {
+      ref.read(wayBackAnswersProvider.notifier).state = null;
+    }
+
     TodayPlan plan(TodayChips chips, {bool lighter = false}) => buildTodayPlan(
           actions: inputs.actions,
           person: inputs.person,
@@ -275,7 +310,13 @@ class TodayController extends AsyncNotifier<TodayView> {
             TodayKind.options => TodayMode.allDone,
           };
 
+    final answered = ref.read(wayBackAnswersProvider)?.lapseStartDay;
     return TodayView(
+      wayBackOffered: lapse != null &&
+          pause == null &&
+          !accepted &&
+          _wayBackDismissedDay != today &&
+          answered != lapse.startDay,
       today: today,
       mode: mode,
       chips: _chips,
@@ -426,6 +467,73 @@ class TodayController extends AsyncNotifier<TodayView> {
       requireSameDay: false,
     );
     return sentence;
+  }
+
+  // ---- My Way Back (S-005)
+
+  /// "Not now" on the welcome-back banner: it costs nothing and comes back tomorrow if the lapse goes on.
+  Future<void> dismissWayBack() => _act((view) async {
+        _wayBackDismissedDay = view.today;
+        await _reload();
+      });
+
+  /// The end of My Way Back: keeps the answers for the return they belong to (EQ-011) and puts one small first
+  /// step at the top of Today. It only offers it; nothing is planned until the person taps "I'll try this" (BR-005).
+  /// Returns what it offered, or null when nothing fits (the answers are kept all the same).
+  Future<WayBackStart?> startWayBack({required Set<String> whatChanged, required ReturnApproach approach}) async {
+    WayBackStart? start;
+    await _act((view) async {
+      final inputs = await _repo.inputs();
+      final pool = wayBackPool(
+        actions: inputs.actions,
+        reflections: inputs.reflections,
+        wanted: approach,
+        excluded: inputs.person.excluded,
+      );
+      final lapses = findLapses(
+        reflectedDays: inputs.reflectedDays,
+        pausedDays: pausedDays(inputs.pauses, view.today),
+        today: view.today,
+      );
+      // Answers are kept only for a lapse that is open: with none there is no return to put them on.
+      final open = lapses.isNotEmpty && lapses.last.isOpen ? lapses.last : null;
+      ref.read(wayBackAnswersProvider.notifier).state = open == null
+          ? null
+          : WayBackAnswers(whatChanged: whatChanged, approach: pool.approach, lapseStartDay: open.startDay);
+
+      // A small step first: the lighter options of the pool, then of the whole library, then anything that fits.
+      const chips = TodayChips();
+      _chips = chips;
+      TodayPlan? chosen;
+      for (final (actions, lighter) in [(pool.actions, true), (inputs.actions, true), (inputs.actions, false)]) {
+        final plan = buildTodayPlan(
+          actions: actions,
+          person: inputs.person,
+          libraryVersion: inputs.libraryVersion,
+          followedOrder: inputs.followedOrder,
+          freeTimes: inputs.freeTimes,
+          chips: chips,
+          now: _now,
+          lighter: lighter,
+        );
+        if (plan.kind == TodayKind.options) {
+          chosen = plan;
+          break;
+        }
+      }
+      if (chosen != null) {
+        await _repo.createHeroChain(view.today, chosen, chips);
+        final first = chosen.hero.first.ranked.action;
+        start = WayBackStart(
+          title: first.title,
+          durationMin: first.durationMin,
+          activity: first.activity,
+          reason: chosen.hero.first.ranked.reason.text,
+        );
+      }
+      await _reload();
+    });
+    return start;
   }
 
   // ---- pause

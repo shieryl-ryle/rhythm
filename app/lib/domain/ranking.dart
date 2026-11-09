@@ -179,6 +179,9 @@ const _exclusionActivities = {
   'team_sport': ['team_sports', 'basketball'],
 };
 
+/// Whether the person left this action out (BR-011). Shared so a screen never names what Today would never offer.
+bool isExcludedAction(ActionInfo a, Set<String> excluded) => _isExcluded(a, excluded);
+
 bool _isExcluded(ActionInfo a, Set<String> excluded) {
   if (excluded.contains(a.activity.code) || a.tags.any(excluded.contains)) return true;
   return excluded.any((e) => (_exclusionActivities[e] ?? const []).contains(a.activity.code));
