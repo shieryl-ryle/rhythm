@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../data/providers.dart';
 import '../features/consent/consent_screen.dart';
+import '../features/discover/activity_detail_screen.dart';
+import '../features/discover/discover_screen.dart';
 import '../features/rhythm/history_screen.dart';
 import '../features/rhythm/rhythm_screen.dart';
 import '../features/settings/settings_screen.dart';
@@ -49,18 +51,17 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/settings', builder: (_, _) => const SettingsScreen()),
       // My Way Back (S-005): offered by a banner on Today after a lapse, and by a link on My rhythm.
       GoRoute(path: '/way-back', builder: (_, _) => const WayBackScreen()),
+      // Activity detail (S-013): opened from a Discover card.
+      GoRoute(path: '/activity/:id', builder: (_, state) => ActivityDetailScreen(actionId: state.pathParameters['id']!)),
       // The full history is a page above the tabs, with Back (frame 6.4).
       GoRoute(path: '/rhythm/history', builder: (_, _) => const HistoryScreen()),
-      // The four tabs. Discover and Together are not built yet and say so.
+      // The four tabs. Together is not built yet and says so.
       StatefulShellRoute.indexedStack(
         builder: (_, _, shell) => AppShell(shell: shell),
         branches: [
           StatefulShellBranch(routes: [GoRoute(path: '/today', builder: (_, _) => const TodayScreen())]),
           StatefulShellBranch(routes: [
-            GoRoute(
-              path: '/discover',
-              builder: (_, _) => const ComingSoonScreen(title: 'Discover', body: 'Browse and save activities. Coming soon.'),
-            ),
+            GoRoute(path: '/discover', builder: (_, _) => const DiscoverScreen()),
           ]),
           StatefulShellBranch(routes: [
             GoRoute(
