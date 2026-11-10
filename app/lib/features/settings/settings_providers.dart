@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/providers.dart';
 import '../starting_point/setup_controller.dart';
 import '../today/today_controller.dart';
+import '../discover/discover_controller.dart';
 import '../way_back/way_back_logic.dart';
 import 'demo_seed.dart';
 
@@ -47,6 +48,8 @@ final loadDemoProvider = Provider<Future<void> Function(DemoPersona)>((ref) {
           ..invalidate(setupDoneProvider);
       }
       ref
+        ..invalidate(wayBackAnswersProvider)
+        ..invalidate(discoverControllerProvider)
         ..invalidate(todayControllerProvider)
         ..invalidate(demoDataLoadedProvider);
       rethrow;
@@ -54,6 +57,7 @@ final loadDemoProvider = Provider<Future<void> Function(DemoPersona)>((ref) {
     // Consent and setup are both on record again, so only what reads the data is refreshed.
     ref
       ..invalidate(wayBackAnswersProvider)
+      ..invalidate(discoverControllerProvider)
       ..invalidate(todayControllerProvider)
       ..invalidate(demoDataLoadedProvider);
   };

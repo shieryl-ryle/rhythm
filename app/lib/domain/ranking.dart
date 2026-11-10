@@ -130,6 +130,7 @@ List<RankedAction> rankOptions({
   required String libraryVersion,
   int limit = 3,
   List<ActionInfo>? reasonContext,
+  bool startersFirst = true,
 }) {
   final known = person.reflections.where((r) => r.isKnown).toList();
   // A reason can name an action outside the pool that was ranked ("Similar to ..."), so it looks in the whole
@@ -137,7 +138,7 @@ List<RankedAction> rankOptions({
   final byId = {for (final a in reasonContext ?? actions) a.id: a};
 
   var pool = actions.where((a) => _isOffered(a, person, request, libraryVersion)).toList();
-  if (known.isEmpty) {
+  if (known.isEmpty && startersFirst) {
     // Starters first; if none fit what the person allows, anything that does is better than an empty card.
     final starters = pool.where((a) => a.isStarter).toList();
     if (starters.isNotEmpty) pool = starters;
