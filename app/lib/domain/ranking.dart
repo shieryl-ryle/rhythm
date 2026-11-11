@@ -95,11 +95,17 @@ class ScoreParts {
 }
 
 class RankedAction {
-  const RankedAction({required this.action, required this.parts, required this.reason});
+  RankedAction({required this.action, required this.parts, required this.reason, List<Reason>? reasons})
+      : reasons = reasons ?? [reason];
 
   final ActionInfo action;
   final ScoreParts parts;
+
+  /// The reason on the card (BR-004).
   final Reason reason;
+
+  /// Every reason that applies, the card's first ("Why this?" lists them all).
+  final List<Reason> reasons;
 
   double get score => parts.score;
 }
@@ -163,13 +169,8 @@ List<RankedAction> rankOptions({
   for (final s in scored) {
     if (picked.length == limit) break;
     if (!activities.add(s.action.activity)) continue;
-    picked.add(
-      RankedAction(
-        action: s.action,
-        parts: s.parts,
-        reason: chooseReason(action: s.action, parts: s.parts, person: person, request: request, byId: byId),
-      ),
-    );
+    final reasons = chooseReasons(action: s.action, parts: s.parts, person: person, request: request, byId: byId);
+    picked.add(RankedAction(action: s.action, parts: s.parts, reason: reasons.first, reasons: reasons));
   }
   return picked;
 }

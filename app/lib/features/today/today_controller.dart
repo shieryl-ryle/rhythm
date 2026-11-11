@@ -76,12 +76,20 @@ class TodayView {
     required this.lighterAvailable,
     required this.followedPaths,
     required this.planned,
+    this.freeTimes = const {},
+    this.excluded = const {},
     this.wayBackOffered = false,
   });
 
   /// The welcome-back banner is shown (S-005): the person is in a lapse (EQ-001), nothing is planned or paused,
   /// they have not said "Not now" today, and have not already been through My Way Back for this lapse.
   final bool wayBackOffered;
+
+  /// The free times the person gave, for the choices under "When" on the Edit sheet.
+  final Set<String> freeTimes;
+
+  /// What the person left out (BR-011): Edit never relaxes it.
+  final Set<String> excluded;
 
   final String today;
   final TodayMode mode;
@@ -116,8 +124,8 @@ class TodayView {
 
   StoredOffer? get shown => shownOffer(offers);
 
-  /// Offers the person accepted today: the plan.
-  List<StoredOffer> get accepted => [for (final o in offers) if (o.status == OfferStatus.accepted) o];
+  /// Offers the person accepted today, as they were or after Edit: the plan.
+  List<StoredOffer> get accepted => [for (final o in offers) if (o.status == OfferStatus.accepted || o.status == OfferStatus.edited) o];
 
   /// "N of M" on the hero card: the options stepped past plus the one shown, out of those plus what is left.
   int get heroPosition => offers.where((o) => o.status == OfferStatus.replaced).length + 1;
@@ -298,7 +306,7 @@ class TodayController extends AsyncNotifier<TodayView> {
     final shownIsLight = shown != null && shown.action.durationMin <= 10 && shown.action.energyNeeded == Energy.low;
     final lighterAvailable =
         pause == null && shown != null && !shownIsLight && plan(_chips, lighter: true).kind == TodayKind.options;
-    final accepted = offers.any((o) => o.status == OfferStatus.accepted) || planned.any((p) => p.item.plannedDay == today);
+    final accepted = offers.any((o) => o.status == OfferStatus.accepted || o.status == OfferStatus.edited) || planned.any((p) => p.item.plannedDay == today);
     final waiting = shown != null;
 
     final mode = pause != null
@@ -329,6 +337,8 @@ class TodayController extends AsyncNotifier<TodayView> {
       lighterAvailable: lighterAvailable,
       followedPaths: inputs.followedPaths,
       planned: planned,
+      freeTimes: inputs.freeTimes,
+      excluded: inputs.person.excluded,
     );
   }
 
@@ -382,22 +392,26 @@ class TodayController extends AsyncNotifier<TodayView> {
   // ---- options
 
   /// "I'll try this" on the hero card. Returns true when it planned something, so the screen can offer Undo.
-  Future<bool> acceptShown() async {
+  /// With an [edit] it is "Save changes" on the Edit sheet instead (S-102).
+  Future<bool> acceptShown({OfferEdit? edit}) async {
     var planned = false;
     await _act((view) async {
       final shown = view.shown;
       if (shown == null) return;
-      planned = await _repo.accept(shown);
+      // An edit never relaxes a leave-out (BR-011), whatever called this.
+      if (!editAllowed(excluded: view.excluded, action: shown.action, edit: edit)) return;
+      planned = await _repo.accept(shown, edit: edit);
       if (planned) _lastAccept = (offerId: shown.offer.id, wasNew: false);
       await _reload();
     });
     return planned;
   }
 
-  Future<bool> acceptCompact(TodayOption option) async {
+  Future<bool> acceptCompact(TodayOption option, {OfferEdit? edit}) async {
     var planned = false;
     await _act((view) async {
-      final id = await _repo.acceptNew(view.today, option, _chips);
+      if (!editAllowed(excluded: view.excluded, action: option.ranked.action, edit: edit)) return;
+      final id = await _repo.acceptNew(view.today, option, _chips, edit: edit);
       planned = id != null;
       if (id != null) _lastAccept = (offerId: id, wasNew: true);
       await _reload();
