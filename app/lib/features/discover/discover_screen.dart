@@ -220,7 +220,7 @@ class ActivityTile extends StatelessWidget {
           color: LiltColors.selected,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(LiltRadius.md)),
         ),
-        child: Icon(iconFor(item.action.activity), color: LiltColors.primary, size: size * 0.5),
+        child: Icon(iconForAction(item.action), color: LiltColors.primary, size: size * 0.5),
       ),
     );
   }

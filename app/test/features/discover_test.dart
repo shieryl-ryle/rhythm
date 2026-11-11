@@ -9,6 +9,7 @@ import 'package:lilt/data/database.dart';
 import 'package:lilt/data/enums.dart';
 import 'package:lilt/data/library/library_loader.dart';
 import 'package:lilt/data/providers.dart';
+import 'package:lilt/domain/models.dart';
 import 'package:lilt/features/discover/discover_controller.dart';
 import 'package:lilt/features/discover/discover_logic.dart';
 import 'package:lilt/features/starting_point/setup_model.dart';
@@ -86,7 +87,36 @@ Future<void> _tap(WidgetTester tester, String text, {int index = 0}) async {
 
 Future<void> _openDiscover(WidgetTester tester) => _tap(tester, 'Discover', index: 0);
 
+ActionInfo _idea(String id, ActivityKind kind) => ActionInfo(
+      id: id,
+      activity: kind,
+      title: id,
+      durationMin: 5,
+      energyNeeded: Energy.low,
+      tags: const {},
+      isStarter: false,
+      similarTo: const [],
+      libraryVersion: 'test',
+    );
+
 void main() {
+  test('each idea typed other has its own icon, and none is the old lightning bolt', () {
+    final icons = {
+      for (final id in [
+        'act_other_stairs',
+        'act_other_stretch_break',
+        'act_other_seated_moves',
+        'act_other_seated_breathing',
+      ])
+        id: iconForAction(_idea(id, ActivityKind.other)),
+    };
+    expect(icons.values.toSet().length, 4);
+    expect(icons.values, isNot(contains(Icons.bolt)));
+    // An idea typed other that is not one of these still gets a calm icon, and other activities keep theirs.
+    expect(iconForAction(_idea('act_other_new', ActivityKind.other)), Icons.spa);
+    expect(iconForAction(_idea('act_walk_10', ActivityKind.walking)), Icons.directions_walk);
+  });
+
   group('the rules', () {
     late LiltDatabase db;
 
