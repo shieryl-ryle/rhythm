@@ -111,6 +111,18 @@ List<DiscoverItem> savedItems({
   return items;
 }
 
+/// The tile icon for one idea. Ideas typed "other" (stairs, a stretch, chair moves, breathing) share no activity, so
+/// each gets its own; everything else uses its activity's icon.
+IconData iconForAction(ActionInfo a) {
+  if (a.activity != ActivityKind.other) return iconFor(a.activity);
+  final id = a.id;
+  if (id.contains('stairs')) return Icons.stairs;
+  if (id.contains('stretch')) return Icons.accessibility_new;
+  if (id.contains('seated_moves')) return Icons.chair_alt;
+  if (id.contains('breathing')) return Icons.air;
+  return Icons.spa;
+}
+
 /// A tile icon per activity, standing in for the illustrations in the frames.
 IconData iconFor(ActivityKind kind) => switch (kind) {
       ActivityKind.walking => Icons.directions_walk,
@@ -125,5 +137,5 @@ IconData iconFor(ActivityKind kind) => switch (kind) {
       ActivityKind.dance => Icons.music_note,
       ActivityKind.hiking => Icons.hiking,
       ActivityKind.bouldering => Icons.terrain,
-      ActivityKind.other || ActivityKind.notSure => Icons.bolt,
+      ActivityKind.other || ActivityKind.notSure => Icons.spa,
     };
