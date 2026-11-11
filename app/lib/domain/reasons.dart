@@ -13,24 +13,38 @@ class Reason {
   String toString() => '$code: $text';
 }
 
-/// EQ-004. A first-time action that is similar to one the person did and enjoyed always says so (BR-004,
-/// F-002). Otherwise the score term that adds the most picks its template; a term counts only when it rests on
-/// something the person actually did or said (a first-time action has no "You managed this before"). When no
-/// term applies the order is: lighter mode, company, starter, and last a neutral library line that claims
-/// nothing about the person. A reason may only cite an answer a rule uses (BR-004).
+/// The reason on the card: the first of [chooseReasons].
 Reason chooseReason({
   required ActionInfo action,
   required ScoreParts parts,
   required PersonContext person,
   required RankingRequest request,
   required Map<String, ActionInfo> byId,
+}) =>
+    chooseReasons(action: action, parts: parts, person: person, request: request, byId: byId).first;
+
+/// EQ-004. Every reason that applies, strongest first: the first is the one on the card and the rest are what
+/// "Why this?" adds (BR-004). A first-time action that is similar to one the person did and enjoyed always says so
+/// first. Then each score term that applies, the one that adds the most first; a term counts only when it rests on
+/// something the person actually did or said (a first-time action has no "You managed this before"). Then, when
+/// they are true, lighter mode, company and starter. A neutral library line that claims nothing about the person
+/// is used only when nothing else applies. A reason may only cite an answer a rule uses (BR-004).
+List<Reason> chooseReasons({
+  required ActionInfo action,
+  required ScoreParts parts,
+  required PersonContext person,
+  required RankingRequest request,
+  required Map<String, ActionInfo> byId,
 }) {
+  final reasons = <Reason>[];
+
   // New to them: say which action they enjoyed that this one is like.
   if (parts.known == 0) {
     final liked = _enjoyedActionIds(person);
     for (final id in action.similarTo) {
       if (liked.contains(id) && byId[id] != null) {
-        return Reason('similar', 'Similar to ${byId[id]!.title}, which you enjoyed');
+        reasons.add(Reason('similar', 'Similar to ${byId[id]!.title}, which you enjoyed'));
+        break;
       }
     }
   }
@@ -46,24 +60,34 @@ Reason chooseReason({
       (0.1, const Reason('help_shorter', 'You said shorter sessions would help')),
     if (parts.help == 'someone_to_go_with') (0.1, const Reason('help_company', 'You said company would help')),
   ];
-  if (terms.isNotEmpty) {
-    var best = terms.first;
-    for (final t in terms.skip(1)) {
-      if (t.$1 > best.$1) best = t;
+  // A stable sort, strongest first: a tie keeps the order above.
+  final ordered = <(double, Reason)>[];
+  for (final t in terms) {
+    var at = ordered.length;
+    while (at > 0 && ordered[at - 1].$1 < t.$1) {
+      at--;
     }
-    return best.$2;
+    ordered.insert(at, t);
   }
+  reasons.addAll([for (final t in ordered) t.$2]);
 
-  if (request.lighter) return const Reason('lighter', 'Short and gentle for today');
+  if (request.lighter) reasons.add(const Reason('lighter', 'Short and gentle for today'));
   if (action.tags.contains('with_company') && person.motivations.contains('time_with_people')) {
-    return const Reason('company', 'You like company');
+    reasons.add(const Reason('company', 'You like company'));
   }
-  if (action.isStarter) return const Reason('starter', 'A small way to begin');
-  // Neither line may overstate the action: "gentle" is not said of something that needs high energy.
-  if (action.energyNeeded == Energy.high) return const Reason('neutral', 'Something different to try');
-  return action.tags.contains('with_company')
-      ? const Reason('neutral', 'Social and easy to learn')
-      : const Reason('neutral', 'A gentle way to get moving');
+  if (action.isStarter) reasons.add(const Reason('starter', 'A small way to begin'));
+
+  if (reasons.isEmpty) {
+    // Neither line may overstate the action: "gentle" is not said of something that needs high energy.
+    reasons.add(
+      action.energyNeeded == Energy.high
+          ? const Reason('neutral', 'Something different to try')
+          : action.tags.contains('with_company')
+              ? const Reason('neutral', 'Social and easy to learn')
+              : const Reason('neutral', 'A gentle way to get moving'),
+    );
+  }
+  return reasons;
 }
 
 /// Actions the person did and enjoyed (`completed` or `partly`, "Enjoyed it").

@@ -160,6 +160,26 @@ class _TodayBody extends ConsumerWidget {
         );
     }
 
+    // "Edit": the person adjusts the length and the time, and "Save changes" plans it as chosen, with the same Undo
+    // as "I'll try this" (BR-005). Closing the sheet plans nothing.
+    Future<void> edit({
+      required String title,
+      required int ideaMinutes,
+      required SuggestedSlot? suggested,
+      required Future<bool> Function(OfferEdit? edit) save,
+    }) async {
+      final chosen = await showEditSheet(
+        context,
+        title: title,
+        ideaMinutes: ideaMinutes,
+        suggested: suggested,
+        freeTimes: view.freeTimes,
+        now: ref.read(clockProvider)(),
+      );
+      if (chosen == null || !context.mounted) return;
+      await accepted(() => save(chosen.changed ? chosen : null));
+    }
+
     // "How did it go?": the sheet, then the one sentence that says what will change (F-003). Closing it without
     // saving changes nothing: the reflection stays unknown (BR-009).
     Future<void> reflect(PlannedItem p) async {
@@ -303,6 +323,13 @@ class _TodayBody extends ConsumerWidget {
                 onAccept: () => accepted(c.acceptShown),
                 onSwap: c.swapShown,
                 onNotToday: () => notToday(lighter: true),
+                onWhy: () => showWhySheet(context, reasons: shown.allReasons),
+                onEdit: () => edit(
+                  title: shown.action.title,
+                  ideaMinutes: shown.action.durationMin,
+                  suggested: storedSlot(shown),
+                  save: (e) => c.acceptShown(edit: e),
+                ),
               ))
               ..add(const SizedBox(height: LiltSpacing.md));
           }
@@ -314,6 +341,13 @@ class _TodayBody extends ConsumerWidget {
                 today: view.today,
                 onAccept: () => accepted(() => c.acceptCompact(option)),
                 onNotToday: () => notToday(option: option),
+                onWhy: () => showWhySheet(context, reasons: [for (final r in option.ranked.reasons) r.text]),
+                onEdit: () => edit(
+                  title: option.ranked.action.title,
+                  ideaMinutes: option.ranked.action.durationMin,
+                  suggested: option.slot,
+                  save: (e) => c.acceptCompact(option, edit: e),
+                ),
               ))
               ..add(const SizedBox(height: LiltSpacing.md));
           }

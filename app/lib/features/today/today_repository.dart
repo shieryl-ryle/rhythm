@@ -10,11 +10,19 @@ import 'today_logic.dart';
 
 /// One option that was offered today, with the reason that was shown and the action it points at.
 class StoredOffer {
-  const StoredOffer({required this.offer, required this.action, required this.reason});
+  const StoredOffer({required this.offer, required this.action, required this.reason, this.reasons = const []});
 
   final OptionOffer offer;
   final ActionInfo action;
+
+  /// The reason on the card (rank 1).
   final String reason;
+
+  /// Every reason stored for the offer, strongest first, for "Why this?". An offer stored before the list existed
+  /// has only the card's reason.
+  final List<String> reasons;
+
+  List<String> get allReasons => reasons.isEmpty ? [if (reason.isNotEmpty) reason] : reasons;
 
   OfferStatus get status => offer.status;
 }
@@ -157,12 +165,20 @@ class TodayRepository {
           // Insert order is the order of the chain; swap positions count per followed activity, not overall.
           ..orderBy([(t) => OrderingTerm(expression: const CustomExpression<int>('rowid'))]))
         .get();
-    final reasons = await (_db.select(_db.offerReasons)..where((t) => t.rank.equals(1))).get();
-    final reasonByOffer = {for (final r in reasons) r.offerId: r.reasonText};
+    final rows = await (_db.select(_db.offerReasons)..orderBy([(t) => OrderingTerm.asc(t.rank)])).get();
+    final reasonsByOffer = <String, List<String>>{};
+    for (final r in rows) {
+      (reasonsByOffer[r.offerId] ??= []).add(r.reasonText);
+    }
     return [
       for (final o in offers)
         if (actionsById[o.actionId] != null)
-          StoredOffer(offer: o, action: actionsById[o.actionId]!, reason: reasonByOffer[o.id] ?? ''),
+          StoredOffer(
+            offer: o,
+            action: actionsById[o.actionId]!,
+            reason: reasonsByOffer[o.id]?.first ?? '',
+            reasons: reasonsByOffer[o.id] ?? const [],
+          ),
     ];
   }
 
@@ -221,6 +237,7 @@ class TodayRepository {
     TodayChips chips,
     Map<ActivityKind, String> followed, {
     OfferStatus status = OfferStatus.offered,
+    OfferEdit? edit,
   }) async {
     final followedId = followed[option.ranked.action.activity];
     final taken = await (_db.select(_db.optionOffers)
@@ -239,38 +256,62 @@ class TodayRepository {
             status: Value(status),
             timeInputMin: Value(chips.timeMin),
             energyInput: Value(chips.energy),
+            editedDurationMin: Value(edit?.durationMin),
+            editedDay: Value(edit?.day),
+            editedTime: Value(edit?.time),
           ),
         );
-    final reason = option.ranked.reason;
-    await _db.into(_db.offerReasons).insert(
-          OfferReasonsCompanion.insert(
-            offerId: offer.id,
-            rank: 1,
-            reasonCode: reason.code,
-            reasonText: reason.text,
-          ),
-        );
+    // Every reason, strongest first: the card shows rank 1 and "Why this?" lists them all (BR-004).
+    final reasons = option.ranked.reasons;
+    for (var i = 0; i < reasons.length; i++) {
+      await _db.into(_db.offerReasons).insert(
+            OfferReasonsCompanion.insert(
+              offerId: offer.id,
+              rank: i + 1,
+              reasonCode: reasons[i].code,
+              reasonText: reasons[i].text,
+            ),
+          );
+    }
     return offer;
   }
 
   /// "I'll try this" on an offer that is already stored (the hero card): it becomes `accepted`, and a plan item
   /// with an `unknown` reflection is created with it (docs/data-model.md rules for the code that uses the schema).
-  Future<bool> accept(StoredOffer stored) => _db.transaction(() async {
+  ///
+  /// With an [edit] ("Save changes" on the Edit sheet) it becomes `edited` and the plan item takes the chosen
+  /// length, day and time. Either way it is the person's tap that plans it (BR-005).
+  Future<bool> accept(StoredOffer stored, {OfferEdit? edit}) => _db.transaction(() async {
         // Still waiting? A second tap on the same button, or a stale screen, must not plan it twice.
         final current = await (_db.select(_db.optionOffers)..where((t) => t.id.equals(stored.offer.id))).getSingleOrNull();
         if (current == null || current.status != OfferStatus.offered) return false;
-        await (_db.update(_db.optionOffers)..where((t) => t.id.equals(stored.offer.id)))
-            .write(OptionOffersCompanion(status: Value(OfferStatus.accepted)));
-        await _createPlanItem(stored.offer, stored.action);
+        await (_db.update(_db.optionOffers)..where((t) => t.id.equals(stored.offer.id))).write(
+          OptionOffersCompanion(
+            status: Value(edit == null ? OfferStatus.accepted : OfferStatus.edited),
+            editedDurationMin: Value(edit?.durationMin),
+            editedDay: Value(edit?.day),
+            editedTime: Value(edit?.time),
+          ),
+        );
+        final saved = await (_db.select(_db.optionOffers)..where((t) => t.id.equals(stored.offer.id))).getSingle();
+        await _createPlanItem(saved, stored.action);
         return true;
       });
 
   /// "I'll try this" on a compact card, which is not stored until now.
-  Future<String?> acceptNew(String day, TodayOption option, TodayChips chips) => _db.transaction(() async {
+  Future<String?> acceptNew(String day, TodayOption option, TodayChips chips, {OfferEdit? edit}) =>
+      _db.transaction(() async {
         // The same action is not planned twice in a day (a double tap).
         if ((await _actedActionIds(day)).contains(option.ranked.action.id)) return null;
         final followed = await _followedIds();
-        final offer = await _insertOffer(day, option, chips, followed, status: OfferStatus.accepted);
+        final offer = await _insertOffer(
+          day,
+          option,
+          chips,
+          followed,
+          status: edit == null ? OfferStatus.accepted : OfferStatus.edited,
+          edit: edit,
+        );
         await _createPlanItem(offer, option.ranked.action);
         return offer.id;
       });
@@ -288,7 +329,15 @@ class TodayRepository {
         if (wasNew) {
           await (_db.delete(_db.optionOffers)..where((t) => t.id.equals(offerId))).go();
         } else {
-          await _setStatus(offerId, OfferStatus.offered);
+          // Back to waiting as it was: an edit goes with the Undo.
+          await (_db.update(_db.optionOffers)..where((t) => t.id.equals(offerId))).write(
+            const OptionOffersCompanion(
+              status: Value(OfferStatus.offered),
+              editedDurationMin: Value(null),
+              editedDay: Value(null),
+              editedTime: Value(null),
+            ),
+          );
         }
       });
 
@@ -298,11 +347,12 @@ class TodayRepository {
             source: PlanSource.offer,
             activity: action.activity,
             title: action.title,
-            plannedDay: offer.suggestedDay,
+            // An edited offer plans what the person chose; otherwise what was suggested.
+            plannedDay: offer.editedDay ?? offer.suggestedDay,
             offerId: Value(offer.id),
             actionId: Value(action.id),
-            plannedTime: Value(offer.suggestedTime),
-            durationMin: Value(action.durationMin),
+            plannedTime: Value(offer.status == OfferStatus.edited ? offer.editedTime : offer.suggestedTime),
+            durationMin: Value(offer.editedDurationMin ?? action.durationMin),
             withWhom: Value(action.tags.contains('with_company') ? WithWhom.friends : WithWhom.solo),
           ),
         );
