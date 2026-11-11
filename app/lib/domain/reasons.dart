@@ -75,7 +75,9 @@ List<Reason> chooseReasons({
   if (action.tags.contains('with_company') && person.motivations.contains('time_with_people')) {
     reasons.add(const Reason('company', 'You like company'));
   }
-  if (action.isStarter) reasons.add(const Reason('starter', 'A small way to begin'));
+  // "A small way to begin" says nothing about someone who has already done it, so it is a reason only for a first time
+  // (or when nothing else applies, as before).
+  if (action.isStarter && (parts.known == 0 || reasons.isEmpty)) reasons.add(const Reason('starter', 'A small way to begin'));
 
   if (reasons.isEmpty) {
     // Neither line may overstate the action: "gentle" is not said of something that needs high energy.

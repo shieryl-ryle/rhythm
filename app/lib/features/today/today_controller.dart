@@ -77,6 +77,7 @@ class TodayView {
     required this.followedPaths,
     required this.planned,
     this.freeTimes = const {},
+    this.excluded = const {},
     this.wayBackOffered = false,
   });
 
@@ -86,6 +87,9 @@ class TodayView {
 
   /// The free times the person gave, for the choices under "When" on the Edit sheet.
   final Set<String> freeTimes;
+
+  /// What the person left out (BR-011): Edit never relaxes it.
+  final Set<String> excluded;
 
   final String today;
   final TodayMode mode;
@@ -334,6 +338,7 @@ class TodayController extends AsyncNotifier<TodayView> {
       followedPaths: inputs.followedPaths,
       planned: planned,
       freeTimes: inputs.freeTimes,
+      excluded: inputs.person.excluded,
     );
   }
 
@@ -393,6 +398,8 @@ class TodayController extends AsyncNotifier<TodayView> {
     await _act((view) async {
       final shown = view.shown;
       if (shown == null) return;
+      // An edit never relaxes a leave-out (BR-011), whatever called this.
+      if (!editAllowed(excluded: view.excluded, action: shown.action, edit: edit)) return;
       planned = await _repo.accept(shown, edit: edit);
       if (planned) _lastAccept = (offerId: shown.offer.id, wasNew: false);
       await _reload();
@@ -403,6 +410,7 @@ class TodayController extends AsyncNotifier<TodayView> {
   Future<bool> acceptCompact(TodayOption option, {OfferEdit? edit}) async {
     var planned = false;
     await _act((view) async {
+      if (!editAllowed(excluded: view.excluded, action: option.ranked.action, edit: edit)) return;
       final id = await _repo.acceptNew(view.today, option, _chips, edit: edit);
       planned = id != null;
       if (id != null) _lastAccept = (offerId: id, wasNew: true);

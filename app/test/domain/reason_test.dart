@@ -214,6 +214,17 @@ void whyThisTests() {
     expect(codes.indexOf('fit'), lessThan(codes.indexOf('help_shorter')));
   });
 
+  test('"A small way to begin" is not listed for something they have already done', () {
+    final starter = actions.firstWhere((a) => a.isStarter);
+    final person = PersonContext(
+      access: const {'none'},
+      reflections: [reflect('2026-10-01', ReflectionStatus.completed, action: starter)],
+    );
+    final codes = rankedFor(starter.id, person).reasons.map((x) => x.code);
+    expect(codes, contains('fit'));
+    expect(codes, isNot(contains('starter')));
+  });
+
   test('the neutral line stands alone: it is only used when nothing else applies', () {
     final ranked = rankOptions(
       actions: actions,

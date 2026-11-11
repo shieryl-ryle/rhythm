@@ -9,6 +9,8 @@ import 'package:lilt/data/providers.dart';
 import 'package:lilt/features/starting_point/setup_model.dart';
 import 'package:lilt/features/starting_point/setup_repository.dart';
 import 'package:lilt/features/support/support_providers.dart';
+import 'package:lilt/domain/models.dart';
+import 'package:lilt/features/today/today_controller.dart';
 import 'package:lilt/features/today/today_logic.dart';
 import 'package:lilt/ui/ui.dart';
 
@@ -24,6 +26,24 @@ class _Agreed implements ConsentRepository {
   Future<void> agree() async {}
 }
 
+/// Walks only, lunch and after work, with "Outdoors after dark" left out (BR-011).
+const _walkerNoDark = SetupAnswers(
+  paths: {SetupPath.keepGoing},
+  keepActivity: ActivityKind.walking,
+  progress: Progress.goingWell,
+  freeTimes: {'lunch', 'after_work'},
+  access: {'none'},
+  excluded: {'after_dark'},
+);
+
+const _walker = SetupAnswers(
+  paths: {SetupPath.keepGoing},
+  keepActivity: ActivityKind.walking,
+  progress: Progress.goingWell,
+  freeTimes: {'lunch', 'after_work'},
+  access: {'none'},
+);
+
 const _runner = SetupAnswers(
   paths: {SetupPath.keepGoing, SetupPath.pickUpAgain},
   keepActivity: ActivityKind.gym,
@@ -34,13 +54,13 @@ const _runner = SetupAnswers(
   access: {'gym_membership'},
 );
 
-Future<LiltDatabase> _open(WidgetTester tester, {double textScale = 1}) async {
+Future<LiltDatabase> _open(WidgetTester tester, {double textScale = 1, SetupAnswers answers = _runner}) async {
   tester.view.physicalSize = const Size(360, 800);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   final db = inMemoryDatabase();
   addTearDown(db.close);
-  await DriftSetupRepository(db).save(_runner);
+  await DriftSetupRepository(db).save(answers);
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
@@ -99,6 +119,82 @@ void main() {
       expect(pickedWhen(15 * 60, now).label, 'Today 15:00');
       expect(pickedWhen(7 * 60, now).label, 'Tomorrow 07:00');
       expect(pickedWhen(9 * 60, now).label, 'Tomorrow 09:00', reason: 'the same minute has already begun');
+    });
+  });
+
+  group('Edit never relaxes a leave-out (BR-011)', () {
+    ActionInfo idea(List<String> tags) => ActionInfo(
+          id: 'a',
+          activity: ActivityKind.walking,
+          title: 'a',
+          durationMin: 10,
+          energyNeeded: Energy.low,
+          tags: tags.toSet(),
+          isStarter: false,
+          similarTo: const [],
+          libraryVersion: 'test',
+        );
+
+    test('dark hours are 18:00 to 06:00', () {
+      expect(isDarkMinute(17 * 60 + 59), isFalse);
+      expect(isDarkMinute(18 * 60), isTrue);
+      expect(isDarkMinute(5 * 60 + 59), isTrue);
+      expect(isDarkMinute(6 * 60), isFalse);
+    });
+
+    test('only an outdoor idea with "Outdoors after dark" left out may not be planned in the dark', () {
+      expect(darkTimesAllowed({'after_dark'}, idea(['outdoors'])), isFalse);
+      expect(darkTimesAllowed({'after_dark'}, idea(['indoors'])), isTrue);
+      expect(darkTimesAllowed(const {}, idea(['outdoors'])), isTrue);
+    });
+
+    test('when: dark slots are not offered to an idea that may not go in the dark', () {
+      final now = fixedNow();
+      final slot = upcomingSlots({'lunch', 'after_work'}, now).first;
+      final open = whenChoices(suggested: slot, freeTimes: const {'lunch', 'after_work'}, now: now);
+      final closed = whenChoices(suggested: slot, freeTimes: const {'lunch', 'after_work'}, now: now, allowDark: false);
+      expect(open.map((c) => c.label), contains('Today 18:30'));
+      expect(closed.map((c) => c.time), isNot(contains('18:30')));
+      expect(closed.first.label, 'Today 12:30');
+    });
+
+    test('an edit with a dark time is refused for such an idea, and a daytime or unset time is not', () {
+      const dark = OfferEdit(durationMin: 10, day: '2026-10-23', time: '20:00');
+      const day = OfferEdit(durationMin: 10, day: '2026-10-23', time: '15:00');
+      const unset = OfferEdit(durationMin: 10, day: '2026-10-23');
+      final outdoor = idea(['outdoors']);
+      expect(editAllowed(excluded: {'after_dark'}, action: outdoor, edit: dark), isFalse);
+      expect(editAllowed(excluded: {'after_dark'}, action: outdoor, edit: day), isTrue);
+      expect(editAllowed(excluded: {'after_dark'}, action: outdoor, edit: unset), isTrue);
+      expect(editAllowed(excluded: {'after_dark'}, action: outdoor, edit: null), isTrue);
+      expect(editAllowed(excluded: const {}, action: outdoor, edit: dark), isTrue);
+      expect(editAllowed(excluded: {'after_dark'}, action: idea(['indoors']), edit: dark), isTrue);
+    });
+
+    testWidgets('the sheet offers no after-dark time for an outdoor walk when that is left out', (tester) async {
+      await _open(tester, answers: _walkerNoDark);
+      expect(find.text('A ten-minute easy walk'), findsWidgets);
+      await _tap(tester, find.text('Edit').first);
+      expect(_inSheet('Today 12:30'), findsOneWidget);
+      expect(find.descendant(of: find.byType(LiltSheet), matching: find.textContaining('18:30')), findsNothing);
+    });
+
+    testWidgets('with nothing left out the same walk can be moved to after work', (tester) async {
+      await _open(tester, answers: _walker);
+      await _tap(tester, find.text('Edit').first);
+      expect(find.descendant(of: find.byType(LiltSheet), matching: find.textContaining('18:30')), findsOneWidget);
+    });
+
+    testWidgets('the save refuses a dark time even if something other than the sheet asks for it', (tester) async {
+      final db = await _open(tester, answers: _walkerNoDark);
+      final container = ProviderScope.containerOf(tester.element(find.byType(LiltApp)));
+      final planned = await container
+          .read(todayControllerProvider.notifier)
+          .acceptShown(edit: const OfferEdit(durationMin: 10, day: '2026-10-23', time: '20:00'));
+      await tester.pumpAndSettle();
+      expect(planned, isFalse);
+      expect(await _plan(db), isEmpty);
+      expect((await _offers(db)).every((o) => o.status == OfferStatus.offered), isTrue);
     });
   });
 

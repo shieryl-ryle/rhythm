@@ -298,11 +298,13 @@ String whenLabel(String day, String? time, String today) {
 }
 
 /// The choices under "When": what was suggested first, then the next free times after it (at most three in all).
+/// Dark slots are left out when [allowDark] is false (BR-011).
 /// "Pick a time" is a separate control on the sheet.
 List<WhenChoice> whenChoices({
   required SuggestedSlot? suggested,
   required Set<String> freeTimes,
   required DateTime now,
+  bool allowDark = true,
 }) {
   final today = formatDay(DateTime.utc(now.year, now.month, now.day));
   final choices = <WhenChoice>[
@@ -313,6 +315,7 @@ List<WhenChoice> whenChoices({
   ];
   for (final slot in upcomingSlots(freeTimes, now)) {
     if (choices.length == 3) break;
+    if (!allowDark && slot.isDark) continue;
     final choice = WhenChoice(day: slot.day, time: slot.clock, label: whenLabel(slot.day, slot.clock, today));
     if (!choices.contains(choice)) choices.add(choice);
   }
@@ -325,4 +328,20 @@ WhenChoice pickedWhen(int minuteOfDay, DateTime now) {
   final day = minuteOfDay > now.hour * 60 + now.minute ? today : addDays(today, 1);
   final time = '${(minuteOfDay ~/ 60).toString().padLeft(2, '0')}:${(minuteOfDay % 60).toString().padLeft(2, '0')}';
   return WhenChoice(day: day, time: time, label: whenLabel(day, time, today));
+}
+
+/// Whether this idea may be planned in dark hours (18:00 to 06:00): not an outdoor idea when "Outdoors after dark"
+/// is left out (BR-011). Edit never relaxes a leave-out, so the sheet, "Pick a time" and the save all use this.
+bool darkTimesAllowed(Set<String> excluded, ActionInfo action) =>
+    !(excluded.contains('after_dark') && action.tags.contains('outdoors'));
+
+/// Whether a minute of the day is in dark hours, the same hours as [SuggestedSlot.isDark].
+bool isDarkMinute(int minuteOfDay) => minuteOfDay >= 18 * 60 || minuteOfDay < 6 * 60;
+
+/// Whether an edit may be saved for this idea: a time in dark hours is refused when the idea may not be planned then.
+bool editAllowed({required Set<String> excluded, required ActionInfo action, required OfferEdit? edit}) {
+  final time = edit?.time;
+  if (time == null) return true;
+  final minute = int.parse(time.substring(0, 2)) * 60 + int.parse(time.substring(3));
+  return !isDarkMinute(minute) || darkTimesAllowed(excluded, action);
 }

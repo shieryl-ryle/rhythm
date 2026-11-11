@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/theme.dart';
+import '../../domain/models.dart';
 import '../../ui/ui.dart';
 import '../way_back/way_back_screen.dart';
 import 'option_cards.dart';
@@ -164,6 +165,7 @@ class _TodayBody extends ConsumerWidget {
     // as "I'll try this" (BR-005). Closing the sheet plans nothing.
     Future<void> edit({
       required String title,
+      required ActionInfo action,
       required int ideaMinutes,
       required SuggestedSlot? suggested,
       required Future<bool> Function(OfferEdit? edit) save,
@@ -175,6 +177,7 @@ class _TodayBody extends ConsumerWidget {
         suggested: suggested,
         freeTimes: view.freeTimes,
         now: ref.read(clockProvider)(),
+        allowDark: darkTimesAllowed(view.excluded, action),
       );
       if (chosen == null || !context.mounted) return;
       await accepted(() => save(chosen.changed ? chosen : null));
@@ -325,6 +328,7 @@ class _TodayBody extends ConsumerWidget {
                 onNotToday: () => notToday(lighter: true),
                 onWhy: () => showWhySheet(context, reasons: shown.allReasons),
                 onEdit: () => edit(
+                  action: shown.action,
                   title: shown.action.title,
                   ideaMinutes: shown.action.durationMin,
                   suggested: storedSlot(shown),
@@ -343,6 +347,7 @@ class _TodayBody extends ConsumerWidget {
                 onNotToday: () => notToday(option: option),
                 onWhy: () => showWhySheet(context, reasons: [for (final r in option.ranked.reasons) r.text]),
                 onEdit: () => edit(
+                  action: option.ranked.action,
                   title: option.ranked.action.title,
                   ideaMinutes: option.ranked.action.durationMin,
                   suggested: option.slot,

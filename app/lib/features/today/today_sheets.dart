@@ -187,6 +187,7 @@ Future<OfferEdit?> showEditSheet(
   required SuggestedSlot? suggested,
   required Set<String> freeTimes,
   required DateTime now,
+  bool allowDark = true,
 }) {
   return showLiltSheet<OfferEdit>(
     context,
@@ -197,6 +198,7 @@ Future<OfferEdit?> showEditSheet(
       suggested: suggested,
       freeTimes: freeTimes,
       now: now,
+      allowDark: allowDark,
       onSave: (edit) => Navigator.of(sheet).pop(edit),
     ),
   );
@@ -208,6 +210,7 @@ class _EditBody extends StatefulWidget {
     required this.suggested,
     required this.freeTimes,
     required this.now,
+    required this.allowDark,
     required this.onSave,
   });
 
@@ -215,6 +218,7 @@ class _EditBody extends StatefulWidget {
   final SuggestedSlot? suggested;
   final Set<String> freeTimes;
   final DateTime now;
+  final bool allowDark;
   final ValueChanged<OfferEdit> onSave;
 
   @override
@@ -224,15 +228,23 @@ class _EditBody extends StatefulWidget {
 class _EditBodyState extends State<_EditBody> {
   late int _minutes = widget.ideaMinutes;
   late final List<WhenChoice> _choices =
-      whenChoices(suggested: widget.suggested, freeTimes: widget.freeTimes, now: widget.now);
+      whenChoices(suggested: widget.suggested, freeTimes: widget.freeTimes, now: widget.now, allowDark: widget.allowDark);
   late WhenChoice _when = _choices.first;
   WhenChoice? _picked;
+  bool _refusedDark = false;
 
   Future<void> _pick() async {
     final t = await showTimePicker(context: context, initialTime: const TimeOfDay(hour: 12, minute: 30));
     if (t == null || !mounted) return;
+    final minute = t.hour * 60 + t.minute;
+    if (!widget.allowDark && isDarkMinute(minute)) {
+      // Edit never relaxes a leave-out (BR-011): say so, plainly, and keep what was chosen.
+      setState(() => _refusedDark = true);
+      return;
+    }
     setState(() {
-      _picked = pickedWhen(t.hour * 60 + t.minute, widget.now);
+      _refusedDark = false;
+      _picked = pickedWhen(minute, widget.now);
       _when = _picked!;
     });
   }
@@ -261,6 +273,14 @@ class _EditBodyState extends State<_EditBody> {
           ],
         ),
         LiltButton(label: 'Pick a time ›', kind: LiltButtonKind.text, flush: true, onPressed: _pick),
+        if (_refusedDark)
+          Semantics(
+            liveRegion: true,
+            child: Text(
+              'You left outdoor ideas out after dark, so pick a time between 06:00 and 18:00.',
+              style: LiltText.label.copyWith(color: LiltColors.inkMuted, fontWeight: FontWeight.w400),
+            ),
+          ),
         const SizedBox(height: LiltSpacing.md),
         LiltButton(
           label: 'Save changes',
