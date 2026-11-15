@@ -37,7 +37,7 @@ Built and tested:
 - My Way Back: a welcome-back banner after a lapse and three optional steps.
 - Discover and an activity page: browse the library with filters, save ideas, follow or stop following an activity.
 - Settings: export everything as JSON, delete everything, and the demo people.
-- A support message reachable from the start, before consent, with a "call your local emergency number" fallback.
+- A support message reachable from the start, before consent. It lists no helpline numbers yet (each region's numbers must be sourced and verified first), so it tells the person to call their local emergency number.
 
 Designed but not built for this submission: Together (events, clubs, accounts, a Firebase backend), gentle reminder notifications, adding an activity of your own from Today, search inside Discover, the timeline of how suggestions changed, share cards and achievements, and native Android and iPhone builds. The prototype is the web build only.
 
@@ -84,7 +84,7 @@ These are assumptions, not findings.
 - **The activity library is a team-written draft.** It has not been reviewed by an exercise or health professional, or for cultural fit. The file says so (`status: draft`, `reviewed_by: null`), and the build has a release gate that fails until a reviewer is recorded. We therefore do not describe the library as reviewed anywhere in the app.
 - **No target-user sessions have been completed yet.** The plan is three to five. Until then the prototype demonstrates that the ideas work in software, not that they help people.
 - **Small library.** 48 ideas will feel repetitive after a few weeks.
-- **Support numbers cover some regions only.** Elsewhere the app says to call the local emergency number. We will not add a number we cannot source.
+- **The support message has no helpline numbers yet.** It tells the person to call their local emergency number. We will add a number only when we can source and verify it, and the build has a release gate that fails until some are listed.
 - **The ranking does not learn across people.** There is no model, so it cannot discover patterns we did not write down. That is the price of being explainable.
 - **Web only.** Nothing has been tested on a real phone; accessibility has been tested by automated checks at 100% and 200% text, not by people using assistive technology.
 - **Single device.** Data does not sync, and clearing browser data removes it. Export is the only backup.
