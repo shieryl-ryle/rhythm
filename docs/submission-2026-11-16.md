@@ -11,9 +11,9 @@ Everything below is text to paste into the challenge form and the slide template
 | Technology type | **Software application** only. Do not tick AI agent, Machine learning or Analytics: the prototype has no AI or learned model, and the ranking is a written formula |
 | Prototype / deployment link | https://lilt-app-2026.web.app |
 | Software, hardware or both | **Software** |
-| Solution deck | PDF of the slide template, 5 MB or less (section 2) |
+| Solution deck | `C:Users	endililt-submissionLilt-solution-deck.pdf` (filled template, 0.5 MB; fill in team name, size and members, and the conflict-of-interest slide) |
 | Conflict of interest | [owner answers each box for every team member; the repo cannot know] |
-| Demo video link | [YouTube, Vimeo or Drive link, viewable by anyone with it; under 3 minutes] (script in section 3) |
+| Demo video link | [upload `C:Users	endililt-submissionLilt-demo-video.mp4` to YouTube (unlisted), Vimeo or Drive, viewable by anyone with the link, and paste the link] |
 
 ### Solution summary
 
@@ -129,28 +129,24 @@ Flutter and Dart engineering: the prototype was built, tested and deployed by th
 
 **Conflict of interest declaration:** [owner answers; the form lists six options including "None"]
 
-## 3. Demo video (under 3 minutes, a story, made from the Figma screens)
+## 3. Demo video (2 minutes 21 seconds, a family story, made from the polished Figma screens)
 
-The video is a screen recording of the Figma prototype in Present mode. The form's prototype link stays the live app, so the video should say once, in a caption on the first and last screen, "Design prototype (Figma)". Judges will compare the video with the link, and the caption keeps the two consistent. The flow already exists in the file: start the Present mode on the flow **"3 · Coming back after a break"** (frame 2.9).
+Both files are built and saved outside the repo (they are large binaries) in `C:\Users\tendi\lilt-submission\`:
+- `Lilt-demo-video.mp4`: the video, 1920x1080, with captions and no voice-over.
+- `Lilt-solution-deck.pdf`: the filled slide template, about 0.5 MB.
 
-**Story: Noor.** Noor walked every day for two weeks. Then work got busy, and five days went quiet. Most apps would now tell Noor the streak is broken. Lilt says welcome back.
+**The story.** In many families, health is a tradition: the evening walk after dinner, the Friday game, a grandmother's morning loop around the park. Sam used to join Gran on her loop most weekends, a slow run-walk at her pace. Then work got busier and the loop went quiet. Most apps would say "you broke your streak". Lilt says welcome back.
 
-**Record:** Figma, Present mode (the play button), flow 3. Use any screen recorder (Windows Game Bar, OBS, Loom) and record your voice. Upload to YouTube (unlisted) or Drive (anyone with the link) and paste the link into the form.
+**What it shows**, in order, all from the "Lilt · Screens" page of the Figma file: welcome back (2.9), what changed (4.1), what to try (4.2), a smaller first step (4.3), one tap to plan (2.5), why this suggestion (3.1), adjust this (3.2), how did it go (3.11), what changes next (2.6), rest counts and totals only go up (2.2), your data stays on your phone (7.5), then Together as "Designed, not built yet" (11.4), and an end card with the live prototype link.
 
-Every tap below was checked against the prototype's links (the exact label is in quotes).
+**Labels.** Every scene carries "Design prototype (Figma) · an illustrative story", and the end card says the screens are the Figma design prototype of the same flow and links the working web prototype. The caption "Sam", "Gran" and the story are invented. The video makes no claim the app cannot back: Together is labelled as not built, and nothing says "no account" because the Settings screen in Figma shows a Together account row.
 
-| Time | Frame and tap | Say |
-|---|---|---|
-| 0:00 to 0:12 | Title card (wordmark, "No streaks. Rest counts too."), then frame **2.9 After a break** | "Noor walked for two weeks. Then life got busy and five days went quiet. Most apps would say the streak is broken. Lilt says welcome back." |
-| 0:12 to 0:50 | Tap **"Start my way back"** to 4.1 What changed, pick one answer, **"Next"** to 4.2 What to try, **"Next"** to 4.3 A smaller first step | "No guilt. It never assumes why, and prefer not to say is always there. Then one small step that fits." |
-| 0:50 to 1:05 | Tap **"I'll try this"** to 2.5 Today's plan | "Noor taps once, and only then is it planned." |
-| 1:05 to 1:45 | Tap the **Today** tab to 2.3 Today, tap **"Why this?"** to 3.2, **"Got it"**, tap **"Edit"** to 3.3, **"Save changes"** back to 2.5 | "Every idea says why it is here. Noor can change the length and the time, and nothing changes until Noor taps." |
-| 1:45 to 2:15 | Tap **"How did it go?"** to 3.11, **"Save"** to 3.12 Saved, what changes, **"Done"**, **"Not now"** to 2.6, tap the **My rhythm** tab to 6.1 | "Partly counts. Rest counts. Lilt says what will change next, and the totals only go up." |
-| 2:15 to 2:30 | Tap the **Discover** tab to 5.1 For you | "Ideas for Noor, each with its reason, never anything Noor has left out." |
-| 2:30 to 2:50 | Tap the **profile** circle to 7.1 Settings, **"Export my data"** to 7.5, then 7.6 Export done | "Noor's data stays on the phone. No account, and no AI guessing. Export or delete in one tap." |
-| 2:50 to 2:58 | Wordmark, the URL, caption "Design prototype (Figma)" | "Lilt. No streaks. Rest counts too." |
+**Known differences between the Figma screens and the built app.**
+- The Figma "Why this suggestion?" screen says "a reviewed library of activities". That is false (the library is an unreviewed draft), so the video covers that line with a blank strip. The built app already says "a library of activities the Lilt team wrote". Fix the Figma text when you can.
+- Its reasons list ("Lunch is one of your free times", "Lunch runs have worked well for you") is illustrative; the built app lists the reasons its rules produce (docs/methods.md EQ-004).
+- The Figma Settings screen shows Together and Gentle reminders, which are not built.
 
-If you run over 3:00, shorten the Discover beat first. Do one practice run before recording: the Figma prototype follows the links above, but a missed tap sends you somewhere else.
+**Voice-over (optional).** The captions carry the story, so the video works muted. If you want your own voice, record the captions as a script over it; the captions are the narration. Re-render with `node build.js` in `video-work` if the captions change.
 
 ## 4. Before you submit, check
 
