@@ -9,6 +9,7 @@ import '../support/domain_support.dart';
 /// TC-032 (EQ-004, BR-004): each dominant term yields its template, and a reason never cites something the
 /// person did not do or say.
 void main() {
+  whyThisTests();
   late List<ActionInfo> actions;
   late Map<String, ActionInfo> byId;
 
@@ -166,5 +167,76 @@ void main() {
       ],
     );
     expect(reasonFor('run_walk', person).code, 'fit'); // 0.5 * 0.75 = 0.375 against 0.2 for the save
+  });
+}
+
+/// "Why this?" lists every reason that applies; the first is the one on the card (BR-004).
+void whyThisTests() {
+  late List<ActionInfo> actions;
+  late Map<String, ActionInfo> byId;
+
+  setUpAll(() async {
+    actions = await loadFixtureActions();
+    byId = {for (final a in actions) a.id: a};
+  });
+
+  RankedAction rankedFor(String actionId, PersonContext person) {
+    final target = byId[actionId]!;
+    return rankOptions(
+      actions: [for (final a in actions) if (a.id == actionId || a.activity != target.activity) a],
+      person: person,
+      request: const RankingRequest(),
+      libraryVersion: fixtureLibraryVersion,
+      limit: 20,
+    ).firstWhere((r) => r.action.id == actionId);
+  }
+
+  test('the card shows the first of the list, and the list has no repeats', () {
+    final person = PersonContext(
+      access: const {'none'},
+      wouldHelp: const {'shorter_sessions'},
+      reflections: [reflect('2026-10-01', ReflectionStatus.completed, action: byId['yoga_stretch'])],
+    );
+    final r = rankedFor('yoga_stretch', person);
+    expect(r.reasons.first.code, r.reason.code);
+    expect(r.reasons.map((x) => x.code).toSet().length, r.reasons.length);
+    // Each reason is one a rule allows (BR-004): the done term and the help term, both resting on something said.
+    expect(r.reasons.map((x) => x.code), containsAll(['fit', 'help_shorter']));
+  });
+
+  test('strongest first: what they did outweighs what they said would help', () {
+    final person = PersonContext(
+      access: const {'none'},
+      wouldHelp: const {'shorter_sessions'},
+      reflections: [reflect('2026-10-01', ReflectionStatus.completed, action: byId['yoga_stretch'])],
+    );
+    final codes = rankedFor('yoga_stretch', person).reasons.map((x) => x.code).toList();
+    expect(codes.indexOf('fit'), lessThan(codes.indexOf('help_shorter')));
+  });
+
+  test('"A small way to begin" is not listed for something they have already done', () {
+    final starter = actions.firstWhere((a) => a.isStarter);
+    final person = PersonContext(
+      access: const {'none'},
+      reflections: [reflect('2026-10-01', ReflectionStatus.completed, action: starter)],
+    );
+    final codes = rankedFor(starter.id, person).reasons.map((x) => x.code);
+    expect(codes, contains('fit'));
+    expect(codes, isNot(contains('starter')));
+  });
+
+  test('the neutral line stands alone: it is only used when nothing else applies', () {
+    final ranked = rankOptions(
+      actions: actions,
+      person: const PersonContext(access: {'none'}),
+      request: const RankingRequest(),
+      libraryVersion: fixtureLibraryVersion,
+      limit: 100,
+      startersFirst: false,
+    );
+    expect(ranked, isNotEmpty);
+    for (final r in ranked) {
+      if (r.reasons.any((x) => x.code == 'neutral')) expect(r.reasons, hasLength(1), reason: r.action.id);
+    }
   });
 }

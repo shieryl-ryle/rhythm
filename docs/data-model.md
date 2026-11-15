@@ -165,9 +165,9 @@ One option shown on a day (F-002). Serves BR-004, BR-005.
 | `suggested_time` | text | yes | null | Local `HH:mm`, from the person's free times (see the clock times in §7) |
 | `swap_index` | int | no | 1 | 1 to 3: the position in the day's "Something else" chain ("1 of 3"), so a restart cannot reshuffle the three candidates |
 | `status` | offer_status | no | offered | Set by the tap: "I'll try this" → `accepted`; Edit then "Save changes" → `edited`; "Something else" → the shown offer becomes `replaced`; "Not today" → `declined`; untouched stays `offered` |
-| `edited_duration_min` | int | yes | null | Set when edited (frame 3.2; options 10, 20, 30 or 45) |
-| `edited_day` | text | yes | null | Set when the "When" choice in frame 3.2 changes the day |
-| `edited_time` | text | yes | null | Set when the "When" choice in frame 3.2 changes the time |
+| `edited_duration_min` | int | yes | null | Set when edited (frame 3.3; options 10, 20, 30 or 45) |
+| `edited_day` | text | yes | null | Set when the "When" choice in frame 3.3 changes the day |
+| `edited_time` | text | yes | null | Set when the "When" choice in frame 3.3 changes the time |
 | `time_input_min` | int | yes | null | The Today time chip when the offer was made (10, 20, 30 or 45) |
 | `energy_input` | energy | yes | null | The Today energy chip when the offer was made |
 | `created_at` | datetime | no | now | |
@@ -177,7 +177,7 @@ The reasons live in `offer_reason`. The two Today chips default to 20 min and Me
 `display_text` were removed: there is no AI text in P0 (ADR-006). Add them back with the AI adapter.
 
 ### `offer_reason`
-The reasons shown for one offer: the card shows rank 1, and "Why this suggestion?" (frame 3.1) lists all of them.
+The reasons shown for one offer: the card shows rank 1, and "Why this suggestion?" (frame 3.2) lists all of them.
 Every reason must come from a rule in EQ-004 (BR-004).
 
 | Column | Type | Null | Default | Notes |

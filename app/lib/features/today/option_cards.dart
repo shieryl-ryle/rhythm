@@ -65,6 +65,44 @@ String relationLabel(ActivityKind kind, Map<ActivityKind, SetupPath> paths) => s
       null => 'New for you',
     };
 
+/// "Why this?" and "Edit", two quiet links under the reason (frame 2.3). Neither plans anything.
+class _OptionLinks extends StatelessWidget {
+  const _OptionLinks({required this.title, required this.onWhy, required this.onEdit});
+
+  final String title;
+  final VoidCallback? onWhy;
+  final VoidCallback? onEdit;
+
+  @override
+  Widget build(BuildContext context) {
+    if (onWhy == null && onEdit == null) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: LiltSpacing.xs),
+      child: Wrap(
+        spacing: LiltSpacing.lg,
+        children: [
+          if (onWhy != null)
+            LiltButton(
+              label: 'Why this?',
+              kind: LiltButtonKind.text,
+              flush: true,
+              semanticLabel: 'Why this suggestion? $title',
+              onPressed: onWhy,
+            ),
+          if (onEdit != null)
+            LiltButton(
+              label: 'Edit',
+              kind: LiltButtonKind.text,
+              flush: true,
+              semanticLabel: 'Edit $title',
+              onPressed: onEdit,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
 class _CardShell extends StatelessWidget {
   const _CardShell({required this.child});
 
@@ -130,6 +168,8 @@ class HeroCard extends StatelessWidget {
     required this.canSwap,
     required this.onAccept,
     required this.onSwap,
+    this.onWhy,
+    this.onEdit,
     required this.onNotToday,
   });
 
@@ -142,6 +182,8 @@ class HeroCard extends StatelessWidget {
   final VoidCallback onAccept;
   final VoidCallback onSwap;
   final VoidCallback onNotToday;
+  final VoidCallback? onWhy;
+  final VoidCallback? onEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -153,6 +195,7 @@ class HeroCard extends StatelessWidget {
           ActivityTag(activity: offer.action.activity, relation: relation),
           const SizedBox(height: LiltSpacing.lg),
           _OptionText(title: offer.action.title, suggested: slot, reason: offer.reason, big: true),
+          _OptionLinks(title: offer.action.title, onWhy: onWhy, onEdit: onEdit),
           const SizedBox(height: LiltSpacing.lg),
           LiltButton(label: 'I’ll try this', onPressed: onAccept),
           const SizedBox(height: LiltSpacing.sm),
@@ -188,6 +231,8 @@ class CompactCard extends StatelessWidget {
     required this.today,
     required this.onAccept,
     required this.onNotToday,
+    this.onWhy,
+    this.onEdit,
   });
 
   final TodayOption option;
@@ -195,6 +240,8 @@ class CompactCard extends StatelessWidget {
   final String today;
   final VoidCallback onAccept;
   final VoidCallback onNotToday;
+  final VoidCallback? onWhy;
+  final VoidCallback? onEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -210,6 +257,7 @@ class CompactCard extends StatelessWidget {
             suggested: option.slot == null ? null : suggestedLabel(option.slot!, today),
             reason: option.ranked.reason.text,
           ),
+          _OptionLinks(title: action.title, onWhy: onWhy, onEdit: onEdit),
           const SizedBox(height: LiltSpacing.md),
           LiltButtonRow(
             children: [
@@ -328,14 +376,19 @@ class PlannedCard extends StatelessWidget {
 }
 
 String? _slotLabel(StoredOffer offer, String today) {
+  final slot = storedSlot(offer);
+  return slot == null ? null : suggestedLabel(slot, today);
+}
+
+/// The slot a stored offer was suggested for, or null when the person gave no free time.
+SuggestedSlot? storedSlot(StoredOffer offer) {
   final time = offer.offer.suggestedTime;
   if (time == null) return null;
-  final slot = SuggestedSlot(
+  return SuggestedSlot(
     day: offer.offer.suggestedDay,
     minute: int.parse(time.substring(0, 2)) * 60 + int.parse(time.substring(3)),
     code: _codeFor(time),
   );
-  return suggestedLabel(slot, today);
 }
 
 /// The slot a stored clock time belongs to (the clock times are fixed, docs/data-model.md).

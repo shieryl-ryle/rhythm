@@ -249,3 +249,99 @@ ChipRelaxation _relaxation(TodayChips chips, bool Function(TodayChips) hasOption
     chips: TodayChips(timeMin: TodayChips.timeChoices.last, energy: Energy.high),
   );
 }
+
+// ---- Edit (S-102, frame 3.3 "Adjust this")
+
+/// What "Save changes" plans: the length and the day and time the person chose. Saving it is a tap, so it is the
+/// person's own plan (BR-005).
+class OfferEdit {
+  const OfferEdit({required this.durationMin, required this.day, this.time, this.changed = true});
+
+  final int durationMin;
+  final String day;
+
+  /// False when "Save changes" was tapped with nothing changed: that plans the suggestion as it was, so it is
+  /// counted as accepted, not as an edit.
+  final bool changed;
+
+  /// "HH:mm", or null when the person has no set time.
+  final String? time;
+}
+
+/// "How long": the lengths the Today chip offers, and always the idea's own length too, so saving without a change
+/// plans what was suggested.
+List<int> durationChoices(int ideaMinutes) => ({...TodayChips.timeChoices, ideaMinutes}.toList()..sort());
+
+/// One answer to "When".
+class WhenChoice {
+  const WhenChoice({required this.day, required this.time, required this.label});
+
+  final String day;
+  final String? time;
+  final String label;
+
+  @override
+  bool operator ==(Object other) => other is WhenChoice && other.day == day && other.time == time;
+
+  @override
+  int get hashCode => Object.hash(day, time);
+}
+
+/// "Today 12:30", "Tomorrow 12:30", "Sat 10:00"; "Today" when there is no set time.
+String whenLabel(String day, String? time, String today) {
+  final word = day == today
+      ? 'Today'
+      : day == addDays(today, 1)
+          ? 'Tomorrow'
+          : _weekdayName(day);
+  return time == null ? word : '$word $time';
+}
+
+/// The choices under "When": what was suggested first, then the next free times after it (at most three in all).
+/// Dark slots are left out when [allowDark] is false (BR-011).
+/// "Pick a time" is a separate control on the sheet.
+List<WhenChoice> whenChoices({
+  required SuggestedSlot? suggested,
+  required Set<String> freeTimes,
+  required DateTime now,
+  bool allowDark = true,
+}) {
+  final today = formatDay(DateTime.utc(now.year, now.month, now.day));
+  final choices = <WhenChoice>[
+    if (suggested != null)
+      WhenChoice(day: suggested.day, time: suggested.clock, label: whenLabel(suggested.day, suggested.clock, today))
+    else
+      WhenChoice(day: today, time: null, label: whenLabel(today, null, today)),
+  ];
+  for (final slot in upcomingSlots(freeTimes, now)) {
+    if (choices.length == 3) break;
+    if (!allowDark && slot.isDark) continue;
+    final choice = WhenChoice(day: slot.day, time: slot.clock, label: whenLabel(slot.day, slot.clock, today));
+    if (!choices.contains(choice)) choices.add(choice);
+  }
+  return choices;
+}
+
+/// A time the person picked: today if it is still ahead, otherwise tomorrow, so Today never plans the past.
+WhenChoice pickedWhen(int minuteOfDay, DateTime now) {
+  final today = formatDay(DateTime.utc(now.year, now.month, now.day));
+  final day = minuteOfDay > now.hour * 60 + now.minute ? today : addDays(today, 1);
+  final time = '${(minuteOfDay ~/ 60).toString().padLeft(2, '0')}:${(minuteOfDay % 60).toString().padLeft(2, '0')}';
+  return WhenChoice(day: day, time: time, label: whenLabel(day, time, today));
+}
+
+/// Whether this idea may be planned in dark hours (18:00 to 06:00): not an outdoor idea when "Outdoors after dark"
+/// is left out (BR-011). Edit never relaxes a leave-out, so the sheet, "Pick a time" and the save all use this.
+bool darkTimesAllowed(Set<String> excluded, ActionInfo action) =>
+    !(excluded.contains('after_dark') && action.tags.contains('outdoors'));
+
+/// Whether a minute of the day is in dark hours, the same hours as [SuggestedSlot.isDark].
+bool isDarkMinute(int minuteOfDay) => minuteOfDay >= 18 * 60 || minuteOfDay < 6 * 60;
+
+/// Whether an edit may be saved for this idea: a time in dark hours is refused when the idea may not be planned then.
+bool editAllowed({required Set<String> excluded, required ActionInfo action, required OfferEdit? edit}) {
+  final time = edit?.time;
+  if (time == null) return true;
+  final minute = int.parse(time.substring(0, 2)) * 60 + int.parse(time.substring(3));
+  return !isDarkMinute(minute) || darkTimesAllowed(excluded, action);
+}
