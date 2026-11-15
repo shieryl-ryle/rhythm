@@ -32,12 +32,12 @@ Lilt does three things differently.
 
 Privacy by design: personal data stays on the device with no account, consent comes first, and the person can export or delete everything. There is no AI model in this prototype; a rules-based approach keeps every reason true and every behaviour testable. Lilt is wellness support, not medical advice, and free text that mentions self-harm, disordered eating or a medical emergency gets a support message instead of a suggestion.
 
-Status: a working web prototype (Flutter) with 624 automated tests. The activity library is a team-written draft, not yet reviewed by a health professional, and we have not yet tested with target users.
+Status: a working web prototype (Flutter) with 624 automated tests. The activity library is a team-written draft, not yet reviewed by a health professional, and we have not yet tested with target users. The demo video uses the Figma design prototype of the same flow.
 ```
 
 ### What has been built during the challenge
 
-**Limit: 1500 characters.** This text says Edit and "Why this?" are live: it is only true once PR #25 is merged and the demo build is deployed.
+**Limit: 1500 characters.** This text says Edit and "Why this?" are live: that is true once the demo build from the merged PR #25 is deployed.
 
 ```text
 A working, deployed web prototype (Flutter and Dart; runs in a modern browser and is designed for Android and iPhone). Built during the challenge:
@@ -62,7 +62,7 @@ Template: https://docs.google.com/presentation/d/1esYKP7jdFF1KXzhBR3mjFx5pxv0ECz
 
 **Team members:** [name, country, role, organization, age confirmation for each]
 
-**Team Capability Summary (max 1,000 characters):** edit to match the real people.
+**Team Capability Summary (max 1,000 characters):**
 
 ```text
 Flutter and Dart engineering: the prototype was built, tested and deployed by the team within the challenge window, with 624 automated tests and a written set of business rules that each change is reviewed against. Product and UX design: a full design system and about 100 screens drawn in Figma before the build, then reviewed for usability and accessibility (tap targets, text at 200%, contrast). Domain approach: behaviour-change reasoning for people who lapse, an explainable rules-based ranking, and privacy by design (on-device data, consent first, export and delete). Gaps we know about: no exercise-science or clinical reviewer yet, and no user sessions completed; both are planned next.
@@ -89,12 +89,12 @@ Flutter and Dart engineering: the prototype was built, tested and deployed by th
 - Plans that tie an action to a situation (if it is lunchtime, then I walk) help people act on intentions. Gollwitzer PM. Implementation intentions: strong effects of simple plans. *American Psychologist* 1999;54(7):493-503. Lilt ties each idea to one of the person's own free times.
 - A single lapse can spiral when the person blames themselves (the "abstinence violation effect"). Marlatt GA, Gordon JR. *Relapse Prevention*. Guilford Press, 1985. This comes from addiction research; we use it as an analogy for designing a no-blame return, not as evidence that Lilt works.
 - Our own evidence is small: written responses from six friends (four students, two working people), the founder's experience and one teammate's review. A convenience sample, not representative, not validated in Abu Dhabi.
-- Prior testing: automated tests only. No sessions with target users have been completed. [Update this if any happen before you submit.]
+- Prior testing: automated tests only. No sessions with target users have been completed.
 
 **Data sources and legal right to use them:**
 - The person's own answers (setup, plan, reflections, observations): personal and health-related; owner is the person; collected only after consent; stored on their device only; never sent anywhere; can be exported or deleted.
 - Activity library (48 ideas): written by the team; owned by the team; not personal data. Draft, not yet reviewed by a professional.
-- Red-flag phrase list (115 phrases): written by the team from public crisis-line and eating-disorder guidance; [add the sources before final]. Used on free text on the device only.
+- Red-flag phrase list (115 phrases): written by the team from public crisis-line and eating-disorder guidance; the draft does not yet cite its sources, and we will before any wider use. Used on free text on the device only.
 - Support numbers: none listed yet. The support message tells the person to call their local emergency number; no number is added until sourced and verified.
 - Demo people: invented, generated with a fixed seed; contain no real person's data.
 - Personal data is used: yes, on the device only.
@@ -119,7 +119,7 @@ Flutter and Dart engineering: the prototype was built, tested and deployed by th
 - Regulatory: wellness positioning, not a medical device; consent and data-protection rules of the pilot country; app-store policies for any store release.
 - Sustainability: free for people during the challenge; any later funding model is untested.
 
-**Pre-existing IP and third-party materials:** All code, designs and content were created by the team during the challenge window. [Confirm.]
+**Pre-existing IP and third-party materials:** All code, designs and content were created by the team during the challenge window; the repository's first commit is dated 2026-10-24.
 - Flutter and Dart (BSD-3, Google), go_router (BSD-3), path_provider (BSD-3).
 - flutter_riverpod and riverpod (MIT), drift and drift_flutter (MIT), sqlite3 (MIT), cupertino_icons (MIT).
 - Fonts: Geist, Instrument Serif and Unbounded (SIL Open Font License 1.1; the licence files ship in the repo).
@@ -129,30 +129,31 @@ Flutter and Dart engineering: the prototype was built, tested and deployed by th
 
 **Conflict of interest declaration:** [owner answers; the form lists six options including "None"]
 
-## 3. Demo video (under 3 minutes, a story)
+## 3. Demo video (under 3 minutes, a story, made from the Figma screens)
 
-**Record the real app, not Figma.** The form asks for a working prototype and for a video that shows "what your solution does and how it works". The live web app is that, and it has the 624 tests behind it; a Figma-only video would hide it. Use the Figma frames for one thing only: the closing "what comes next" beat (Together, reminders), with a caption "Designed, not built yet". Do not show a Figma frame as if it were the app.
+The video is a screen recording of the Figma prototype in Present mode. The form's prototype link stays the live app, so the video should say once, in a caption on the first and last screen, "Design prototype (Figma)". Judges will compare the video with the link, and the caption keeps the two consistent. The flow already exists in the file: start the Present mode on the flow **"3 · Coming back after a break"** (frame 2.9).
 
-**Story: Noor.** Noor walked every day for two weeks. Then work got busy, and five days went quiet. Most apps would now tell Noor the streak is broken. Lilt does not.
+**Story: Noor.** Noor walked every day for two weeks. Then work got busy, and five days went quiet. Most apps would now tell Noor the streak is broken. Lilt says welcome back.
 
-**Setup:** open https://lilt-app-2026.web.app in a private window, browser window about 480 px wide so it looks like a phone, Settings, "Demo build", load Noor. Do a dry run first and fix anything that looks off. Record with any screen recorder and a voice-over; upload to YouTube (unlisted) or Drive (anyone with the link).
+**Record:** Figma, Present mode (the play button), flow 3. Use any screen recorder (Windows Game Bar, OBS, Loom) and record your voice. Upload to YouTube (unlisted) or Drive (anyone with the link) and paste the link into the form.
 
-| Time | Show | Say |
+Every tap below was checked against the prototype's links (the exact label is in quotes).
+
+| Time | Frame and tap | Say |
 |---|---|---|
-| 0:00 to 0:15 | Title card, then the Lilt wordmark | "Noor walked for two weeks. Then life got busy and five days went quiet. Most apps would say the streak is broken. Lilt says welcome back." |
-| 0:15 to 0:40 | Today with the welcome-back banner; tap "Find my way back" | "No guilt, no streak. Just: want help picking a gentle first step? And Noor can skip it." |
-| 0:40 to 1:10 | The three steps: what changed (pick "busier" or "prefer not to say"), what to try, a small first step | "It never assumes why. Prefer not to say is always there. Then one small step that fits." |
-| 1:10 to 1:45 | Today: the idea and its reason; tap "Why this?"; close; tap "Edit", pick 10 min, "Save changes"; the "Added to today's plan" message | "Every idea says why it is here. Noor can change the length and time. Nothing is planned until Noor taps." |
-| 1:45 to 2:10 | "How did it go?", answer "Partly", the "What changes next" sentence; then My rhythm: "Came back 1 time after a break" | "Partly counts. Rest counts. Totals only go up. Coming back is something Lilt celebrates." |
-| 2:10 to 2:25 | Discover: the list with reasons, one filter chip | "Discover shows ideas for Noor, with reasons, never anything Noor has left out." |
-| 2:25 to 2:40 | Settings: "Export my data", "Delete everything" | "Noor's data stays on the phone. No account. No AI guessing. Export or delete in one tap." |
-| 2:40 to 2:55 | Figma frames for Together and reminders, captioned "Designed, not built yet"; then the wordmark and the URL | "Next: gentle reminders and doing it together. Lilt: no streaks, rest counts too." |
+| 0:00 to 0:12 | Title card (wordmark, "No streaks. Rest counts too."), then frame **2.9 After a break** | "Noor walked for two weeks. Then life got busy and five days went quiet. Most apps would say the streak is broken. Lilt says welcome back." |
+| 0:12 to 0:50 | Tap **"Start my way back"** to 4.1 What changed, pick one answer, **"Next"** to 4.2 What to try, **"Next"** to 4.3 A smaller first step | "No guilt. It never assumes why, and prefer not to say is always there. Then one small step that fits." |
+| 0:50 to 1:05 | Tap **"I'll try this"** to 2.5 Today's plan | "Noor taps once, and only then is it planned." |
+| 1:05 to 1:45 | Tap the **Today** tab to 2.3 Today, tap **"Why this?"** to 3.2, **"Got it"**, tap **"Edit"** to 3.3, **"Save changes"** back to 2.5 | "Every idea says why it is here. Noor can change the length and the time, and nothing changes until Noor taps." |
+| 1:45 to 2:15 | Tap **"How did it go?"** to 3.11, **"Save"** to 3.12 Saved, what changes, **"Done"**, **"Not now"** to 2.6, tap the **My rhythm** tab to 6.1 | "Partly counts. Rest counts. Lilt says what will change next, and the totals only go up." |
+| 2:15 to 2:30 | Tap the **Discover** tab to 5.1 For you | "Ideas for Noor, each with its reason, never anything Noor has left out." |
+| 2:30 to 2:50 | Tap the **profile** circle to 7.1 Settings, **"Export my data"** to 7.5, then 7.6 Export done | "Noor's data stays on the phone. No account, and no AI guessing. Export or delete in one tap." |
+| 2:50 to 2:58 | Wordmark, the URL, caption "Design prototype (Figma)" | "Lilt. No streaks. Rest counts too." |
 
-Keep it under 3:00; trim the Discover beat first if you run over.
+If you run over 3:00, shorten the Discover beat first. Do one practice run before recording: the Figma prototype follows the links above, but a missed tap sends you somewhere else.
 
 ## 4. Before you submit, check
 
-1. PR #25 merged and the demo build deployed, so the live site matches section 1. If you skip #25, delete Edit and "Why this?" from the texts and the video.
-2. Every [bracket] above is filled in, especially the conflict-of-interest answers, which only you and the team can give.
-3. The statement that no target-user sessions have been completed is still true.
-4. Open the live site in a private window and go through the Noor flow once before you record.
+1. Deploy the demo build (PR #25 is merged), then open the live site in a private window at phone width and check: Settings, Demo build, load Noor; on Today open "Why this?" and "Edit", choose 10 min and "Save changes", see "Added to today's plan" and Undo; close Edit without saving and see that nothing was planned.
+2. Fill in the brackets that only you can answer: team name and size, team members, the conflict-of-interest answers (the form and the slide), and the video link.
+3. The statement that no target-user sessions have been completed is still true when you submit.
