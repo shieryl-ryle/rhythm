@@ -203,7 +203,7 @@ void main() {
       final db = await _open(tester);
       await _tap(tester, find.text('Why this?').first);
       expect(find.text('Why this suggestion?'), findsOneWidget);
-      expect(find.textContaining('reviewed library of activities'), findsOneWidget);
+      expect(find.textContaining('library of activities the Lilt team wrote'), findsOneWidget);
       // The reason on the card is the first one in the sheet.
       final first = (await db.select(db.offerReasons).get()).where((r) => r.rank == 1).map((r) => r.reasonText).toSet();
       expect(first.any((text) => _inSheet(text).evaluate().isNotEmpty), isTrue);

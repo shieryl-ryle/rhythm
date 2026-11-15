@@ -167,7 +167,7 @@ Future<void> showWhySheet(BuildContext context, {required List<String> reasons})
             ),
           ),
         Text(
-          'Ideas come from a reviewed library of activities, ranked by what you’ve told us.',
+          'Ideas come from a library of activities the Lilt team wrote, ranked by what you’ve told us.',
           style: LiltText.label.copyWith(color: LiltColors.inkMuted, fontWeight: FontWeight.w400),
         ),
         const SizedBox(height: LiltSpacing.lg),
