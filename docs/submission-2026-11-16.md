@@ -129,24 +129,26 @@ Flutter and Dart engineering: the prototype was built, tested and deployed by th
 
 **Conflict of interest declaration:** [owner answers; the form lists six options including "None"]
 
-## 3. Demo video (2 minutes 21 seconds, a family story, made from the polished Figma screens)
+## 3. Demo video (2 minutes 43 seconds, a family story with a voice-over, made from the polished Figma screens)
 
 Both files are built and saved outside the repo (they are large binaries) in `C:\Users\tendi\lilt-submission\`:
-- `Lilt-demo-video.mp4`: the video, 1920x1080, with captions and no voice-over.
+- `Lilt-demo-video.mp4`: the video, 1920x1080, about 18 MB, with a voice-over and captions. It is under the 3-minute limit.
 - `Lilt-solution-deck.pdf`: the filled slide template, about 0.5 MB.
 
-**The story.** In many families, health is a tradition: the evening walk after dinner, the Friday game, a grandmother's morning loop around the park. Sam used to join Gran on her loop most weekends, a slow run-walk at her pace. Then work got busier and the loop went quiet. Most apps would say "you broke your streak". Lilt says welcome back.
+**The story.** It opens with the owner's line: *In many families, health is a tradition. The evening walk after dinner. The Friday game. A grandmother's morning loop around the park.* It then speaks to the viewer as "you", with no invented characters. Nobody called it exercise; it was an hour beside someone you love. Then life got louder (a new job, a new city, a baby, a hard year) and the shoes stayed by the door. The longer it has been, the heavier it feels to start, and most apps make it worse by showing a broken streak. Lilt says welcome back, asks what changed (never why), starts small, lets you decide, shows its reasons, lets you edit, listens, and counts rest. It closes on "Health isn't a streak. It's a tradition. The loop is still there, whenever you're ready."
 
-**What it shows**, in order, all from the "Lilt · Screens" page of the Figma file: welcome back (2.9), what changed (4.1), what to try (4.2), a smaller first step (4.3), one tap to plan (2.5), why this suggestion (3.1), adjust this (3.2), how did it go (3.11), what changes next (2.6), rest counts and totals only go up (2.2), your data stays on your phone (7.5), then Together as "Designed, not built yet" (11.4), and an end card with the live prototype link.
+**Animation.** The five story scenes (opening, side by side, life gets louder with the shoes by the door, the broken streak, the return) are drawn as animation: a park loop with two walkers, the sun crossing the day, a bouncing ball, notification cards piling up, a door, a streak card going grey, and a door opening onto the loop. The phone scenes slide in over a slowly moving background with captions that appear line by line, and the end card animates the l·i·l bars. The animation is drawn by `video-work/anim.js` (outside the repo).
 
-**Labels.** Every scene carries "Design prototype (Figma) · an illustrative story", and the end card says the screens are the Figma design prototype of the same flow and links the working web prototype. The caption "Sam", "Gran" and the story are invented. The video makes no claim the app cannot back: Together is labelled as not built, and nothing says "no account" because the Settings screen in Figma shows a Together account row.
+**What the phone scenes show**, in order, all from the "Lilt · Screens" page of the Figma file: welcome back (2.9), what changed (4.1), what to try (4.2), a smaller first step (4.3), one tap to plan (2.5), why this suggestion (3.1), adjust this (3.2), how did it go (3.11), what changes next (2.6), rest counts and totals only go up (2.3), your data stays on your phone (7.5), then Together as "Designed, not built yet" (11.4), and an end card with the live prototype link.
+
+**Voice.** The voice-over is Kokoro-82M (voice af_heart), an open-source text-to-speech model under the Apache-2.0 licence (hexgrad/Kokoro-82M on Hugging Face), run locally through sherpa-onnx with the full-precision model. The closing card credits it as an AI-generated voice. `make-voice.ps1` regenerates the audio; `node build.js` in `video-work` rebuilds the video.
+
+**Labels.** Every scene's footer reads "Lilt · Future Health Digital Innovation Challenge". The end card says the screens are the Figma design prototype of the same flow and links the working web prototype; the Together scene says "Designed, not built yet", and it is not claimed as built anywhere. Add the same disclosure to the video description when you upload it. The story is told in the second person and uses no real or invented person. The video does not claim "no account", because the Settings screen in Figma shows a Together account row.
 
 **Known differences between the Figma screens and the built app.**
 - The Figma "Why this suggestion?" screen says "a reviewed library of activities". That is false (the library is an unreviewed draft), so the video covers that line with a blank strip. The built app already says "a library of activities the Lilt team wrote". Fix the Figma text when you can.
 - Its reasons list ("Lunch is one of your free times", "Lunch runs have worked well for you") is illustrative; the built app lists the reasons its rules produce (docs/methods.md EQ-004).
 - The Figma Settings screen shows Together and Gentle reminders, which are not built.
-
-**Voice-over (optional).** The captions carry the story, so the video works muted. If you want your own voice, record the captions as a script over it; the captions are the narration. Re-render with `node build.js` in `video-work` if the captions change.
 
 ## 4. Before you submit, check
 
