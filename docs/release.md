@@ -1,6 +1,6 @@
 # Release runbook — Rhythm (Flutter → App Store + Google Play)
 
-> **Status (2026-10-23):** inactive until the first store release. The challenge submission is an APK + web build ([Ops](ops.md)). Run `/ship-mobile-release` when a store release is planned.
+> **Status (2026-11-21):** the challenge is submitted. The first store release (iOS, TestFlight first) is now active: the Apple Developer account is approved (owner, individual), `app/ios/` exists and builds on a macOS runner (`.github/workflows/ios-build.yml`), and a manual signed-upload workflow is written (`.github/workflows/testflight.yml`, not yet run). Where iOS builds run (GitHub macOS runners instead of a Mac) is proposed and awaits the owner’s confirmation and a superseding ADR for ADR-018 decision 3.
 
 > **Owns:** how a version gets from `main` to users on both stores. Rules the build must satisfy
 > live in [Store compliance](store-compliance.md); listing copy in [Store listing](store-listing.md);
@@ -15,7 +15,7 @@
 | App ID | Bundle ID `io.github.shierylryle.lilt` (ADR-018) | Application ID `io.github.shierylryle.lilt` (set in `app/android/app/build.gradle.kts`) |
 | Store record | App Store Connect app `TBD: created by the owner` | Play Console app `TBD: after the hackathon` |
 | Developer account | Apple, individual, held by the owner (US$99 a year) | TBD after the hackathon: Play developer account (personal / organization undecided) |
-| Signing | Xcode automatic signing, team `TBD: TEAM_ID` | Upload key in `upload-keystore.jks` (path in key.properties, outside repo); Play App Signing enabled |
+| Signing | Automatic, cloud-managed signing in CI with an App Store Connect API key (team id in the `APPLE_TEAM_ID` secret) | Upload key in `upload-keystore.jks` (path in key.properties, outside repo); Play App Signing enabled |
 
 **Account type matters:** new *personal* Google Play accounts must run a closed test before
 production access is granted (see Store compliance §Google Play). Whether organization accounts are exempt is
@@ -36,7 +36,8 @@ the hackathon.
 |---|---|---|
 | `app/android/key.properties` | local only, git-ignored | Android upload keystore path + passwords |
 | `upload-keystore.jks` | password manager / secure storage, **backed up** | Android upload key — losing it requires a Play support reset |
-| App Store Connect API key | TBD: secure storage | CLI / CI uploads |
+| `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8` (App Store Connect API key, Admin role) | GitHub environment secrets (`testflight`) | `.github/workflows/testflight.yml` signing and upload |
+| `APPLE_TEAM_ID` | GitHub environment secret (`testflight`) | Same workflow |
 | `--dart-define` values (`RECAPTCHA_SITE_KEY`, `DEMO`) | build command line | API endpoints, keys — never hard-coded |
 
 ## 3. Release steps
