@@ -1,0 +1,38 @@
+# Proves the iOS project builds on a macOS runner (no signing, no Apple account needed). Does not upload anything.
+# Signed TestFlight uploads come later and need the Apple Developer account (docs/release.md §3).
+name: ios-build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [task/ios-platform]
+  pull_request:
+    paths:
+      - 'app/**'
+      - '.github/workflows/ios-build.yml'
+
+jobs:
+  ios:
+    runs-on: macos-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.0'
+          channel: stable
+          cache: true
+      - name: Dependencies
+        working-directory: app
+        run: flutter pub get
+      - name: Analyze
+        working-directory: app
+        run: flutter analyze
+      - name: Build iOS (release, no codesign, no DEMO build)
+        working-directory: app
+        run: flutter build ios --release --no-codesign
+      - name: Show what was built
+        run: |
+          ls -la app/build/ios/iphoneos/
+          /usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" app/build/ios/iphoneos/Runner.app/Info.plist
+          ls app/build/ios/iphoneos/Runner.app | grep -i privacy || true
