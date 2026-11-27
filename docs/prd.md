@@ -1,6 +1,10 @@
 # PRD — Rhythm (working name)
 
-**Status:** Draft v0.5 · **Owner:** Shieryl · **Last updated:** 2026-10-25
+**Status:** Draft v0.6 · **Owner:** Shieryl · **Last updated:** 2026-11-27
+
+v0.6 change ([ADR-019](adr/ADR-019-together-deferred-after-challenge.md)):
+- **Together (F-018) is deferred out of the first release.** No account and no backend are added for it. The v0.5
+  text below is kept as the design for when it returns.
 
 v0.5 changes ([ADR-009](adr/ADR-009-community-in-p0.md)):
 - **Community is P0 (F-018).** A Together tab with events and clubs near you, RSVP, join and host.
@@ -80,7 +84,9 @@ and not validated in Abu Dhabi. It informs hypotheses only.
   enjoyed, what got in the way, and when they are free. Every suggestion shows its reason.
   **No LLM in P0** ([ADR-006](adr/ADR-006-no-ai-in-p0.md)).
 - **Data:** personal and health data (setup answers, reflections, grid, observations) stays on
-  the device, with no account needed. **Together (F-018)** is the exception:
+  the device, with no account needed. **Together (F-018)** would be the exception, but it is deferred
+  ([ADR-019](adr/ADR-019-together-deferred-after-challenge.md)), so the first release has no account at all. If it
+  returns:
   - It needs an account.
   - It stores a community profile (display name, optional photo, approximate area), clubs,
     events, RSVPs and reports in Firebase.
@@ -130,7 +136,7 @@ entry point.
 | F-014 | Activity Data Import | As a user, I want the app to learn from activities my phone or watch already records (Health Connect, Apple Health), so that I don't have to log everything by hand. | P1 |
 | F-015 | Share Achievements | As a user, I want to share an achievement card (e.g. "Came back after a break", "First pickleball game", "30 active days") through my phone's share sheet to Instagram, TikTok, Facebook or X, so that my effort is seen and celebrated. In P1 I can also share an open challenge as a link, QR code or join code (F-012). | P0 (cards) · P1 (challenge sharing) |
 | F-016 | Home-screen Widget | As a user, I want a home-screen widget that shows today's suggestion and my grid, and opens Today when tapped, so that I see it without opening the app. | P1 (moved from P0 by ADR-009) |
-| F-018 | Community (Together tab) | As someone who'd rather be active with others, I want a **Together** tab where I can find events and clubs near me, filter by activity, level and time, see who's going, RSVP so it joins Today's plan, join clubs, and host my own event at a public place, so that I find people to do it with. Like Reclub, but tied to my rhythm. | P0 ([ADR-009](adr/ADR-009-community-in-p0.md)) |
+| F-018 | Community (Together tab) | As someone who'd rather be active with others, I want a **Together** tab where I can find events and clubs near me, filter by activity, level and time, see who's going, RSVP so it joins Today's plan, join clubs, and host my own event at a public place, so that I find people to do it with. Like Reclub, but tied to my rhythm. | Deferred ([ADR-019](adr/ADR-019-together-deferred-after-challenge.md); was P0 in [ADR-009](adr/ADR-009-community-in-p0.md)) |
 | F-017 | iPhone & Apple Watch | As an iPhone user, I want Rhythm on my iPhone, and on my Apple Watch to see today's suggestion and log a quick check-in, so that it's with me wherever I am. | P1 |
 
 **Hard cuts (this phase):**
@@ -403,7 +409,7 @@ analytics; on-device data is shared only with the participant's consent.
 - Diagnosis, clinical risk scores, or medical advice: wellness only (BR-001).
 - Healthy habits other than physical activity (sleep, hydration…) in this phase.
 - Friends, circles, group challenges, invites and together days in P0: they arrive in P1
-  (F-010..F-012). Together (F-018) is the only P0 feature with an account.
+  (F-010..F-012). Together (F-018) is deferred too (ADR-019); the first release has no account.
 - Chat or messaging between users: not planned.
 - Wearable or health-platform integration in P0: planned as P1 (F-014).
 - Recording activities (GPS, route, pace, heart rate, live tracking or a running timer) in P0 or P1 ([ADR-014](adr/ADR-014-lilt-does-not-record-activities.md)). Lilt plans, suggests and asks how it went; it does not record. Importing phone or watch data later is F-014.

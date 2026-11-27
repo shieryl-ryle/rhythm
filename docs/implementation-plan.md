@@ -4,9 +4,8 @@
 
 **Plan owner:** Shieryl
 **Last checkpoint:** 2026-11-27 · The core loop is built and the web build is live (see §3). The challenge
-submission went in on 2026-11-21 (owner-confirmed); PR #27 with the submission pack is still open. Together
-(TASK-013 to TASK-016), notifications and share cards have no code, and the owner has not yet decided whether
-Together is cut. The iOS and TestFlight work is postponed until the owner has a Mac. Earlier milestones, now
+submission went in on 2026-11-21 (owner-confirmed); PR #27 with the submission pack is still open. Notifications
+and share cards have no code. Together (TASK-013 to TASK-016) is deferred by ADR-019. The iOS and TestFlight work is postponed until the owner has a Mac. Earlier milestones, now
 passed: skeleton deployed 2026-10-30 · feature freeze 2026-11-13 · submission 2026-11-20 ([BRD](brd.md) §7).
 
 ## 0. Rules
@@ -34,13 +33,15 @@ Statuses: `ready` · `in-progress` · `in-review` · `done` · `cut`
 | TASK-011 | Wireframes v2: apply the design-review fixes; cut S-002; new setup (activity profile, free times); visible adapting (what changes after reflection, "how Rhythm adjusted", suggested time, "my plan fell through"); P1 social concept screens for the pitch | ADR-005..007; F-001..F-004, F-010, F-012 | Claude (for Shieryl) | done | Figma "Rhythm — Wireframes v1" (drafts), page "Wireframes v2" | Superseded by TASK-012, then TASK-017 |
 | TASK-012 | Wireframes v3 (PRD v0.4): 4-path setup with follow-ups per path; following several activities; grid at the top of Today; share-card sheet; Android widget; calendar-sync opt-in; P1 Challenges tab with invite by link, QR code and join code; P1 Apple Watch glance | ADR-008; F-001, F-002, F-006, F-012, F-013, F-015..F-017 · Q10, Q11 open | Claude (for Shieryl) | done | Figma "Rhythm — Wireframes v1" (drafts), page "Wireframes v3" | Superseded by TASK-017 |
 | TASK-017 | Wireframes v5: apply the senior UI/UX review (kit sizes and 48 dp targets, accessible search and fields, sheets with the dimmed parent screen and ×, snackbars and dialogs, one primary on Today, 44 dp calendar, Discover loading, edit free times); calendar and widget moved to P1 | ADR-009; DESIGN.md interaction rules | Claude (for Shieryl) | done | Figma page "Wireframes v5" | Figma page "Lilt · Screens": 99 frames, 523 links, polish pass and reviewer approval 2026-10-26 (.claude/figma-state.json). Known unfixed: header more icon box, 10.8 hero alignment, 10.3 QR placeholder |
-| TASK-013 | Run `adapt-project` for the new P0 capabilities: accounts (Firebase Auth), backend (Firestore and security rules), approximate location, user-generated content and moderation, share sheet. It adds rules, tests and store-compliance checks. Calendar and widget are now P1 | ADR-008, ADR-009; BR-023, BR-025..BR-029 | Claude (for Shieryl) | ready | `docs/`, `.claude/` | |
-| TASK-014 | Community backend: Firebase Auth (email link and Google), Firestore collections (profiles, clubs, events, rsvps, reports, blocks), security rules with emulator tests, account deletion that removes server data (BR-017), budget alert | ADR-009; F-018; BR-017, BR-025..BR-029 | unassigned | ready (after TASK-001, TASK-013) | `app/lib/community/data/`, `firestore.rules`, `test/rules/` | |
-| TASK-015 | Together screens: tab, sign-in and area, events and clubs list with filters, event detail with RSVP to Today's plan, club page, host an event, report and block | F-018; UJ-005 | unassigned | ready (after TASK-014) | `app/lib/features/together/`, tests | |
-| TASK-016 | Seed community data (DS-006: labelled sample clubs and events) and reach out to 2–3 real local clubs | ADR-009; BRD RK-010 | Shieryl + Dzelle | ready | `app/tool/seed_community.dart`, outreach notes | |
+| TASK-013 | Run `adapt-project` for the new P0 capabilities: accounts (Firebase Auth), backend (Firestore and security rules), approximate location, user-generated content and moderation, share sheet. It adds rules, tests and store-compliance checks. Calendar and widget are now P1 | ADR-008, ADR-009; BR-023, BR-025..BR-029 | Claude (for Shieryl) | cut | `docs/`, `.claude/` | Deferred 2026-11-27, ADR-019 |
+| TASK-014 | Community backend: Firebase Auth (email link and Google), Firestore collections (profiles, clubs, events, rsvps, reports, blocks), security rules with emulator tests, account deletion that removes server data (BR-017), budget alert | ADR-009; F-018; BR-017, BR-025..BR-029 | unassigned | cut | `app/lib/community/data/`, `firestore.rules`, `test/rules/` | Deferred 2026-11-27, ADR-019 |
+| TASK-015 | Together screens: tab, sign-in and area, events and clubs list with filters, event detail with RSVP to Today's plan, club page, host an event, report and block | F-018; UJ-005 | unassigned | cut | `app/lib/features/together/`, tests | Deferred 2026-11-27, ADR-019 |
+| TASK-016 | Seed community data (DS-006: labelled sample clubs and events) and reach out to 2–3 real local clubs | ADR-009; BRD RK-010 | Shieryl + Dzelle | cut | `app/tool/seed_community.dart`, outreach notes | Deferred 2026-11-27, ADR-019 |
+| TASK-018 | Reconcile docs and Figma with ADR-019: Sitemap (Together tab, S-010, S-019..S-025), User Flow (UJ-005), Data Model (server collections), DESIGN.md (four-tab bar to three), QA test plan, Figma tab bar, Together frames marked deferred, Settings Together account row removed; fix the three known Figma gaps | ADR-019 | Claude (for Shieryl) | ready | `docs/`, Figma page "Lilt · Screens" | |
 
-**Next up (not yet ledgered):** the Together decision (cut or build, owner), gentle notifications S-106 (F-008),
-share card S-111 (F-015), user sessions (BRD §11), Figma-versus-build comparison, merge PR #27.
+**Next up (not yet ledgered):** user sessions on the web build (BRD §11), Figma-versus-build comparison, merge
+PR #27. Gentle notifications S-106 (F-008) and the share card S-111 (F-015) wait for the Mac, because they need a
+real device to verify.
 
 ## 2. Checkpoints
 
@@ -81,9 +82,11 @@ The deployed bundle contains the work merged through PR #25.
 fix and the demo-build deploy (PR #21), Discover and Activity detail (PRs #23, #24), Edit and Why this (PR #25),
 ADR-018 (PR #20).
 
-**Not built:** Together (TASK-013 to TASK-016), gentle notifications S-106 (F-008), share card S-111 (F-015).
-**Open decision (owner):** cut Together, or build it. Until it is made, the PRD, [build scope](build-scope.md) and
-Figma still show Together as P0.
+**Not built:** gentle notifications S-106 (F-008), share card S-111 (F-015). Together (TASK-013 to TASK-016) is
+deferred and has no code.
+**Decided 2026-11-27 ([ADR-019](adr/ADR-019-together-deferred-after-challenge.md)):** Together is deferred out of
+the first release and Lilt stays account-free. The PRD, BRD and [build scope](build-scope.md) are updated; Sitemap,
+User Flow, Data Model, DESIGN.md, the QA test plan and Figma are owed under TASK-018.
 
 **Open or unmerged:** PR #27 (technical documentation and submission pack). Branch `task/ios-platform` (iOS project,
 app icon, privacy manifest, store listing draft, a TestFlight workflow that has never run); no pull request yet.
