@@ -6,6 +6,9 @@
 > **Traces back to:** the UI reviewer's whole-flow review of 2026-10-27 (gate for TASK-005).
 > **Status:** Draft · **Date:** 2026-10-27
 
+> **Update 2026-11-27 ([ADR-019](adr/ADR-019-together-deferred-after-challenge.md)):** Together (section 11, tier B)
+> is deferred and has no code. Read every "Tier B" row as deferred. The frames stay in Figma as design reference.
+
 ## 1. How to read it
 - **Tier A** is the core loop and everything a person needs on day one. Build it first.
 - **Tier B** is Together stage A: sign-in, profile and area, events and clubs, RSVP, join. It needs the backend

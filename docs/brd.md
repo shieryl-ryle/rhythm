@@ -47,7 +47,8 @@ I can care for my health alongside my responsibilities and personal priorities.*
   above and focused on physical activity; features are defined in the [PRD](prd.md) (`F-###`).
   Includes an explainable personalisation engine, explicit consent, data minimisation, and
   user-controlled data.
-- **Highlight in the prototype: community (Together).**
+- **Highlight in the prototype: community (Together).** *Deferred on 2026-11-27 (ADR-019): not built, and not in the
+  first release. The text below is the design for when it returns.*
   - Find local events and clubs (Reclub-style), RSVP, join and host.
   - It uses a small Firebase backend, and only the community profile and RSVPs go to the server;
     health data stays on the phone.
