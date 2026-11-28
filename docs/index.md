@@ -27,6 +27,7 @@ When two docs disagree, the owner wins until the other is reconciled.
 | Active capabilities + catalog of what each requires | [Capabilities](capabilities.md) | Core |
 | Live work `TASK-###`, owners, status | [Implementation Plan](implementation-plan.md) | Core |
 | Demo walkthrough | [Demo script](demo-script.md) | Optional — demo/pitch |
+| Running sessions with target users | [User sessions](user-sessions.md) | Validation (BRD §11) |
 | Pitch: business model canvas, visual direction | [Pitch kit](pitch/README.md) | Optional — demo/pitch |
 | Seed / fixture data | [`seed/README.md`](../seed/README.md) | Optional — has fixtures |
 | Store release process, versioning, signing (names only) | [Release](release.md) | Mobile |
