@@ -236,6 +236,8 @@ entry point.
 3. Notifications quiet down during a pause (BR-013). Progress is kept (BR-007).
 
 ### UJ-005 — Find people to do it with
+*Deferred out of the first release ([ADR-019](adr/ADR-019-together-deferred-after-challenge.md)); kept as the design for when Together returns.*
+
 1. From Together, or from "Find a session near you" on an activity, browse events near your area.
 2. Open an event → see who's going → "I'm going" → it appears in Today's plan.
 3. Afterwards, check in as usual. The grid counts it like any other activity.
@@ -317,6 +319,8 @@ entry point.
 - [ ] Export produces a readable file; delete-all leaves no local records (BR-017).
 
 ### F-018 — Community (Together tab)
+*Deferred out of the first release ([ADR-019](adr/ADR-019-together-deferred-after-challenge.md)). These criteria are the design for when it returns and are not being tested now.*
+
 - [ ] Together is the third of four tabs (Today, Discover, Together, My rhythm). Signed-out people can browse public events and clubs; "I'm going", Join and Host show the sign-in screen first, which explains what's shared. The rest
   of the app never requires an account (BR-025).
 - [ ] It lists events and clubs near the chosen area, filterable by activity, level and day. Each
