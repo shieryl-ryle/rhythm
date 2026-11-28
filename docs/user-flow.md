@@ -17,7 +17,7 @@
 | UF-007 | Set up gentle notifications | All | S-106 | S-008 | F-008 | Must-Have | once |
 | UF-008 | Export or delete my data | All | S-008 | S-008 / S-001 | F-007 | Must-Have | rare |
 | UF-009 | Check progress | All | S-006 | S-006 | F-006 | Must-Have | weekly |
-| UF-010 | Find people to do it with | All | S-010 | S-004 | F-018 (UJ-005) | Must-Have | weekly |
+| UF-010 | Find people to do it with | All | S-010 | S-004 | F-018 (UJ-005) | Deferred (ADR-019) | weekly |
 | UF-011 | Create or join a challenge (P1) | All | S-010 (Mine) | S-010 (Mine) | F-012 (UJ-005) | Later (P1) | occasional |
 | UF-012 | Stop or restart sharing active days (P1) | All | S-008 | S-008 | F-010, F-012 (BR-018) | Later (P1) | rare |
 
@@ -109,8 +109,8 @@ pause and goes to S-004 (paused state).
 |---|---|---|---|---|
 | 1 | S-006 | Opens My rhythm | Renders the grid (EQ-002) and totals (EQ-011) | Pause days marked neutrally; totals never decrease |
 
-### UF-010 — Find people to do it with
-Detail screens have no S-IDs yet (TASK-015); they are named in brackets.
+### UF-010 — Find people to do it with (deferred)
+Deferred out of the first release ([ADR-019](adr/ADR-019-together-deferred-after-challenge.md)): no screen exists and nothing is built. The steps are kept as the design for when Together returns. Detail screens have no S-IDs yet; they are named in brackets.
 
 | Step | Screen | User does | System does | Success looks like |
 |---|---|---|---|---|
@@ -119,7 +119,7 @@ Detail screens have no S-IDs yet (TASK-015); they are named in brackets.
 | 3 | S-010 | Taps "I'm going" | Saves the RSVP; adds the event to Today's plan (F-018) | The event appears on S-004 |
 
 ### UF-011 — Create or join a challenge (P1)
-Not built for the challenge submission (PRD §11). Shown in the wireframes as "11.9 Together · mine (P1)".
+Not built for the challenge submission (PRD §11). Shown in the wireframes as "11.9 Together · mine (P1)". It lives inside Together, which is deferred ([ADR-019](adr/ADR-019-together-deferred-after-challenge.md)), so it cannot start before Together returns.
 
 | Step | Screen | User does | System does | Success looks like |
 |---|---|---|---|---|

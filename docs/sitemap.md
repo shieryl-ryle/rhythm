@@ -6,9 +6,11 @@
 
 ## 1. Navigation model
 First run is a short linear wizard (consent → My Starting Point). After that, a
-**bottom tab bar** with four tabs, in this order: **Today**, **Discover**, **Together**, **My rhythm** (as in Figma).
-The owner cut the bar to three tabs on 2026-10-23 (reference mock-up), then restored the fourth
-when community became P0 (F-018, [ADR-009](adr/ADR-009-community-in-p0.md)). Settings & My Data
+**bottom tab bar** with three tabs, in this order: **Today**, **Discover**, **My rhythm**.
+The bar was three tabs on 2026-10-23, became four when community became P0 (F-018,
+[ADR-009](adr/ADR-009-community-in-p0.md)), and is three again because Together is deferred
+([ADR-019](adr/ADR-019-together-deferred-after-challenge.md)). The Figma file still draws four until its tab bar
+is updated (TASK-018), and the app still shows a fourth tab, Together, marked "Coming soon", until TASK-019 removes it. Settings & My Data
 open from a profile icon in the header. Today shows **one hero suggestion**, with "Something
 else" (swap) and "Not today" (lighter / reschedule / pause) as secondary actions. My Way Back is
 not a tab. After a lapse (EQ-001) Today offers it with a welcome-back banner that has a "Not now"; it
@@ -30,22 +32,22 @@ IDs: `S-001…` main screens · `S-09x` error/blocked states · `S-1xx` dialogs/
 | S-007 | What works for me (cut: merged into S-006 on 2026-10-23) | — | F-004 | — | — | — |
 | S-008 | Settings & My Data | Notifications, (P1) Sharing row: stop sharing active days, excluded categories, export, delete-all, edit starting point | F-007, F-008 | Header profile icon | Consented | idle / exporting / export done / export error |
 | S-009 | Discover | Browse the action library ("For you", filtered by exclusions and preferences) and "Saved" actions; try or save one | F-002, F-004 | Tab | Consented | loading / list / saved empty / all excluded |
-| S-010 | Together | Events and clubs near the chosen area, filterable by activity, level and day; RSVP, join, host, report and block. Signed-out people can browse public events and clubs; RSVP, join and host ask them to sign in first (owner decision 2026-10-26). This is the only screen group that needs an account (BR-025) | F-018 | Tab | Tab and public lists are open to everyone; sign-in is needed to RSVP, join or host | signed out (browse; sign-in on RSVP, join or host) / loading / list / empty / error. Segments: Events, Clubs, Mine. Signed-out lists show attendee counts only (BR-029). Detail screens (event, club, host, sign-in, report; P1: challenges, friends, invite, join) get their own S-IDs when TASK-015 starts |
+| S-010 | Together (deferred, ADR-019) | Events and clubs near the chosen area, filterable by activity, level and day; RSVP, join, host, report and block. Signed-out people can browse public events and clubs; RSVP, join and host ask them to sign in first (owner decision 2026-10-26). This is the only screen group that needs an account (BR-025) | F-018 | Tab | Tab and public lists are open to everyone; sign-in is needed to RSVP, join or host | signed out (browse; sign-in on RSVP, join or host) / loading / list / empty / error. Segments: Events, Clubs, Mine. Signed-out lists show attendee counts only (BR-029). Detail screens (event, club, host, sign-in, report; P1: challenges, friends, invite, join) get their own S-IDs when TASK-015 starts |
 | S-011 | Find an activity | Search the library and pick one to follow or plan; type your own when nothing matches (frames 3.6, 9.1, 9.14) | F-002 | Today "+ Add an activity"; Discover search; S-109 | Consented | idle / results / no matches / keyboard open |
 | S-012 | Plan your own | Add a one-off activity with a day and time (3.7) | F-002 | Today "+ Plan your own"; S-109 | Consented | idle |
-| S-013 | Activity detail | What it is, who it suits, find a session near you (3.10) | F-002, F-018 | Discover card; Today card | Consented | idle / saved |
+| S-013 | Activity detail | What it is, who it suits, (deferred with Together) find a session near you (3.10) | F-002, F-018 | Discover card; Today card | Consented | idle / saved |
 | S-014 | Achievements | Earned and locked achievements; tapping an earned one opens the share sheet (6.2) | F-015 | My rhythm | Consented | populated / none yet |
 | S-015 | Full history | The commit grid over time; tap a day for detail (6.4) | F-006 | My rhythm "See all" | Consented | populated |
 | S-016 | My activities | Follow, unfollow and add the activities Lilt suggests from (7.2) | F-002 | Settings | Consented | idle |
 | S-017 | When I'm free | Edit the free times Lilt plans around (7.8, 1.12) | F-001, F-002 | Settings; setup | Consented | idle |
 | S-018 | Access and what I leave out | Access, limits and excluded categories (no frame yet; builder derives it from 1.14) | F-001 | Settings | Consented | idle |
-| S-019 | Your profile | Together profile: display name, optional photo, 18+ confirmation (11.2) | F-018, BR-027 | After S-024; Settings › Together account | Signed in | idle / error |
-| S-020 | Your area | Choose an approximate area (11.3) | F-018, BR-026 | After S-019; a tappable "Near …" label on S-010 (proposed, not drawn: the frame shows plain text) | Any | idle |
-| S-021 | Event detail | Event info, RSVP, who is going (counts only when signed out, BR-029); cancelled state with an alternative (11.5, 11.6, 10.5) | F-018 | S-010 | Public to view; sign-in to RSVP | idle / going / cancelled |
-| S-022 | Club page | Club info, upcoming sessions, join (11.7) | F-018 | S-010 Clubs | Public to view; sign-in to join | idle / joined |
-| S-023 | Host an event | Create an event and confirm it was posted (11.10, 11.11) | F-018, BR-027 | S-010 "+ Host an event" | Signed in, 18+ | idle / posted |
-| S-024 | Sign-in step | Google or email sign-in, shown on RSVP, join or host (11.1); email entry and link-sent states are not drawn | F-018 | S-021 "I'm going", S-022 Join, S-010 "+ Host an event", the signed-out "Mine" segment | Public | idle / email sent / error |
-| S-025 | Together account | Edit profile, sign out, delete the account (no frame; BR-017) | F-018, BR-017 | Settings | Signed in | idle |
+| S-019 | Your profile (deferred, ADR-019) | Together profile: display name, optional photo, 18+ confirmation (11.2) | F-018, BR-027 | After S-024; Settings › Together account | Signed in | idle / error |
+| S-020 | Your area (deferred, ADR-019) | Choose an approximate area (11.3) | F-018, BR-026 | After S-019; a tappable "Near …" label on S-010 (proposed, not drawn: the frame shows plain text) | Any | idle |
+| S-021 | Event detail (deferred, ADR-019) | Event info, RSVP, who is going (counts only when signed out, BR-029); cancelled state with an alternative (11.5, 11.6, 10.5) | F-018 | S-010 | Public to view; sign-in to RSVP | idle / going / cancelled |
+| S-022 | Club page (deferred, ADR-019) | Club info, upcoming sessions, join (11.7) | F-018 | S-010 Clubs | Public to view; sign-in to join | idle / joined |
+| S-023 | Host an event (deferred, ADR-019) | Create an event and confirm it was posted (11.10, 11.11) | F-018, BR-027 | S-010 "+ Host an event" | Signed in, 18+ | idle / posted |
+| S-024 | Sign-in step (deferred, ADR-019) | Google or email sign-in, shown on RSVP, join or host (11.1); email entry and link-sent states are not drawn | F-018 | S-021 "I'm going", S-022 Join, S-010 "+ Host an event", the signed-out "Mine" segment | Public | idle / email sent / error |
+| S-025 | Together account (deferred, ADR-019) | Edit profile, sign out, delete the account (no frame; BR-017) | F-018, BR-017 | Settings | Signed in | idle |
 | S-090 | Support message | Fixed, non-AI message pointing to professional or emergency help. Three rows (emergency services, a crisis line, your doctor) open the numbers for the person's region **as text**; the app never dials (owner decision 2026-10-28). The numbers are data in `app/assets/support/helplines.json`, which the owner fills and verifies per region (South Africa, MENA and APAC first); until a region is listed the screen says "call your local emergency number" | BR-003 | Red-flag text anywhere | Any | static |
 | S-091 | Something went wrong | Recoverable error with retry; no data loss | — | Unhandled error | Any | static |
 | S-101 | Reflection sheet | Completed / partly / skipped + optional enjoyment, effort, barrier | F-003 | Today (after accept); notification | Consented | idle / saved |
@@ -75,7 +77,7 @@ The planned card for today has "How did it go?" as its one primary and a quiet "
 The profile button on Today opens `/settings` (a page above the tabs, with Back). Rows: **Need support?** (opens S-090), **Export my data** (every user table as one JSON document, copied to the clipboard: there is no file or share sheet yet; the row has a copy icon, says "Copies everything on this phone as text", then "Exporting…", "Copied. Paste it into a note or a file to keep it." (a tick), or "That didn’t work. Try again."; its line is a live region, so a screen reader announces the change), and **Delete everything**, which opens the destructive dialog (7.6): "Keep my data" is the one filled button, "Delete everything" is outlined in the danger colour, and the body scrolls at large text. It sits in its own group below Export, with no chevron (it opens a dialog, not a screen). Deleting removes every user row, keeps the library, and shows the consent screen (BR-017); if a step fails nothing is removed and the row says so and can be tried again. In a demo build only, a **Demo build** section loads Rana or Sam after a confirmation ("This replaces everything on this phone with invented data"; seed/README.md). If a load fails after it has deleted, the person is sent to the consent screen rather than left on a phone with no consent record (BR-014); while demo rows exist a "Demo data · invented, not a real person" strip shows above the tab bar and at the top of Settings. Not built: reminders (S-106), edit my starting point, My activities (S-016), When I'm free (S-017), and sharing (P1).
 
 ### S-006 My rhythm, S-015 Full history, S-105 Observation sheet and S-113 Day detail as built (TASK-006 piece b, 2026-10-31)
-**My rhythm** (the fourth tab, `/rhythm`; frames 6.1, 6.3, 6.4, 6.5): the grid for the last 17 weeks with the month names above it, the legend "Done / Partly / Rest or not shared", and the totals line from EQ-011: "Active on 31 days. Came back 2 times after a break." (the second sentence only when there has been a return; both totals only ever go up, BR-007). Under it **What works for me**: a noticed pattern waits in a "We noticed" card ("Does this fit?" on a first ask) with two equal outlined buttons, "Yes, it fits" (confirms it, so suggestions may use it) and "Not really" (deletes it and it is never proposed again); confirmed ones show "Confirmed · used for suggestions" and an Edit link (BR-010). The rules propose at most one new pattern a day and none while one is waiting (EQ-009, `RhythmRepository.proposeIfDue`). **Edit** opens the observation sheet (frame 6.3): the observation as the title, "Does this still fit you?", "It still fits" or "Say it differently" (a text field of at most 140 characters, no suggestions or keyboard learning, BR-015; writing their own words confirms it; the words are checked against the red-flag list first, and a match stores nothing and shows the support message, EQ-008, BR-003; if the check cannot run the words are not kept and the sheet says so), Save, and "Remove it". Rewording changes the words only: the pattern it came from (its key) is kept, so a confirmed observation still counts for suggestions as that pattern. "Remove it" is how the person stops that. Closing the sheet changes nothing. **See every day** opens `/rhythm/history` (a page above the tabs, with Back): every month as a calendar, newest first, with the same colours as the grid; days after today and days before the first plan are plain numbers. A day opens its **detail** (frame 6.5): the date, how it counted in words ("Done · counts toward your rhythm", "Partly · counts toward your rhythm", "Paused", "Rest or not shared"), and each planned thing with its status and **Edit** or **Add answer**, which reuses the "How did it go?" sheet; an answer can be kept or raised, never lowered (BR-007), and a day never answered stays "Not shared", not skipped (BR-009). A day with nothing planned says "Nothing was planned this day."
+**My rhythm** (the third tab, `/rhythm`; frames 6.1, 6.3, 6.4, 6.5): the grid for the last 17 weeks with the month names above it, the legend "Done / Partly / Rest or not shared", and the totals line from EQ-011: "Active on 31 days. Came back 2 times after a break." (the second sentence only when there has been a return; both totals only ever go up, BR-007). Under it **What works for me**: a noticed pattern waits in a "We noticed" card ("Does this fit?" on a first ask) with two equal outlined buttons, "Yes, it fits" (confirms it, so suggestions may use it) and "Not really" (deletes it and it is never proposed again); confirmed ones show "Confirmed · used for suggestions" and an Edit link (BR-010). The rules propose at most one new pattern a day and none while one is waiting (EQ-009, `RhythmRepository.proposeIfDue`). **Edit** opens the observation sheet (frame 6.3): the observation as the title, "Does this still fit you?", "It still fits" or "Say it differently" (a text field of at most 140 characters, no suggestions or keyboard learning, BR-015; writing their own words confirms it; the words are checked against the red-flag list first, and a match stores nothing and shows the support message, EQ-008, BR-003; if the check cannot run the words are not kept and the sheet says so), Save, and "Remove it". Rewording changes the words only: the pattern it came from (its key) is kept, so a confirmed observation still counts for suggestions as that pattern. "Remove it" is how the person stops that. Closing the sheet changes nothing. **See every day** opens `/rhythm/history` (a page above the tabs, with Back): every month as a calendar, newest first, with the same colours as the grid; days after today and days before the first plan are plain numbers. A day opens its **detail** (frame 6.5): the date, how it counted in words ("Done · counts toward your rhythm", "Partly · counts toward your rhythm", "Paused", "Rest or not shared"), and each planned thing with its status and **Edit** or **Add answer**, which reuses the "How did it go?" sheet; an answer can be kept or raised, never lowered (BR-007), and a day never answered stays "Not shared", not skipped (BR-009). A day with nothing planned says "Nothing was planned this day."
 Differences from Figma, for the design review: the frame's refinement choices ("Weekday evenings only", "Only in winter") need data the app does not hold, so the sheet offers keep or reword instead; "See every day" is a visible link (the frame has no way in to 6.4); the year chip on 6.4 is left out (every month heading names its year); day one follows frame 9.7: until anything has been reflected the page is one card, "Your first two weeks", with this week and next as empty tiles (today ringed) and "Each day you check in fills a tile.", and no legend, totals or What works section.
 The grid shows as many weeks as there is history for, at least 12 and at most 17; days before the first plan are left unfilled, as in the calendar. Grid level 1 (under half a day's goal) cannot occur while the daily goal is 1, so the legend names only Done and Partly; a daily goal above 1 needs a legend entry and a colour at least 3:1 against `grid-0` first (pinned by a test in `test/domain/grid_level_test.dart`).
 Not built, and why: the "How Lilt has adjusted to you" timeline (no history of changed suggestions is stored yet, F-004), Achievements and 6.2 (the earning rules belong to F-015), "What you've shared" (open question Q1: list or tags). My Way Back (S-005) is built (2026-11-08): the banner on Today after a lapse (EQ-001), the "Returning after a break?" link on My rhythm, three steps (what changed, what to try, one small first step), and `return_event` is now recorded when the first reflected day ends a lapse (EQ-011).
@@ -129,8 +131,6 @@ Tabs
  │   ├─ Edit option (S-102) · Not today (S-103) · Reflection (S-101) · Why this (S-107)
  │   └─ My Way Back (S-005)  ← offered by a banner after a lapse
  ├─ Discover (S-009)  — For you · Saved
- ├─ Together (S-010)  — Events · Clubs · Mine
- │   └─ Mine: Going · Hosting · My clubs · (P1) With friends → Challenges · Friends (pushed screens, no tab bar)
  └─ My rhythm (S-006)  — grid · totals · experiences · what works
      ├─ Observation edit (S-105)
      └─ My Way Back (S-005)  ← "Returning after a break?"
@@ -140,6 +140,9 @@ Header profile icon → Settings & My Data (S-008)
      └─ Delete all (S-104)
 Anywhere: Support message (S-090) · Error (S-091)
 ```
+Together (S-010 and its screens S-019 to S-025) is deferred ([ADR-019](adr/ADR-019-together-deferred-after-challenge.md))
+and is not in the tab bar. Its design, if it returns, was a third tab between Discover and My rhythm with Events,
+Clubs and Mine.
 
 ## 4. Route table
 | Route | Screen | Params | Auth | Method(s) | Indexable | Notes |
@@ -150,7 +153,7 @@ Anywhere: Support message (S-090) · Error (S-091)
 | `/way-back` | S-005 | — | Consented | — | no | |
 | `/rhythm` | S-006 | — | Consented | — | no | Replaces `/progress` and `/works` |
 | `/discover` | S-009 | `?tab=saved` | Consented | — | no | |
-| `/together` | S-010 | — | Consented | — | no | Public lists are open to signed-out users; RSVP, join and host show the sign-in screen first. Sub-routes come with TASK-015 |
+| `/together` | S-010 | — | Consented | — | no | Deferred (ADR-019): no route in the app. Was: Public lists are open to signed-out users; RSVP, join and host show the sign-in screen first. Sub-routes come with TASK-015 |
 | `/settings` | S-008 | — | Consented | — | no | |
 | `/find` | S-011 | `?q=` | Consented | — | no | |
 | `/plan` | S-012 | — | Consented | — | no | |
@@ -160,25 +163,25 @@ Anywhere: Support message (S-090) · Error (S-091)
 | `/settings/activities` | S-016 | — | Consented | — | no | |
 | `/settings/free-times` | S-017 | — | Consented | — | no | |
 | `/settings/access` | S-018 | — | Consented | — | no | |
-| `/settings/together` | S-025 | — | Signed in | — | no | |
-| `/together/profile` | S-019 | — | Signed in | — | no | |
-| `/together/area` | S-020 | — | Any | — | no | |
-| `/together/event/:id` | S-021 | `id` | Public to view | — | no | |
-| `/together/club/:id` | S-022 | `id` | Public to view | — | no | |
-| `/together/host` | S-023 | — | Signed in, 18+ | — | no | |
-| `/together/sign-in` | S-024 | — | Public | — | no | |
+| `/settings/together` | S-025 | — | Signed in | — | no | Deferred (ADR-019): no route in the app |
+| `/together/profile` | S-019 | — | Signed in | — | no | Deferred (ADR-019): no route in the app |
+| `/together/area` | S-020 | — | Any | — | no | Deferred (ADR-019): no route in the app |
+| `/together/event/:id` | S-021 | `id` | Public to view | — | no | Deferred (ADR-019): no route in the app |
+| `/together/club/:id` | S-022 | `id` | Public to view | — | no | Deferred (ADR-019): no route in the app |
+| `/together/host` | S-023 | — | Signed in, 18+ | — | no | Deferred (ADR-019): no route in the app |
+| `/together/sign-in` | S-024 | — | Public | — | no | Deferred (ADR-019): no route in the app |
 | `/support` | S-090 | — | Any | — | no | |
 
 The web build is a private demo: `noindex` for all routes.
 
 ## 5. Access boundaries
-Everything except Together works with no account and no server data. Together (F-018) is the one exception: it has an account, and signed-out people can browse public events and clubs (BR-025). The zones are consent and, for RSVP, join, host and the Together account screens, sign-in.
+Everything works with no account and no server data. Together (F-018) would be the one exception, with an account and public browsing of events and clubs (BR-025), but it is deferred ([ADR-019](adr/ADR-019-together-deferred-after-challenge.md)), so the first release has one zone: consent. The sign-in zone below is kept for when Together returns.
 
 | Zone | Screens | Who gets in | Enforced where | On denial |
 |---|---|---|---|---|
 | Public | S-001, S-090, S-091 | Anyone | n/a | n/a |
 | Consented | All other screens | Users with a stored, current consent record | go_router redirect plus the data layer refusing writes without consent | Redirect to `/welcome` |
-| Signed in (Together) | S-019, S-023, S-025, and RSVP, join and host on S-021, S-022 | Signed-in adults (BR-027) | Firestore security rules (server-side) plus the client gate | Show the sign-in step S-024 |
+| Signed in (Together; deferred, ADR-019) | S-019, S-023, S-025, and RSVP, join and host on S-021, S-022 | Signed-in adults (BR-027) | Firestore security rules (server-side) plus the client gate | Show the sign-in step S-024 |
 | (P1) Challenge or friend member | Challenges, Friends | Members of that challenge or friendship, after the opt-in | Firestore security rules (server-side) | Not built in P0 |
 
 ## 6. Entry points from outside
@@ -193,7 +196,7 @@ tabs to Today.
 
 ## 8. Not in the map
 - Circles, group rewards, personal rewards (P1: F-009..F-011).
-- Accounts for anything other than Together (none planned).
+- Accounts of any kind (none planned; Together, the only feature that needed one, is deferred, ADR-019).
 - Chat screen (non-goal).
 
 ## 9. Open questions
@@ -203,6 +206,6 @@ tabs to Today.
 | Q2 | ~~Can a signed-out user browse Together?~~ Resolved 2026-10-26: yes, public events and clubs can be browsed; RSVP, join and host show the sign-in screen first | Owner |
 
 ## Self-check
-- [x] Every P0 `F-###` is served by at least one screen (F-001 S-003 · F-002 S-004/S-009 · F-003 S-101 · F-004 S-006/S-009 · F-018 S-010 · F-005 S-005 · F-006 S-006 · F-007 S-001/S-008 · F-008 S-106).
+- [x] Every P0 `F-###` is served by at least one screen (F-001 S-003 · F-002 S-004/S-009 · F-003 S-101 · F-004 S-006/S-009 · F-018 deferred (ADR-019) · F-005 S-005 · F-006 S-006 · F-007 S-001/S-008 · F-008 S-106).
 - [x] Every screen lists its required states.
 - [x] Every non-public zone is enforced (no server data in P0; P1 circles need server rules).

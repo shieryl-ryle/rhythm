@@ -17,7 +17,7 @@ The schema lives in `app/lib/data/` (the skeleton keeps `database.dart`; tables 
 `app/lib/data/tables/` as they grow). Migrations use drift's `schemaVersion` and `MigrationStrategy`. The action
 library is a bundled JSON asset (`app/assets/library/actions.json`, DS-001), loaded into `action` on first run and
 on library version change. **Personal fields** are marked 🔒: they never leave the device except through a
-user-initiated export (BR-015, BR-016). Together (F-018) keeps its own server-side data (profile, events, clubs,
+user-initiated export (BR-015, BR-016). Together (F-018, deferred, ADR-019: no server data exists in the first release) would keep its own server-side data (profile, events, clubs,
 RSVPs; BR-025); health data is never part of it.
 
 ## 1. Conventions
@@ -191,7 +191,7 @@ Every reason must come from a rule in EQ-004 (BR-004).
 
 ### `plan_item`
 Something on Today's plan (frames 2.5 to 2.7, 3.7, 11.6): an accepted suggestion, a one-off the person planned, or
-a Together RSVP. Serves BR-005 (nothing is planned without accept or edit).
+a Together RSVP. Serves BR-005 (nothing is planned without accept or edit). While Together is deferred (ADR-019), `together_event` and `together_event_id` exist in the schema but nothing writes them.
 
 | Column | Type | Null | Default | Notes |
 |---|---|---|---|---|
@@ -289,7 +289,7 @@ F-008. Serves BR-012, BR-013.
 | `lapse_checkin_enabled` | bool | no | true | Weekly check-in after a lapse. No P0 screen changes it; the default stays true |
 
 ## 5. Deliberately not modeled
-- **Users and accounts:** none on the device. Together (F-018) keeps its own server-side data (profile, events,
+- **Users and accounts:** none on the device. Together (F-018, deferred, ADR-019) would keep its own server-side data (profile, events,
   clubs, RSVPs, reports; BR-025); health data is never in it. P1 sharing adds two server-side daily flags
   ([ADR-013](adr/ADR-013-p1-sharing-two-flags-and-device-local-count.md)) and a device-local together-days count,
   through a new schema change when it is built.
@@ -403,4 +403,4 @@ The on-screen label is the source of truth for wording; the stored value is a st
 - **Today's offers (TASK-005):** the hero chain (the options "Something else" steps through) is written once per day, all offers at once, so a restart cannot reshuffle it; `swap_index` counts per followed activity and the chain's order is insert order. A compact card (another followed activity) is stored only when it is accepted, or when the person pauses from it (then it is `declined`). "Not today" opens the S-103 sheet and an offer becomes `declined` only when a path from it is taken (a pause); closing the sheet changes nothing. Changing the time or energy chip deletes only offers still `offered` and writes a new chain; acted-on offers stay.
 - **`pause.end_day` is the first day active again:** a pause covers `start_day` up to, not including, `end_day`; "1 week" from Friday 23 October ends on Friday 30 October, and "Resume now" sets `end_day` to today. The domain's pause span includes its last day, so the data adapter passes `end_day` minus one.
 - **Resuming a pause:** the repository sets `end_day` to the resume day.
-- **Delete-all hooks:** the notification cancellation (F-008) and the Together account deletion (F-018, BR-017) must be registered through `deleteAllHooksProvider`. Each must be idempotent. A test must fail if either is missing once those features exist.
+- **Delete-all hooks:** the notification cancellation (F-008) and, if Together returns (ADR-019), the Together account deletion (F-018, BR-017) must be registered through `deleteAllHooksProvider`. Each must be idempotent. A test must fail if either is missing once those features exist.
